@@ -46,7 +46,7 @@ import Data.DRS.Translate
 import Data.DRS.Variables
 import Data.List (intercalate, union)
 
--- Derive an instance of the Show typeclass for DRS
+-- | Derive an instance of the Show typeclass for DRS
 instance Show DRS where
   show d
     | isFOLDRS rd = '\n' : showDRS rd ++ "\n" ++ show (drsToFOL rd) ++ "\n"
@@ -105,8 +105,47 @@ opMerge   = "\x002B" -- Merge symbol
 -- | Shows a DRS
 showDRS :: DRS -> String
 showDRS d = showModifier (showDRSLambdas d) 2 (showDRSBox d)
+--    Set    -> showDRSLambdas d ++ showDRSSet d ++ "\n"
+--    Linear -> showDRSLambdas d ++ showDRSLinear d ++ "\n"
+--    Boxes  -> showModifier (showDRSLambdas d) 2 (showDRSBox d)
 
--- | Shows a DRS box
+-- | Shows a DRS in Set notation
+showDRSSet :: DRS -> String
+showDRSSet (LambdaDRS (v,_)) = v
+showDRSSet (Merge d1 d2)
+  | not(isLambdaDRS d1) && not(isLambdaDRS d2) = showDRSSet (d1 <<+>> d2)
+  | otherwise                                  = showDRSSet d1 ++ " " ++ opMerge ++ " " ++ showDRSSet d2
+showDRSSet (DRS u c)         = "<{" ++ showUniverse u ++ "}, {" ++ intercalate ", " (map showCon c) ++ "}>"
+  where showUniverse :: [DRSRef] -> String
+        showUniverse u = intercalate "," (map drsRefToDRSVar u)
+        showCon :: DRSCon -> String
+        showCon (Rel r d)    = r ++ "(" ++ intercalate "," (map drsRefToDRSVar d) ++ ")"
+        showCon (Neg d1)     = opNeg ++ showDRSSet d1
+        showCon (Imp d1 d2)  = showDRSSet d1 ++ " " ++ opImp ++ " " ++ showDRSSet d2
+        showCon (Or d1 d2)   = showDRSSet d1 ++ " " ++ opOr  ++ " " ++ showDRSSet d2
+        showCon (Prop r d1)  = drsRefToDRSVar r ++ ": " ++ showDRSSet d1
+        showCon (Diamond d1) = opNeg ++ showDRSSet d1
+        showCon (Box d1)     = opNeg ++ showDRSSet d1
+
+-- | Shows a DRS in Linear notation
+showDRSLinear :: DRS -> String
+showDRSLinear (LambdaDRS (v,_)) = v
+showDRSLinear (Merge d1 d2)
+  | not(isLambdaDRS d1) && not(isLambdaDRS d2) = showDRSLinear (d1 <<+>> d2)
+  | otherwise                                  = showDRSLinear d1 ++ " " ++ opMerge ++ " " ++ showDRSLinear d2
+showDRSLinear (DRS u c)         = "[" ++ showUniverse u ++ ": " ++  intercalate ", " (map showCon  c) ++ "]"
+  where showUniverse :: [DRSRef] -> String
+        showUniverse u = intercalate "," (map drsRefToDRSVar u)
+        showCon :: DRSCon -> String
+        showCon (Rel r d)    = r ++ "(" ++ intercalate "," (map drsRefToDRSVar d) ++ ")"
+        showCon (Neg d1)     = opNeg ++ showDRSLinear d1
+        showCon (Imp d1 d2)  = showDRSLinear d1 ++ " " ++ opImp ++ " " ++ showDRSLinear d2
+        showCon (Or d1 d2)   = showDRSLinear d1 ++ " " ++ opOr  ++ " " ++ showDRSLinear d2
+        showCon (Prop r d1)  = drsRefToDRSVar r ++ ": " ++ showDRSLinear d1
+        showCon (Diamond d1) = opNeg ++ showDRSLinear d1
+        showCon (Box d1)     = opNeg ++ showDRSLinear d1
+
+-- | Shows a DRS in Box notation
 showDRSBox :: DRS -> String
 showDRSBox (LambdaDRS (v,_)) = v ++ "\n"
 showDRSBox (Merge d1 d2)
