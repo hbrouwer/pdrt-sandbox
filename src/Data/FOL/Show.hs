@@ -13,14 +13,14 @@ import Data.FOL.Formula
 import Data.List (intercalate)
 
 -- | Operator constants
-opExists = "\x2203" -- ^ Existential quantifier symbol
-opForAll = "\x2200" -- ^ Universal quantifier symbol
-opAnd    = "\x2227" -- ^ Conjunction symbol
-opOr     = "\x2228" -- ^ Disjunction symbol
-opImp    = "\x2192" -- ^ Implication symbol
-opNeg    = "\x00AC" -- ^ Negation symbol
-opTop    = "\x22A4" -- ^ Top/true constant symbol
-opBottom = "\x22A5" -- ^ Bottom/false constant symbol
+opExists = "\x2203" -- Existential quantifier symbol
+opForAll = "\x2200" -- Universal quantifier symbol
+opAnd    = "\x2227" -- Conjunction symbol
+opOr     = "\x2228" -- Disjunction symbol
+opImp    = "\x2192" -- Implication symbol
+opNeg    = "\x00AC" -- Negation symbol
+opTop    = "\x22A4" -- Top/true constant symbol
+opBottom = "\x22A5" -- Bottom/false constant symbol
 
 -- | Derive an instance of the Show type class for FOLForm
 instance Show FOLForm where

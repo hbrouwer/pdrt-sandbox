@@ -13,8 +13,8 @@ import Data.DRS.Variables
 import qualified Data.FOL as F
 
 -- | Constants
-worldVar = "w"   -- ^ World variable
-worldRel = "Acc" -- ^ Accessibility relation between worlds
+worldVar = "w"   -- World variable
+worldRel = "Acc" -- Accessibility relation between worlds
 
 -- | Converts a DRS @d@ to a FOL formula
 drsToFOL :: DRS -> F.FOLForm

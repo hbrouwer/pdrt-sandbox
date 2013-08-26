@@ -71,13 +71,13 @@ instance (ShowablePDRS p) => Show (PDRS -> p) where
   show p = show (resolve p 0 0)
 
 -- | Operator constants
-opAMerge = "\x002B" -- ^ Assertive merge symbol
-opPMerge = "\x002A" -- ^ Projective merge symbol
+opAMerge = "\x002B" -- Assertive merge symbol
+opPMerge = "\x002A" -- Projective merge symbol
 
 -- | Modifier constant
-modPointer = "\x2190" -- ^ Pointer symbol
-modEquals  = "\x003D" -- ^ Equals symbol
-modSubord  = "\x2264" -- ^ Subordination symbol
+modPointer = "\x2190" -- Pointer symbol
+modEquals  = "\x003D" -- Equals symbol
+modSubord  = "\x2264" -- Subordination symbol
 
 -- | Shows a PDRS
 showPDRS :: PDRS -> String
@@ -125,7 +125,7 @@ showConditions :: [PCon] -> String
 showConditions [] = " "
 showConditions c  = foldr (++) "" (map showPCon c)
   where showPCon :: PCon -> String
-        showPCon (PCon p (Rel r d)) = projection p ++ " " ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ ")\n"
+        showPCon (PCon p (Rel r d)) = projection p ++ " " ++ r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ ")\n"
         showPCon (PCon p (Neg p1))
           | isLambdaPDRS p1 = showModifier (projection p) 0 (showModifier opNeg 0 b1)
           | otherwise       = showModifier (projection p) 2 (showModifier opNeg 2 b1)

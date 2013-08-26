@@ -84,29 +84,29 @@ instance (ShowableDRS d) => Show (DRS -> d) where
   show d = show (resolve d 0 0)
 
 -- | Box construction constants
-boxTopLeft     = '\x250C' -- ^ Top left corner symbol
-boxTopRight    = '\x2510' -- ^ Top right corner symbol
-boxBottomLeft  = '\x2514' -- ^ Bottom left corner symbol
-boxBottomRight = '\x2518' -- ^ Bottom right corner symbol
-boxMiddleLeft  = '\x251C' -- ^ Middle left corner symbol
-boxMiddleRight = '\x2524' -- ^ Middle right corner symbol
-boxHorLine     = '-'      -- ^ Horizontal line symbol
-boxVerLine     = '|'      -- ^ Vertical line symbol
+boxTopLeft     = '\x250C' -- Top left corner symbol
+boxTopRight    = '\x2510' -- Top right corner symbol
+boxBottomLeft  = '\x2514' -- Bottom left corner symbol
+boxBottomRight = '\x2518' -- Bottom right corner symbol
+boxMiddleLeft  = '\x251C' -- Middle left corner symbol
+boxMiddleRight = '\x2524' -- Middle right corner symbol
+boxHorLine     = '-'      -- Horizontal line symbol
+boxVerLine     = '|'      -- Vertical line symbol
 
 -- | Operator constants
-opNeg     = "\x00AC" -- ^ Negation symbol
-opImp     = "\x21D2" -- ^ Implication symbol
-opOr      = "\x2228" -- ^ Disjunction symbol
-opDiamond = "\x25C7" -- ^ Diamond symbol
-opBox     = "\x25FB" -- ^ Box symbol
-opLambda  = "\x03BB" -- ^ Lambda symbol
-opMerge   = "\x002B" -- ^ Merge symbol
+opNeg     = "\x00AC" -- Negation symbol
+opImp     = "\x21D2" -- Implication symbol
+opOr      = "\x2228" -- Disjunction symbol
+opDiamond = "\x25C7" -- Diamond symbol
+opBox     = "\x25FB" -- Box symbol
+opLambda  = "\x03BB" -- Lambda symbol
+opMerge   = "\x002B" -- Merge symbol
 
--- Shows a DRS
+-- | Shows a DRS
 showDRS :: DRS -> String
 showDRS d = showModifier (showDRSLambdas d) 2 (showDRSBox d)
 
--- Shows a DRS box
+-- | Shows a DRS box
 showDRSBox :: DRS -> String
 showDRSBox (LambdaDRS (v,_)) = v ++ "\n"
 showDRSBox (Merge d1 d2)
@@ -121,12 +121,12 @@ showDRSBox (DRS u c)         = showHorizontalLine l boxTopLeft boxTopRight
         cl = showConditions c
         l  = 4 + maximum (map length (lines ul) `union` map length (lines cl))
 
--- Shows a horizontal line of length @l@ with left corner symbol @lc@ and
+-- | Shows a horizontal line of length @l@ with left corner symbol @lc@ and
 -- right corner symbol @rc@
 showHorizontalLine :: Int -> Char -> Char -> String
 showHorizontalLine l lc rc = [lc] ++ (take (l - 2) (repeat boxHorLine)) ++ [rc] ++ "\n"
 
--- Shows DRS box content surrounded by vertical DRS box bars
+-- | Shows DRS box content surrounded by vertical DRS box bars
 showContent :: Int -> String -> String
 showContent l s = unlines (map show (lines s))
   where show :: String -> String
