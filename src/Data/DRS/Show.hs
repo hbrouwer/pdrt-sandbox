@@ -49,8 +49,8 @@ import Data.List (intercalate, union)
 -- Derive an instance of the Show typeclass for DRS
 instance Show DRS where
   show d
-    | isFOLDRS rd = "\n" ++ showDRS rd ++ "\n" ++ show (drsToFOL rd) ++ "\n"
-    | otherwise   = "\n" ++ showDRS rd
+    | isFOLDRS rd = '\n' : showDRS rd ++ "\n" ++ show (drsToFOL rd) ++ "\n"
+    | otherwise   = '\n' : showDRS rd
     where rd = drsResolveMerges d
 
 -- | Typeclass for showable, but unresolved DRSs
@@ -65,13 +65,13 @@ instance ShowableDRS DRS where
 -- at least one DRS referent to resolve
 instance (ShowableDRS d) => ShowableDRS (DRSRef -> d) where
   resolve ud nr nd = resolve (ud rv) (nr + 1) nd
-    where rv = LambdaDRSRef ("r" ++ (show nr), nr + nd)
+    where rv = LambdaDRSRef ('r' : show nr, nr + nd)
 
 -- | Derive an instance of ShowableDRS for a DRS that requires
 -- at least one DRS to resolve
 instance (ShowableDRS d) => ShowableDRS (DRS -> d) where
   resolve ud nr nd = resolve (ud lv) nr (nd + 1)
-    where lv = LambdaDRS ("k" ++ (show nd), nr + nd)
+    where lv = LambdaDRS ('k' : show nd, nr + nd)
 
 -- | Derive an instance of Show for a DRS that requires
 -- at least one DRS referent to resolve
@@ -124,7 +124,7 @@ showDRSBox (DRS u c)         = showHorizontalLine l boxTopLeft boxTopRight
 -- | Shows a horizontal line of length @l@ with left corner symbol @lc@ and
 -- right corner symbol @rc@
 showHorizontalLine :: Int -> Char -> Char -> String
-showHorizontalLine l lc rc = [lc] ++ (take (l - 2) (repeat boxHorLine)) ++ [rc] ++ "\n"
+showHorizontalLine l lc rc = [lc] ++ replicate (l - 2) boxHorLine ++ [rc] ++ "\n"
 
 -- | Shows DRS box content surrounded by vertical DRS box bars
 showContent :: Int -> String -> String
@@ -134,16 +134,16 @@ showContent l s = unlines (map show (lines s))
 
 -- | Shows whitespace of width @l@
 showWhitespace :: Int -> String
-showWhitespace l = take l (repeat ' ')
+showWhitespace l = replicate l ' '
 
 -- | Shows the universe @u@ of a DRS
 showUniverse :: [DRSRef] -> String
-showUniverse u = foldr (++) " " (map (\r -> drsRefToDRSVar r ++ "  ") u)
+showUniverse = foldr ((++) . (\r -> drsRefToDRSVar r ++ "  ")) " "
 
 -- | Shows the conditions @c@ of a DRS
 showConditions :: [DRSCon] -> String
 showConditions [] = " "
-showConditions c  = foldr (++) "" (map showCon c)
+showConditions c  = foldr ((++) . showCon) "" c
   where showCon :: DRSCon -> String
         showCon (Rel r d) = r ++ "(" ++ intercalate "," (map drsRefToDRSVar d) ++ ")\n"
         showCon (Neg d1)
@@ -193,12 +193,12 @@ showModifier m p s = unlines (modifier 0 (lines s))
 
 -- | Shows the line by line concatenation of two strings
 showConcat :: String -> String -> String
-showConcat s1 s2 = unlines (concat ls1 ls2)
-  where concat :: [String] -> [String] -> [String]
-        concat [] []         = []
-        concat (a:as) []     = (a ++ " " ++ showWhitespace (length (head ls2))) : concat as []
-        concat [] (b:bs)     = (showWhitespace (length (head ls1)) ++ " " ++ b) : concat [] bs
-        concat (a:as) (b:bs) = (a ++ " " ++ b) : concat as bs
+showConcat s1 s2 = unlines (conc ls1 ls2)
+  where conc :: [String] -> [String] -> [String]
+        conc [] []         = []
+        conc (a:as) []     = (a ++ " " ++ showWhitespace (length (head ls2))) : conc as []
+        conc [] (b:bs)     = (showWhitespace (length (head ls1)) ++ " " ++ b) : conc [] bs
+        conc (a:as) (b:bs) = (a ++ " " ++ b) : conc as bs
         ls1 = lines s1
         ls2 = lines s2
 
@@ -211,7 +211,7 @@ showDRSLambdas d = show (drsLambdas d)
 
 -- | Prints a DRS
 printDRS :: DRS -> IO ()
-printDRS d = putStrLn $ "\n" ++ showDRS d
+printDRS d = putStrLn $ '\n' : showDRS d
 
 -- | Shows a merge between two DRSs
 showMerge :: DRS -> DRS -> String
@@ -222,7 +222,7 @@ showMerge d1 d2 = showConcat (showConcat b1 (showModifier "+" 2 b2)) (showModifi
 
 -- | Prints a merge between two DRSs
 printMerge :: DRS -> DRS -> IO ()
-printMerge d1 d2 = putStrLn $ "\n" ++ showMerge d1 d2
+printMerge d1 d2 = putStrLn $ '\n' : showMerge d1 d2
 
 -- | Shows the beta reduction of an unresolved DRS @d1@ with a DRS @d2@
 showDRSBetaReduct :: (ShowableDRS d) => (DRS -> d) -> DRS -> String
@@ -233,7 +233,7 @@ showDRSBetaReduct d1 d2 = showConcat (showConcat (showModifier "(" 2 b1) (showMo
 
 -- | Prints the beta reduction of an unresolved DRS @d1@ with a DRS @d2@
 printDRSBetaReduct :: (ShowableDRS d) => (DRS -> d) -> DRS -> IO ()
-printDRSBetaReduct d1 d2 = putStrLn $ "\n" ++ showDRSBetaReduct d1 d2
+printDRSBetaReduct d1 d2 = putStrLn $ '\n' : showDRSBetaReduct d1 d2
 
 -- | Shows the beta reduction of an unresolved DRS @d@ with a DRS referent @r@
 showDRSRefBetaReduct :: (ShowableDRS d) => (DRSRef -> d) -> DRSRef -> String
@@ -244,4 +244,4 @@ showDRSRefBetaReduct d r@(DRSRef v) = showConcat (showConcat (showModifier "(" 2
 
 -- | Prints the beta reduction of an unresolved DRS @d@ with a DRS referent @r@
 printDRSRefBetaReduct :: (ShowableDRS d) => (DRSRef -> d) -> DRSRef -> IO ()
-printDRSRefBetaReduct d r = putStrLn $ "\n" ++ showDRSRefBetaReduct d r
+printDRSRefBetaReduct d r = putStrLn $ '\n' : showDRSRefBetaReduct d r

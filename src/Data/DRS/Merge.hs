@@ -34,7 +34,7 @@ d1 <<+>> d2 = d1 `drsMerge` d2
 drsResolveMerges :: DRS -> DRS
 drsResolveMerges ld@(LambdaDRS _) = ld
 drsResolveMerges (Merge d1 d2)
-  | isLambdaDRS d1 || isLambdaDRS d2 = (Merge d1 d2)
+  | isLambdaDRS d1 || isLambdaDRS d2 = Merge d1 d2
   | otherwise                        = d1 <<+>> d2
 drsResolveMerges (DRS u c)        = DRS u (map resolve c)
   where resolve :: DRSCon -> DRSCon
@@ -58,11 +58,11 @@ drsDisjoin d1 d2 = drsAlphaConvert d2 (zip ors nrs)
 newDRSRefs :: [DRSRef] -> [DRSRef] -> [DRSRef]
 newDRSRefs [] _        = []
 newDRSRefs (r:rs) refs = nr : newDRSRefs rs (nr:refs)
-  where nr = (newRef 0)
+  where nr = newRef 0
         newRef :: Int -> DRSRef
         newRef n
-          | elem r' refs = newRef (n + 1)
-          | otherwise    = r'
+          | r' `elem` refs = newRef (n + 1)
+          | otherwise      = r'
           where r' =
                   case r of
                    (LambdaDRSRef (dv,lp)) -> LambdaDRSRef (dv ++ show n, lp)

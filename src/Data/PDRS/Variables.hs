@@ -50,30 +50,30 @@ pdrsPReferents (AMerge p1 p2) = pdrsPReferents p1 `union` pdrsPReferents p2
 pdrsPReferents (PMerge p1 p2) = pdrsPReferents p1 `union` pdrsPReferents p2
 pdrsPReferents (PDRS _ _ u c) = u `union` preferents c
   where preferents :: [PCon] -> [PRef]
-        preferents []                         = []
-        preferents ((PCon _ (Rel _ _)):cs)    = preferents cs
-        preferents ((PCon _ (Neg p1)):cs)     = pdrsPReferents p1 `union` preferents cs
-        preferents ((PCon _ (Imp p1 p2)):cs)  = pdrsPReferents p1 `union` pdrsPReferents p2 `union` preferents cs
-        preferents ((PCon _ (Or p1 p2)):cs)   = pdrsPReferents p1 `union` pdrsPReferents p2 `union` preferents cs
-        preferents ((PCon _ (Prop _ p1)):cs)  = pdrsPReferents p1 `union` preferents cs
-        preferents ((PCon _ (Diamond p1)):cs) = pdrsPReferents p1 `union` preferents cs
-        preferents ((PCon _ (Box p1)):cs)     = pdrsPReferents p1 `union` preferents cs
+        preferents []                       = []
+        preferents (PCon _ (Rel _ _):cs)    = preferents cs
+        preferents (PCon _ (Neg p1):cs)     = pdrsPReferents p1 `union` preferents cs
+        preferents (PCon _ (Imp p1 p2):cs)  = pdrsPReferents p1 `union` pdrsPReferents p2 `union` preferents cs
+        preferents (PCon _ (Or p1 p2):cs)   = pdrsPReferents p1 `union` pdrsPReferents p2 `union` preferents cs
+        preferents (PCon _ (Prop _ p1):cs)  = pdrsPReferents p1 `union` preferents cs
+        preferents (PCon _ (Diamond p1):cs) = pdrsPReferents p1 `union` preferents cs
+        preferents (PCon _ (Box p1):cs)     = pdrsPReferents p1 `union` preferents cs
 
 -- | Returns the list of all variables in a PDRS
 pdrsVariables :: PDRS -> [PDRSRef]
 pdrsVariables (LambdaPDRS _) = []
-pdrsVariables (AMerge p1 p2) = pdrsVariables p1           `union` pdrsVariables p2
-pdrsVariables (PMerge p1 p2) = pdrsVariables p1           `union` pdrsVariables p2
-pdrsVariables (PDRS _ _ u c) = (map (\(PRef _ r) -> r) u) `union` variables c
+pdrsVariables (AMerge p1 p2) = pdrsVariables p1         `union` pdrsVariables p2
+pdrsVariables (PMerge p1 p2) = pdrsVariables p1         `union` pdrsVariables p2
+pdrsVariables (PDRS _ _ u c) = map (\(PRef _ r) -> r) u `union` variables c
   where variables :: [PCon] -> [PDRSRef]
-        variables []                         = []
-        variables ((PCon _ (Rel _ d)):cs)    = d `union` variables cs
-        variables ((PCon _ (Neg p1)):cs)     = pdrsVariables p1 `union` variables cs
-        variables ((PCon _ (Imp p1 p2)):cs)  = pdrsVariables p1 `union` pdrsVariables p2 `union` variables cs
-        variables ((PCon _ (Or p1 p2)):cs)   = pdrsVariables p1 `union` pdrsVariables p2 `union` variables cs
-        variables ((PCon _ (Prop r p1)):cs)  = [r]              `union` pdrsVariables p1 `union` variables cs
-        variables ((PCon _ (Diamond p1)):cs) = pdrsVariables p1 `union` variables cs
-        variables ((PCon _ (Box p1)):cs)     = pdrsVariables p1 `union` variables cs
+        variables []                       = []
+        variables (PCon _ (Rel _ d):cs)    = d `union` variables cs
+        variables (PCon _ (Neg p1):cs)     = pdrsVariables p1 `union` variables cs
+        variables (PCon _ (Imp p1 p2):cs)  = pdrsVariables p1 `union` pdrsVariables p2 `union` variables cs
+        variables (PCon _ (Or p1 p2):cs)   = pdrsVariables p1 `union` pdrsVariables p2 `union` variables cs
+        variables (PCon _ (Prop r p1):cs)  = [r]              `union` pdrsVariables p1 `union` variables cs
+        variables (PCon _ (Diamond p1):cs) = pdrsVariables p1 `union` variables cs
+        variables (PCon _ (Box p1):cs)     = pdrsVariables p1 `union` variables cs
 
 -- | Returns the list of all projection variables in a PDRS
 pdrsPVars :: PDRS -> [PVar]
@@ -103,14 +103,14 @@ pdrsAssertedPDRSRefs p = assertedPDRSRefs p (pdrsAssertedPVars p)
           where arefs :: [PRef] -> [PDRSRef]
                 arefs u = map (\(PRef _ r) -> r) (filter (\(PRef p _) -> p `elem` pvs) u)
                 arefsInCons :: [PCon] -> [PDRSRef]
-                arefsInCons [] = []
-                arefsInCons ((PCon _ (Rel _ _)):cs)    = arefsInCons cs
-                arefsInCons ((PCon _ (Neg p1)):cs)     = assertedPDRSRefs p1 pvs `union` arefsInCons cs
-                arefsInCons ((PCon _ (Imp p1 p2)):cs)  = assertedPDRSRefs p1 pvs `union` assertedPDRSRefs p2 pvs `union` arefsInCons cs
-                arefsInCons ((PCon _ (Or p1 p2)):cs)   = assertedPDRSRefs p1 pvs `union` assertedPDRSRefs p2 pvs `union` arefsInCons cs
-                arefsInCons ((PCon _ (Prop _ p1)):cs)  = assertedPDRSRefs p1 pvs `union` arefsInCons cs
-                arefsInCons ((PCon _ (Diamond p1)):cs) = assertedPDRSRefs p1 pvs `union` arefsInCons cs
-                arefsInCons ((PCon _ (Box p1)):cs)     = assertedPDRSRefs p1 pvs `union` arefsInCons cs
+                arefsInCons []                       = []
+                arefsInCons (PCon _ (Rel _ _):cs)    = arefsInCons cs
+                arefsInCons (PCon _ (Neg p1):cs)     = assertedPDRSRefs p1 pvs `union` arefsInCons cs
+                arefsInCons (PCon _ (Imp p1 p2):cs)  = assertedPDRSRefs p1 pvs `union` assertedPDRSRefs p2 pvs `union` arefsInCons cs
+                arefsInCons (PCon _ (Or p1 p2):cs)   = assertedPDRSRefs p1 pvs `union` assertedPDRSRefs p2 pvs `union` arefsInCons cs
+                arefsInCons (PCon _ (Prop _ p1):cs)  = assertedPDRSRefs p1 pvs `union` arefsInCons cs
+                arefsInCons (PCon _ (Diamond p1):cs) = assertedPDRSRefs p1 pvs `union` arefsInCons cs
+                arefsInCons (PCon _ (Box p1):cs)     = assertedPDRSRefs p1 pvs `union` arefsInCons cs
 
 -- | Returns the list of all lambda variables in a PDRS
 pdrsLambdas :: PDRS -> [DRSVar]
@@ -129,20 +129,20 @@ lambdasPRefs ps = lambdasRefs (map (\(PRef _ r) -> r) ps)
 
 -- | Returns the list of all lambda tuples in a list of PDRS referents
 lambdasRefs :: [PDRSRef] -> [(DRSVar,Int)]
-lambdasRefs []                      = []
-lambdasRefs ((LambdaPDRSRef lt):ps) = lt : lambdasRefs ps
-lambdasRefs ((PDRSRef _):ps)        = lambdasRefs ps
+lambdasRefs []                    = []
+lambdasRefs (LambdaPDRSRef lt:ps) = lt : lambdasRefs ps
+lambdasRefs (PDRSRef{}:ps)        = lambdasRefs ps
 
 -- | Returns the list of all lambda tuples in a list of PDRS conditions
 lambdasPCons :: [PCon] -> [(DRSVar,Int)]
-lambdasPCons [] = []
-lambdasPCons ((PCon _ (Rel _ d)):cs)    = lambdasRefs d   `union` lambdasPCons cs
-lambdasPCons ((PCon _ (Neg p1)):cs)     = lambdas p1      `union` lambdasPCons cs
-lambdasPCons ((PCon _ (Imp p1 p2)):cs)  = lambdas p1      `union` lambdas p2 `union` lambdasPCons cs
-lambdasPCons ((PCon _ (Or p1 p2)):cs)   = lambdas p1      `union` lambdas p2 `union` lambdasPCons cs
-lambdasPCons ((PCon p (Prop r p1)):cs)  = lambdasRefs [r] `union` lambdas p1 `union` lambdasPCons cs
-lambdasPCons ((PCon _ (Diamond p1)):cs) = lambdas p1      `union` lambdasPCons cs
-lambdasPCons ((PCon _ (Box p1)):cs)     = lambdas p1      `union` lambdasPCons cs
+lambdasPCons []                       = []
+lambdasPCons (PCon _ (Rel _ d):cs)    = lambdasRefs d   `union` lambdasPCons cs
+lambdasPCons (PCon _ (Neg p1):cs)     = lambdas p1      `union` lambdasPCons cs
+lambdasPCons (PCon _ (Imp p1 p2):cs)  = lambdas p1      `union` lambdas p2 `union` lambdasPCons cs
+lambdasPCons (PCon _ (Or p1 p2):cs)   = lambdas p1      `union` lambdas p2 `union` lambdasPCons cs
+lambdasPCons (PCon p (Prop r p1):cs)  = lambdasRefs [r] `union` lambdas p1 `union` lambdasPCons cs
+lambdasPCons (PCon _ (Diamond p1):cs) = lambdas p1      `union` lambdasPCons cs
+lambdasPCons (PCon _ (Box p1):cs)     = lambdas p1      `union` lambdasPCons cs
 
 -- | Returns whether project referent @r@ is bound in the PDRS @p@
 pdrsBoundRef :: PRef -> PDRS -> Bool
@@ -154,7 +154,7 @@ pdrsBoundRef (PRef p r) p1
         bound :: [PVar] -> Bool
         bound [] = False
         bound (pv:pvs)
-          | path pg p pv = (PRef pv r) `elem` (pdrsPReferents p1) || bound pvs
+          | path pg p pv = PRef pv r `elem` pdrsPReferents p1 || bound pvs
           | otherwise    = bound pvs
 
 -- | Returns whether PDRS context @p2@ is accessible from PDRS context @p1@
@@ -164,7 +164,7 @@ pdrsIsAccessibleContext p1 p2 p = path (projectionGraph p) p1 p2
 
 -- | Returns whether @pv@ is a free projection variable in PDRS @p@
 pdrsIsFreePVar :: PVar -> PDRS -> Bool
-pdrsIsFreePVar pv p = (path pg (pdrsLabel p) pv) || not(any pathBack (vertices pg))
+pdrsIsFreePVar pv p = path pg (pdrsLabel p) pv || not(any pathBack (vertices pg))
   where pg = projectionGraph p
         pathBack :: PVar -> Bool
         pathBack v

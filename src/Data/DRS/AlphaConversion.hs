@@ -15,7 +15,7 @@ import Data.DRS.Variables
 -- | Applies alpha conversion to a DRS on the basis of a conversion list
 -- for DRS referents @rs@
 drsAlphaConvert :: DRS -> [(DRSRef,DRSRef)] -> DRS
-drsAlphaConvert d rs = alphaConvertSubDRS d d rs
+drsAlphaConvert d = alphaConvertSubDRS d d
 
 -- | Applies alpha conversion to a DRS @sd@, which is a sub-DRS of the global
 -- DRS @gd@, on the basis of a conversion list for DRS referents @rs@
@@ -31,7 +31,7 @@ alphaConvertSubDRS sd@(DRS u _) gd rs    = DRS u' c'
 -- | Applies alpha conversion to a list of DRS referents @u@, on the basis
 -- of a conversion list @rs@
 alphaConvertRefs :: [DRSRef] -> [(DRSRef,DRSRef)] -> [DRSRef]
-alphaConvertRefs u rs = map (flip alphaConvertVar rs) u
+alphaConvertRefs u rs = map (`alphaConvertVar` rs) u
 
 -- | Applies alpha conversion to a variable @v@, iff @v@ occurs in
 -- a variable conversion list. Otherwise, @v@ is returned unmodified.

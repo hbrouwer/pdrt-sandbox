@@ -6,21 +6,14 @@
 module Data.PDRS
 (
   module Data.PDRS
-, module Data.PDRS.AlphaConversion
-, module Data.PDRS.Merge
-, module Data.PDRS.ProjectionGraph
-, module Data.PDRS.Properties
-, module Data.PDRS.Show
-, module Data.PDRS.Structure
-, module Data.PDRS.Translate
-, module Data.PDRS.Variables
+, module PDRS
 ) where
 
-import Data.PDRS.AlphaConversion
-import Data.PDRS.Merge
-import Data.PDRS.ProjectionGraph
-import Data.PDRS.Properties
-import Data.PDRS.Show
-import Data.PDRS.Structure
-import Data.PDRS.Translate
-import Data.PDRS.Variables
+import Data.PDRS.AlphaConversion as PDRS
+import Data.PDRS.Merge as PDRS
+import Data.PDRS.ProjectionGraph as PDRS
+import Data.PDRS.Properties as PDRS
+import Data.PDRS.Show as PDRS
+import Data.PDRS.Structure as PDRS
+import Data.PDRS.Translate as PDRS
+import Data.PDRS.Variables as PDRS

@@ -28,16 +28,16 @@ instance Show FOLForm where
 
 -- | Show FOL formula
 showFOLForm :: FOLForm -> String
-showFOLForm (Exists v f) = (opExists ++ v ++ (showFOLForm f))
-showFOLForm (ForAll v f) = (opForAll ++ v ++ (showFOLForm f))
-showFOLForm (And f1 f2)  = "(" ++ (showFOLForm f1) ++ " " ++ opAnd ++ " " ++ (showFOLForm f2) ++ ")"
-showFOLForm (Or f1 f2)   = "(" ++ (showFOLForm f1) ++ ") " ++ opOr  ++ " (" ++ (showFOLForm f2) ++ ")"
-showFOLForm (Imp f1 f2)  = "(" ++ (showFOLForm f1) ++ ") " ++ opImp ++ " (" ++ (showFOLForm f2) ++ ")"
-showFOLForm (Neg f)      = opNeg ++ (showFOLForm f)
-showFOLForm (Rel r d)    = r ++ "(" ++ (intercalate "," d) ++ ")"
+showFOLForm (Exists v f) = opExists ++ v ++ showFOLForm f
+showFOLForm (ForAll v f) = opForAll ++ v ++ showFOLForm f
+showFOLForm (And f1 f2)  = "(" ++ showFOLForm f1 ++ " " ++ opAnd ++ " " ++ showFOLForm f2 ++ ")"
+showFOLForm (Or f1 f2)   = "(" ++ showFOLForm f1 ++ ") " ++ opOr  ++ " (" ++ showFOLForm f2 ++ ")"
+showFOLForm (Imp f1 f2)  = "(" ++ showFOLForm f1 ++ ") " ++ opImp ++ " (" ++ showFOLForm f2 ++ ")"
+showFOLForm (Neg f)      = opNeg ++ showFOLForm f
+showFOLForm (Rel r d)    = r ++ "(" ++ intercalate "," d ++ ")"
 showFOLForm (Top)        = opTop
 showFOLForm (Bottom)     = opBottom
 
 -- | Print FOL formula
 printFOLForm :: FOLForm -> IO ()
-printFOLForm f = putStrLn $ "\n" ++ showFOLForm f
+printFOLForm f = putStrLn $ '\n' : showFOLForm f

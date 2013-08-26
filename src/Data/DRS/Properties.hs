@@ -28,7 +28,7 @@ isProperSubDRS (LambdaDRS _) _  = True
 isProperSubDRS (Merge d1 d2) gd = isProperSubDRS d1 gd && isProperSubDRS d2 gd
 isProperSubDRS sd@(DRS _ cs) gd = all properCon cs
   where properCon :: DRSCon -> Bool
-        properCon (Rel _ d)    = and $ map (flip ((flip drsBoundRef) sd) gd) d
+        properCon (Rel _ d)    = all (flip (`drsBoundRef` sd) gd) d
         properCon (Neg d1)     = isProperSubDRS d1 gd
         properCon (Imp d1 d2)  = isProperSubDRS d1 gd && isProperSubDRS d2 gd
         properCon (Or d1 d2)   = isProperSubDRS d1 gd && isProperSubDRS d2 gd
@@ -43,7 +43,7 @@ isPureDRS d = isPure d []
   where isPure :: DRS -> [DRSRef] -> Bool
         isPure (LambdaDRS _) _  = True
         isPure (Merge d1 d2) rs = isPure d1 rs && isPure d2 (rs ++ drsUniverse d1)
-        isPure (DRS u c) rs     = not (any ((flip elem) rs) u) && all isPureCon c
+        isPure (DRS u c) rs     = not (any (`elem` rs) u) && all isPureCon c
           where isPureCon :: DRSCon -> Bool
                 isPureCon (Rel _ _)    = True
                 isPureCon (Neg d1)     = isPure d1 (u ++ rs)

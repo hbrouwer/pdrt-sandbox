@@ -29,8 +29,8 @@ accommodatePDRS :: PDRS -> PDRS
 accommodatePDRS lp@(LambdaPDRS _) = lp
 accommodatePDRS (AMerge p1 p2)    = AMerge (accommodatePDRS p1) (accommodatePDRS p2)
 accommodatePDRS (PMerge p1 p2)    = PMerge (accommodatePDRS p1) (accommodatePDRS p2)
-accommodatePDRS p@(PDRS l _ _ _)  = pdrsAlphaConvert p (zip fps (take (length fps) (repeat l))) []
-  where fps = filter ((flip pdrsIsFreePVar) p) (delete l (vertices pg))
+accommodatePDRS p@(PDRS l _ _ _)  = pdrsAlphaConvert p (zip fps (replicate (length fps) l)) []
+  where fps = filter (`pdrsIsFreePVar` p) (delete l (vertices pg))
         pg  = projectionGraph p
 
 -- | Translates a PDRS into FOL
@@ -73,13 +73,13 @@ insertPRef pr@(PRef pv _) (PDRS l m u c)
 -- | Moves projected conditions to their interpretation site in PDRS @p@
 movePCons :: [PCon] -> PDRS -> PDRS
 movePCons [] p = p
-movePCons (pc@(PCon _ (Rel _ _)):pcs)  p = movePCons pcs (insertPCon pc p)
-movePCons ((PCon pv (Neg p1)):pcs)     p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Neg     (emptyPDRS p1))) p))
-movePCons ((PCon pv (Imp p1 p2)):pcs)  p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Imp     (emptyPDRS p1) (emptyPDRS p2))) p))
-movePCons ((PCon pv (Or  p1 p2)):pcs)  p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Or      (emptyPDRS p1) (emptyPDRS p2))) p))
-movePCons ((PCon pv (Prop r p1)):pcs)  p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Prop r  (emptyPDRS p1))) p))
-movePCons ((PCon pv (Diamond p1)):pcs) p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Diamond (emptyPDRS p1))) p))
-movePCons ((PCon pv (Box p1)):pcs)     p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Box     (emptyPDRS p1))) p))
+movePCons (pc@(PCon _ (Rel _ _)):pcs) p = movePCons pcs (insertPCon pc p)
+movePCons (PCon pv (Neg p1):pcs)      p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Neg     (emptyPDRS p1))) p))
+movePCons (PCon pv (Imp p1 p2):pcs)   p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Imp     (emptyPDRS p1) (emptyPDRS p2))) p))
+movePCons (PCon pv (Or  p1 p2):pcs)   p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Or      (emptyPDRS p1) (emptyPDRS p2))) p))
+movePCons (PCon pv (Prop r p1):pcs)   p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Prop r  (emptyPDRS p1))) p))
+movePCons (PCon pv (Diamond p1):pcs)  p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Diamond (emptyPDRS p1))) p))
+movePCons (PCon pv (Box p1):pcs)      p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Box     (emptyPDRS p1))) p))
 
 -- | Inserts projected condition @pc@ in PDRS @p@ at its interpretation site
 insertPCon :: PCon -> PDRS -> PDRS
@@ -116,7 +116,7 @@ stripPVars :: PDRS -> D.DRS
 stripPVars (LambdaPDRS lt) = D.LambdaDRS lt
 stripPVars (AMerge p1 p2)  = D.Merge (stripPVars p1) (stripPVars p2)
 stripPVars (PMerge p1 p2)  = D.Merge (stripPVars p1) (stripPVars p2)
-stripPVars (PDRS _ _ u c)  = D.DRS (map pdrsRefToDRSRef (map (\(PRef _ r) -> r) u)) (map stripPCon c)
+stripPVars (PDRS _ _ u c)  = D.DRS (map (pdrsRefToDRSRef . (\(PRef _ r) -> r)) u) (map stripPCon c)
   where stripPCon :: PCon -> D.DRSCon
         stripPCon (PCon _ (Rel r d))    = D.Rel     r (map pdrsRefToDRSRef d)
         stripPCon (PCon _ (Neg p1))     = D.Neg     (stripPVars p1)

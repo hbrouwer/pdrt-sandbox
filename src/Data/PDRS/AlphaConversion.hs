@@ -13,9 +13,9 @@ import Data.PDRS.Structure
 import Data.PDRS.Variables
 
 -- | Applies alpha conversion to a PDRS on the basis of conversion lists
--- for projection variables @ps@ and PDRS referents @rs@
+-- for projection variables and PDRS referents
 pdrsAlphaConvert :: PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> PDRS
-pdrsAlphaConvert p ps rs = alphaConvertSubPDRS p p ps rs
+pdrsAlphaConvert p = alphaConvertSubPDRS p p
 
 -- | Applies alpha conversion to a PDRS @sp@, which is a sub-PDRS of the
 -- global PDRS @gp@, on the basis of conversion lists for projection

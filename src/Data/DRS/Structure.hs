@@ -47,7 +47,7 @@ data DRSCon =
 isSubDRS :: DRS -> DRS -> Bool
 isSubDRS d1 (LambdaDRS _) = False
 isSubDRS d1 (Merge d2 d3) = d2 == d1 || d3 == d1
-isSubDRS d1 (DRS _ c)     = or $ map subDRS c
+isSubDRS d1 (DRS _ c)     = any subDRS c
   where subDRS :: DRSCon -> Bool
         subDRS (Rel _ _)    = False
         subDRS (Neg d3)     = d3 == d1

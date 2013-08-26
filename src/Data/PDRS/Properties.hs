@@ -17,9 +17,9 @@ import Data.PDRS.Variables
 -- | Returns whether a PDRS is resolved (containing no unresolved merges 
 -- or lambdas)
 isResolvedPDRS :: PDRS -> Bool
-isResolvedPDRS (LambdaPDRS _) = False
-isResolvedPDRS (AMerge _ _)   = False
-isResolvedPDRS (PMerge _ _)   = False
+isResolvedPDRS (LambdaPDRS{}) = False
+isResolvedPDRS (AMerge{})     = False
+isResolvedPDRS (PMerge{})     = False
 isResolvedPDRS (PDRS _ _ u c) = all isResolvedRef (map (\(PRef _ r) -> r) u) && all isResolvedPCon c
   where isResolvedRef :: PDRSRef -> Bool
         isResolvedRef (LambdaPDRSRef _) = False
@@ -35,22 +35,22 @@ isResolvedPDRS (PDRS _ _ u c) = all isResolvedRef (map (\(PRef _ r) -> r) u) && 
 
 -- | Returns whether a PDRS is entirely a merge PDRS (at its top-level)
 isMergePDRS :: PDRS -> Bool
-isMergePDRS (LambdaPDRS _) = False
-isMergePDRS (AMerge _ _)   = True
-isMergePDRS (PMerge _ _)   = True
-isMergePDRS (PDRS _ _ _ _) = False
+isMergePDRS (LambdaPDRS{}) = False
+isMergePDRS (AMerge{})     = True
+isMergePDRS (PMerge{})     = True
+isMergePDRS (PDRS{})       = False
 
 -- | Returns whether a PDRS is entirely a lambda PDRS (at its top-level)
 isLambdaPDRS :: PDRS -> Bool
-isLambdaPDRS (LambdaPDRS _) = True
+isLambdaPDRS (LambdaPDRS{}) = True
 isLambdaPDRS (AMerge p1 p2) = isLambdaPDRS p1 && isLambdaPDRS p2
 isLambdaPDRS (PMerge p1 p2) = isLambdaPDRS p1 && isLambdaPDRS p2
-isLambdaPDRS (PDRS _ _ _ _) = False
+isLambdaPDRS (PDRS{})       = False
 
 -- | Returns whether a PDRS is a *presuppositional PDRS* (a PDRS with
 -- free pointers)
 isPresupPDRS :: PDRS -> Bool
-isPresupPDRS (LambdaPDRS _)   = False
-isPresupPDRS (AMerge p1 p2)   = isPresupPDRS p1 || isPresupPDRS p2
-isPresupPDRS (PMerge _ _)     = True
-isPresupPDRS p@(PDRS _ _ _ _) = any ((flip pdrsIsFreePVar) p) (pdrsPVars p)
+isPresupPDRS (LambdaPDRS{}) = False
+isPresupPDRS (AMerge p1 p2) = isPresupPDRS p1 || isPresupPDRS p2
+isPresupPDRS (PMerge{})     = True
+isPresupPDRS p@(PDRS{})     = any (`pdrsIsFreePVar` p) (pdrsPVars p)
