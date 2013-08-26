@@ -70,8 +70,8 @@ instance (ShowablePDRS p) => Show (PDRS -> p) where
   show p = show (resolve p 0 0)
 
 -- | Operator constants
-opAMerge = "\x002A" -- ^ Assertive merge symbol
-opPMerge = "\x002B" -- ^ Projective merge symbol
+opAMerge = "\x002B" -- ^ Assertive merge symbol
+opPMerge = "\x002A" -- ^ Projective merge symbol
 
 -- | Modifier constant
 modPointer = "\x2190" -- ^ Pointer symbol
