@@ -49,8 +49,9 @@ import Data.List (intercalate, union)
 -- Derive an instance of the Show typeclass for DRS
 instance Show DRS where
   show d
-    | isFOLDRS d = "\n" ++ showDRS d ++ "\n" ++ show (drsToFOL d) ++ "\n"
-    | otherwise  = "\n" ++ showDRS d
+    | isFOLDRS rd = "\n" ++ showDRS rd ++ "\n" ++ show (drsToFOL rd) ++ "\n"
+    | otherwise   = "\n" ++ showDRS rd
+    where rd = drsResolveMerges d
 
 -- | Typeclass for showable, but unresolved DRSs
 class ShowableDRS d where 

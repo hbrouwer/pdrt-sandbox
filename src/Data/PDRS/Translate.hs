@@ -39,24 +39,7 @@ pdrsToFOL p = drsToFOL (pdrsToDRS p)
 
 -- | Translates a PDRS into a DRS
 pdrsToDRS :: PDRS -> D.DRS
-pdrsToDRS p = stripPVars $ movePContent (emptyPDRS p) $ accommodatePDRS $ resolveMerges p
-  where resolveMerges :: PDRS -> PDRS
-        resolveMerges lp@(LambdaPDRS _) = lp
-        resolveMerges (AMerge p1 p2)
-          | isLambdaPDRS p1 || isLambdaPDRS p2 = AMerge p1 p2
-          | otherwise                          = p1 <<+>> p2
-        resolveMerges (PMerge p1 p2)
-          | isLambdaPDRS p1 || isLambdaPDRS p2 = PMerge p1 p2
-          | otherwise                          = p1 <<*>> p2
-        resolveMerges (PDRS l m u c) = PDRS l m u (map resolve c)
-          where resolve :: PCon -> PCon
-                resolve pc@(PCon _ (Rel _ _)) = pc
-                resolve (PCon p (Neg p1))     = PCon p (Neg     (resolveMerges p1))
-                resolve (PCon p (Imp p1 p2))  = PCon p (Imp     (resolveMerges p1) (resolveMerges p2))
-                resolve (PCon p (Or p1 p2))   = PCon p (Or      (resolveMerges p1) (resolveMerges p2))
-                resolve (PCon p (Prop r p1))  = PCon p (Prop r  (resolveMerges p1))
-                resolve (PCon p (Diamond p1)) = PCon p (Diamond (resolveMerges p1))
-                resolve (PCon p (Box p1))     = PCon p (Box     (resolveMerges p1))
+pdrsToDRS p = stripPVars $ movePContent (emptyPDRS p) $ accommodatePDRS $ pdrsResolveMerges p
 
 -- | Moves projected content in PDRS to its interpretation site in PDRS @p@
 movePContent :: PDRS -> PDRS -> PDRS
@@ -69,7 +52,7 @@ movePContent (PDRS _ _ u c)    p = movePCons c (movePRefs u p)
 movePRefs :: [PRef] -> PDRS -> PDRS
 movePRefs [] p                   = p
 movePRefs (pr@(PRef pv d):prs) p = movePRefs prs (insertPRef pr p)
- 
+
 -- | Inserts projected referent @pr@ in PDRS @p@ at its interpretation site
 insertPRef :: PRef -> PDRS -> PDRS
 insertPRef _ lp@(LambdaPDRS _) = lp

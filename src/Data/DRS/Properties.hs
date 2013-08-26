@@ -13,7 +13,6 @@ module Data.DRS.Properties
 , isLambdaDRS
 ) where
 
-import Data.DRS.Merge
 import Data.DRS.Structure
 import Data.DRS.Variables
 
@@ -74,22 +73,7 @@ isResolvedDRS (DRS u c)     = all isResolvedRef u && all isResolvedCon c
 
 -- | Returns whether DRS @d@ is a FOL DRS
 isFOLDRS :: DRS -> Bool
-isFOLDRS d = isResolvedDRS rd && isProperDRS rd && isPureDRS rd
-  where rd = resolveMerges d
-        resolveMerges :: DRS -> DRS
-        resolveMerges ld@(LambdaDRS _) = ld
-        resolveMerges (Merge d1 d2)
-          | isLambdaDRS d1 || isLambdaDRS d2 = (Merge d1 d2)
-          | otherwise                        = d1 <<+>> d2
-        resolveMerges (DRS u c)        = DRS u (map resolve c)
-          where resolve :: DRSCon -> DRSCon
-                resolve r@(Rel _ _)  = r
-                resolve (Neg d1)     = Neg     (resolveMerges d1)
-                resolve (Imp d1 d2)  = Imp     (resolveMerges d1) (resolveMerges d2)
-                resolve (Or d1 d2)   = Or      (resolveMerges d1) (resolveMerges d2)
-                resolve (Prop r d1)  = Prop r  (resolveMerges d1)
-                resolve (Diamond d1) = Diamond (resolveMerges d1)
-                resolve (Box d1)     = Box     (resolveMerges d1)
+isFOLDRS d = isResolvedDRS d && isProperDRS d && isPureDRS d
 
 -- | Returns whether a DRS is entirely a merge DRS (at its top-level)
 isMergeDRS :: DRS -> Bool

@@ -35,9 +35,10 @@ import Data.Tuple (swap)
 -- | Derive and instance of the Show typeclass for PDRS
 instance Show PDRS where
   show p
-    | isFOLDRS d = "\n" ++ showPDRS p ++ "\n" ++ show (drsToFOL d) ++ "\n"
-    | otherwise  = "\n" ++ showPDRS p
-    where d = pdrsToDRS p
+    | isFOLDRS rd = "\n" ++ showPDRS rp ++ "\n" ++ show (drsToFOL rd) ++ "\n"
+    | otherwise   = "\n" ++ showPDRS rp
+    where rp = pdrsResolveMerges p
+          rd = pdrsToDRS rp
 
 -- | Typeclass for showable, but unresolved PDRSs
 class ShowablePDRS p where 
