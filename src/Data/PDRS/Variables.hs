@@ -1,8 +1,15 @@
--- Variables.hs
-
 {- |
-  PDRS variables
+Module      :  Data.PDRS.Variables
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+PDRS variables
 -}
+
 module Data.PDRS.Variables
 (
   pdrsRefToDRSRef

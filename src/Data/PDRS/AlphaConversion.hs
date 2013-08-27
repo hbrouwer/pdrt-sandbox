@@ -1,8 +1,15 @@
--- AlphaConversion.hs
-
 {- |
-  Alpha conversion
+Module      :  Data.PDRS.AlphaConversion
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+PDRS alpha conversion
 -}
+
 module Data.PDRS.AlphaConversion
 (
   pdrsAlphaConvert

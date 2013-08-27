@@ -1,8 +1,15 @@
--- Properties.hs
-
 {- |
-  PDRS properties
+Module      :  Data.PDRS.Properties
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+PDRS properties
 -}
+
 module Data.PDRS.Properties 
 (
   isResolvedPDRS

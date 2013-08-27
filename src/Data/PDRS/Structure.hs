@@ -1,8 +1,15 @@
--- Structure.hs
+{- |
+Module      :  Data.PDRS.Structure
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
 
-{- | 
-  Projective Discourse Representation Structure
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+PDRS data structure
 -}
+
 module Data.PDRS.Structure
 (
   PDRS (..)

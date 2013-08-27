@@ -1,8 +1,15 @@
--- Merge.hs
-
 {- |
-  DRS Merge
+Module      :  Data.DRS.Merge
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+DRS merge
 -}
+
 module Data.DRS.Merge 
 (
   drsMerge

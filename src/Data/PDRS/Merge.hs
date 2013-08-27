@@ -1,8 +1,15 @@
--- Merge.hs
-
 {- |
-  PDRS Merge
+Module      :  Data.PDRS.Merge
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+PDRS merges
 -}
+
 module Data.PDRS.Merge (
   pdrsAMerge
 , (<<+>>)

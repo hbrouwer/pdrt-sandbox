@@ -1,8 +1,15 @@
--- Translate.hs
-
 {- |
-  DRS to FOL translation
+Module      :  Data.DRS.Translate
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+DRS to FOL translation
 -}
+
 module Data.DRS.Translate
 (
   drsToFOL

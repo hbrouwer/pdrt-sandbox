@@ -1,8 +1,16 @@
--- Translate.hs
-
 {- |
-  PDRS to DRS translation
+Module      :  Data.PDRS.Translate
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+PDRS accommodation, PDRS to FOL translation, and PDRS
+to DRS translation
 -}
+
 module Data.PDRS.Translate
 (
   accommodatePDRS

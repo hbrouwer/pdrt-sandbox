@@ -1,8 +1,15 @@
--- Structure.hs
+{- |
+Module      :  Data.DRS.Structure
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
 
-{- | 
-  Discourse Representation Structure
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+DRS data structure
 -}
+
 module Data.DRS.Structure
 (
   DRS (..)

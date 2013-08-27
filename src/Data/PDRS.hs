@@ -1,8 +1,15 @@
--- PDRS.hs
-
 {- |
-  Projective Discourse Representation Structure
+Module      :  Data.PDRS
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+Projective Discourse Representation Structure
 -}
+
 module Data.PDRS
 (
   module Data.PDRS

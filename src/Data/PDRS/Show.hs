@@ -1,12 +1,19 @@
--- Show.hs
-
 {-# LANGUAGE FlexibleInstances #-}
-
 {- |
-  Show PDRS
+Module      :  Data.PDRS.Show
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+PDRS pretty printing
 -}
+
 module Data.PDRS.Show
 (
+-- * Pretty printing
   PDRSNotation (..)
 , showPDRS
 , printPDRS
@@ -81,14 +88,17 @@ instance (ShowablePDRS p) => Show (PDRSNotation p) where
   show (Linear p) = '\n' : showPDRS (Linear (resolve p 0 0))
   show (Set p)    = '\n' : showPDRS (Set    (resolve p 0 0))
 
--- | Operator constants
-opAMerge = "\x002B" -- Assertive merge symbol
-opPMerge = "\x002A" -- Projective merge symbol
+-- | Assertive merge symbol
+opAMerge = "\x002B"
+-- | Projective merge symbol
+opPMerge = "\x002A"
 
--- | Modifier constant
-modPointer = "\x2190" -- Pointer symbol
-modEquals  = "\x003D" -- Equals symbol
-modSubord  = "\x2264" -- Subordination symbol
+-- | Pointer symbol
+modPointer = "\x2190"
+-- | Equals symbol
+modEquals  = "\x003D"
+-- | Subordination symbol
+modSubord  = "\x2264"
 
 -- | Shows a PDRS
 showPDRS :: PDRSNotation PDRS -> String

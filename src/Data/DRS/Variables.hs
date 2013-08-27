@@ -1,8 +1,15 @@
--- Variables.hs
-
 {- |
-  DRS variables
+Module      :  Data.DRS.Variables
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+DRS variables
 -}
+
 module Data.DRS.Variables
 (
   drsRefToDRSVar

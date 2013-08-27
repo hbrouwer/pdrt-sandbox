@@ -1,12 +1,19 @@
--- Show.hs
-
 {-# LANGUAGE FlexibleInstances #-}
-
 {- |
-  Show DRS
+Module      :  Data.DRS.Show
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+DRS pretty printing
 -}
+
 module Data.DRS.Show
 (
+-- * Pretty printing
   DRSNotation (..)
 , showDRS
 , printDRS
@@ -17,6 +24,7 @@ module Data.DRS.Show
 , showDRSRefBetaReduct
 , printDRSRefBetaReduct
 
+-- ** DRS Box symbols
 , boxTopLeft
 , boxTopRight
 , boxBottomLeft
@@ -26,6 +34,7 @@ module Data.DRS.Show
 , boxHorLine
 , boxVerLine
 
+-- ** DRS Operator symbols
 , opNeg
 , opImp
 , opOr
@@ -33,6 +42,7 @@ module Data.DRS.Show
 , opBox
 , opLambda
 
+-- ** DRS Box printing
 , showConcat
 , showContent
 , showHorizontalLine
@@ -94,24 +104,37 @@ instance (ShowableDRS d) => Show (DRSNotation d) where
   show (Linear d) = '\n' : showDRS (Linear (resolve d 0 0))
   show (Set d)    = '\n' : showDRS (Set    (resolve d 0 0))
 
--- | Box construction constants
-boxTopLeft     = '\x250C' -- Top left corner symbol
-boxTopRight    = '\x2510' -- Top right corner symbol
-boxBottomLeft  = '\x2514' -- Bottom left corner symbol
-boxBottomRight = '\x2518' -- Bottom right corner symbol
-boxMiddleLeft  = '\x251C' -- Middle left corner symbol
-boxMiddleRight = '\x2524' -- Middle right corner symbol
-boxHorLine     = '-'      -- Horizontal line symbol
-boxVerLine     = '|'      -- Vertical line symbol
+-- | Top left corner symbol
+boxTopLeft     = '\x250C' 
+-- | Top right corner symbol
+boxTopRight    = '\x2510'
+-- | Bottom left corner symbol
+boxBottomLeft  = '\x2514'
+-- | Bottom right corner symbol
+boxBottomRight = '\x2518'
+-- | Middle left corner symbol
+boxMiddleLeft  = '\x251C'
+-- | Middle right corner symbol
+boxMiddleRight = '\x2524'
+-- | Horizontal line symbol
+boxHorLine     = '-'
+-- | Vertical line symbol
+boxVerLine     = '|'
 
--- | Operator constants
-opNeg     = "\x00AC" -- Negation symbol
-opImp     = "\x21D2" -- Implication symbol
-opOr      = "\x2228" -- Disjunction symbol
-opDiamond = "\x25C7" -- Diamond symbol
-opBox     = "\x25FB" -- Box symbol
-opLambda  = "\x03BB" -- Lambda symbol
-opMerge   = "\x002B" -- Merge symbol
+-- | Negation symbol
+opNeg     = "\x00AC"
+-- | Implication symbol
+opImp     = "\x21D2"
+-- | Disjunction symbol
+opOr      = "\x2228"
+-- | Diamond symbol
+opDiamond = "\x25C7"
+-- | Box symbol
+opBox     = "\x25FB"
+-- | Lambda symbol
+opLambda  = "\x03BB"
+-- | Merge symbol
+opMerge   = "\x002B"
 
 -- | Shows a DRS
 showDRS :: DRSNotation DRS -> String

@@ -1,8 +1,15 @@
--- Formula.hs
-
 {- |
-  First Order Logic formula
+Module      :  Data.FOL.Formula
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+FOL formula data structure
 -}
+
 module Data.FOL.Formula
 ( 
   FOLForm (..)

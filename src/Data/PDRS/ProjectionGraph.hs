@@ -1,8 +1,15 @@
--- ProjectionGraph.hs
-
 {- |
-  PDRS variables
+Module      :  Data.PDRS.ProjectionGraph
+Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
+License     :  Apache-2.0
+
+Maintainer  :  me@hbrouwer.eu
+Stability   :  provisional
+Portability :  portable
+
+PDRS projection graph
 -}
+
 module Data.PDRS.ProjectionGraph
 (
   projectionGraph
