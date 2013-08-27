@@ -55,7 +55,7 @@ edges (PDRS l m _ c) = ((l,l):m) `union` pconEdges c
           | noEdges p1 = pconEdges cs
           | otherwise  = ((pdrsLabel p1,p) : edges p1) `union` pconEdges cs
         noEdges :: PDRS -> Bool
-        noEdges (LambdaPDRS{}) = True
-        noEdges (AMerge{})     = True
-        noEdges (PMerge{})     = True
-        noEdges (PDRS{})       = False
+        noEdges (LambdaPDRS {}) = True
+        noEdges (AMerge {})     = True
+        noEdges (PMerge {})     = True
+        noEdges (PDRS {})       = False
