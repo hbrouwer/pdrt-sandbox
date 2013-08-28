@@ -1,5 +1,5 @@
 {- |
-Module      :  Data.PDRS.AlphaConversion
+Module      :  Data.PDRS.LambdaCalculus
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
 License     :  Apache-2.0
 
@@ -7,15 +7,16 @@ Maintainer  :  me@hbrouwer.eu
 Stability   :  provisional
 Portability :  portable
 
-PDRS alpha conversion
+PDRS lambda calculus; alpha conversion, beta reduction,
+and function composition
 -}
 
-module Data.PDRS.AlphaConversion
+module Data.PDRS.LambdaCalculus
 (
   pdrsAlphaConvert
 ) where
 
-import Data.DRS.AlphaConversion (alphaConvertVar)
+import Data.DRS.LambdaCalculus (alphaConvertVar)
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 

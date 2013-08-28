@@ -18,7 +18,7 @@ module Data.DRS.Merge
 , newDRSRefs
 ) where
 
-import Data.DRS.AlphaConversion
+import Data.DRS.LambdaCalculus
 import Data.DRS.Properties
 import Data.DRS.Structure
 import Data.DRS.Variables

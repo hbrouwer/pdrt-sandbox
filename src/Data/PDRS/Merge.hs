@@ -19,10 +19,12 @@ module Data.PDRS.Merge (
 ) where
 
 import Data.DRS.Merge (newDRSRefs)
-import Data.PDRS.AlphaConversion
+
+import Data.PDRS.LambdaCalculus
 import Data.PDRS.Properties
 import Data.PDRS.Structure
 import Data.PDRS.Variables
+
 import Data.List (intersect, nub, union)
 
 -- | Applies assertive merge to PDRS @p1@ and PDRS @p2@

@@ -21,7 +21,7 @@ module Data.PDRS.Translate
 import qualified Data.DRS.Structure as D
 import Data.DRS.Translate (drsToFOL)
 import qualified Data.FOL.Formula as F
-import Data.PDRS.AlphaConversion
+import Data.PDRS.LambdaCalculus
 import Data.PDRS.Merge
 import Data.PDRS.ProjectionGraph
 import Data.PDRS.Properties

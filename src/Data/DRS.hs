@@ -18,7 +18,7 @@ module Data.DRS
 , printFOLForm
 ) where
 
-import Data.DRS.AlphaConversion as DRS
+import Data.DRS.LambdaCalculus as DRS
 import Data.DRS.Merge as DRS
 import Data.DRS.Properties as DRS
 import Data.DRS.Show as DRS

@@ -1,5 +1,5 @@
 {- |
-Module      :  Data.DRS.AlphaConversion
+Module      :  Data.DRS.LambdaCalculus
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
 License     :  Apache-2.0
 
@@ -7,10 +7,11 @@ Maintainer  :  me@hbrouwer.eu
 Stability   :  provisional
 Portability :  portable
 
-DRS alpha conversion
+DRS lambda calculus; alpha conversion, beta reduction,
+and function composition
 -}
 
-module Data.DRS.AlphaConversion
+module Data.DRS.LambdaCalculus
 (
   drsAlphaConvert
 , alphaConvertVar
