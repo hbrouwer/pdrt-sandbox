@@ -16,9 +16,6 @@ module Data.DRS
 , module DRS
 , showFOLForm
 , printFOLForm
-
-, drsToLatex
-, drsToLatexFile
 ) where
 
 import Data.DRS.LambdaCalculus as DRS
@@ -31,4 +28,4 @@ import Data.DRS.Variables as DRS
 
 import Data.FOL (showFOLForm, printFOLForm)
 
-import Data.DRS.Format.Latex
+import Data.DRS.Format.Latex as DRS
