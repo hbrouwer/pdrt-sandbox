@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 {- |
 Module      :  Data.DRS.LambdaCalculus
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
@@ -15,6 +16,10 @@ module Data.DRS.LambdaCalculus
 (
   drsAlphaConvert
 , alphaConvertVar
+, drsBetaReduce
+, (<<@>>)
+, drsFunctionCompose
+, (<<.>>)
 ) where
 
 import Data.DRS.Structure
@@ -66,3 +71,28 @@ alphaConvertCons ld@(DRS _ c) gd rs = map convertCon c
         convertRef r
           | drsBoundRef r ld gd = alphaConvertVar r rs
           | otherwise           = r
+
+--- NEW stuff
+
+class AbstractDRS a
+instance AbstractDRS DRS
+instance (AbstractDRS a) => AbstractDRS (DRS -> a)
+instance (AbstractDRS a) => AbstractDRS (DRSRef -> a)
+
+class DRSAtom a
+instance DRSAtom DRS
+instance DRSAtom DRSRef
+
+drsBetaReduce :: (AbstractDRS a, DRSAtom b) => (b -> a) -> b -> a
+drsBetaReduce a b = a b
+
+(<<@>>) :: (AbstractDRS a, DRSAtom b) => (b -> a) -> b -> a
+cd <<@>> ad = cd `drsBetaReduce` ad
+
+-- drsFunctionCompose :: (DRSAtom a, AbstractDRS b) => (b -> c) -> (a -> b) -> (a -> c)
+drsFunctionCompose :: (b -> c) -> (a -> b) -> (a -> c)
+drsFunctionCompose a1 a2 = a1 . a2
+
+-- (<<.>>) :: (DRSAtom a, AbstractDRS b) => (b -> c) -> (a -> b) -> (a -> c)
+(<<.>>) :: (b -> c) -> (a -> b) -> (a -> c)
+a1 <<.>> a2 = a1 `drsFunctionCompose` a2

@@ -23,7 +23,9 @@ library
                        Data.PDRS, Data.PDRS.LambdaCalculus, 
                        Data.PDRS.Merge, Data.PDRS.ProjectionGraph,
                        Data.PDRS.Properties, Data.PDRS.Show,
-                       Data.PDRS.Structure, Data.PDRS.Translate, Data.PDRS.Variables
+                       Data.PDRS.Structure, Data.PDRS.Translate, Data.PDRS.Variables,
+                       Data.DRS.Format.Latex
+
   -- other-modules:       
   build-depends:       base ==4.6.*, containers
   hs-source-dirs:      src
