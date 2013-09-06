@@ -14,6 +14,10 @@ and function composition
 module Data.PDRS.LambdaCalculus
 (
   pdrsAlphaConvert
+, pdrsBetaReduce
+, (<<@>>)
+, pdrsFunctionCompose
+, (<<.>>)  
 ) where
 
 import Data.DRS.LambdaCalculus (alphaConvertVar)
@@ -70,3 +74,31 @@ alphaConvertPCons c gp ps rs = map convertPCon c
         convertRef p r
           | pdrsBoundRef (PRef p r) gp = alphaConvertVar r rs
           | otherwise                  = r
+
+-- | Type class for a PDRSAtom, which is either a PDRS or a PDRSRef
+class PDRSAtom a
+instance PDRSAtom PDRS
+instance PDRSAtom PDRSRef
+
+-- | Type class for an AbstractPDRS, which is either a resolved PDRS, or
+-- an unresolved PDRS that takes a PDRSAtom and yields an AbstractPDRS
+class AbstractPDRS a
+instance AbstractPDRS PDRS
+instance (PDRSAtom a, AbstractPDRS b) => AbstractPDRS (a -> b)
+
+-- | Apply beta reduction on an AbstractPDRS with a PDRSAtom
+pdrsBetaReduce :: (AbstractPDRS a, PDRSAtom b) => (b -> a) -> b -> a
+pdrsBetaReduce a = a
+
+-- | Infix notation for 'drsBetaReduce'
+(<<@>>) :: (AbstractPDRS a, PDRSAtom b) => (b -> a) -> b -> a
+up <<@>> ap = up `pdrsBetaReduce` ap
+
+-- | Apply function composition to two unresolved PDRSs, yielding
+-- a new unresolved PDRS
+pdrsFunctionCompose :: (b -> c) -> (a -> b) -> a -> c
+pdrsFunctionCompose = (.)
+
+-- | Infix notation for 'pdrsFunctionCompose'
+(<<.>>) :: (b -> c) -> (a -> b) -> a -> c
+a1 <<.>> a2 = a1 `pdrsFunctionCompose` a2

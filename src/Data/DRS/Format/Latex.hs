@@ -25,6 +25,14 @@ import Data.DRS.Variables
 
 import Data.List (intercalate)
 
+-- texCmdDRS = unlines
+--  [ "\\newcommand{\\drs}[2]{"
+--  , "\\begin{tabular}{ll}"
+--  , "#1 & #2\\\\"
+--  , "\\end{tabular}"
+--  , "}"
+--  ]
+
 texCmdDRSBox = unlines
   [ "\\newcommand{\\drsBox}[2]{"
   , "\\begin{tabular}{c}"

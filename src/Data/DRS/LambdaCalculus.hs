@@ -47,7 +47,7 @@ alphaConvertRefs :: [DRSRef] -> [(DRSRef,DRSRef)] -> [DRSRef]
 alphaConvertRefs u rs = map (`alphaConvertVar` rs) u
 
 -- | Applies alpha conversion to a variable @v@, iff @v@ occurs in
--- a variable conversion list. Otherwise, @v@ is returned unmodified.
+-- a variable conversion list. Otherwise, @v@ is returned unmodified
 alphaConvertVar :: (Eq a) => a -> [(a,a)] -> a
 alphaConvertVar v [] = v
 alphaConvertVar v ((cv,cv'):cvs)
@@ -56,7 +56,7 @@ alphaConvertVar v ((cv,cv'):cvs)
 
 -- | Applies alpha conversion to the conditions in a DRS @sd@, which
 -- is a sub-DRS of @gd@, on the basis of a conversion list for DRS
--- referents @rs@.
+-- referents @rs@
 alphaConvertCons :: DRS -> DRS -> [(DRSRef,DRSRef)] -> [DRSCon]
 alphaConvertCons ld@(DRS _ c) gd rs = map convertCon c
   where convertCon :: DRSCon -> DRSCon
@@ -72,27 +72,30 @@ alphaConvertCons ld@(DRS _ c) gd rs = map convertCon c
           | drsBoundRef r ld gd = alphaConvertVar r rs
           | otherwise           = r
 
---- NEW stuff
-
-class AbstractDRS a
-instance AbstractDRS DRS
-instance (AbstractDRS a) => AbstractDRS (DRS -> a)
-instance (AbstractDRS a) => AbstractDRS (DRSRef -> a)
-
+-- | Type class for a DRSAtom, which is either a DRS or a DRSRef
 class DRSAtom a
 instance DRSAtom DRS
 instance DRSAtom DRSRef
 
+-- | Type class for an AbstractDRS, which is either a resolved DRS, or 
+-- an unresolved DRS that takes a DRSAtom and yields an AbstractDRS
+class AbstractDRS a
+instance AbstractDRS DRS
+instance (DRSAtom a, AbstractDRS b) => AbstractDRS (a -> b)
+
+-- | Apply beta reduction on an AbstractDRS with a DRSAtom
 drsBetaReduce :: (AbstractDRS a, DRSAtom b) => (b -> a) -> b -> a
-drsBetaReduce a b = a b
+drsBetaReduce a = a
 
+-- | Infix notation for 'drsBetaReduce'
 (<<@>>) :: (AbstractDRS a, DRSAtom b) => (b -> a) -> b -> a
-cd <<@>> ad = cd `drsBetaReduce` ad
+ud <<@>> ad = ud `drsBetaReduce` ad
 
--- drsFunctionCompose :: (DRSAtom a, AbstractDRS b) => (b -> c) -> (a -> b) -> (a -> c)
-drsFunctionCompose :: (b -> c) -> (a -> b) -> (a -> c)
-drsFunctionCompose a1 a2 = a1 . a2
+-- | Apply function composition to two unresolved DRSs, yielding
+-- a new unresolved DRS
+drsFunctionCompose :: (b -> c) -> (a -> b) -> a -> c
+drsFunctionCompose = (.)
 
--- (<<.>>) :: (DRSAtom a, AbstractDRS b) => (b -> c) -> (a -> b) -> (a -> c)
-(<<.>>) :: (b -> c) -> (a -> b) -> (a -> c)
+-- | Infix notation for 'drsFunctionCompose'
+(<<.>>) :: (b -> c) -> (a -> b) -> a -> c
 a1 <<.>> a2 = a1 `drsFunctionCompose` a2
