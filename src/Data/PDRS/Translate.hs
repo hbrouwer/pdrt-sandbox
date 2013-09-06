@@ -154,21 +154,13 @@ pdrsToCleanPDRS gp = fst (cleanLabels (gp,[]))
                 cleanCons :: ([PCon],[PVar]) -> ([PCon],[PVar])
                 cleanCons ([],pvs)                          = ([],pvs)
                 cleanCons ((pc@(PCon p (Rel _ _)):pcs),pvs) = (pc : (fst pcs'), (snd pcs'))
-                  where pcs' = cleanCons (pcs,pvs')
-                        pvs'
-                          | pdrsIsFreePVar p gp = pvs
-                          | otherwise           = [p] `union` pvs
+                  where pcs' = cleanCons (pcs,addBoundVariable p pvs)
                 cleanCons ((PCon p (Neg p1):pcs),pvs)       = ((PCon p (Neg (fst p1')):(fst pcs')),(snd pcs'))
-                  where p1'  = cleanLabels (p1,pvs')
-                        pvs'
-                          | pdrsIsFreePVar p gp = pvs
-                          | otherwise           = [p] `union` pvs
+                  where p1'  = cleanLabels (p1,addBoundVariable p pvs)
                         pcs' = cleanCons (pcs,(snd p1'))
                 cleanCons ((PCon p (Imp p1 p2):pcs),pvs)    = ((PCon p (Imp (fst p1') (fst p2')):(fst pcs')),(snd pcs'))
                   where p1l  = pdrsLabel p1
-                        pvs'
-                          | pdrsIsFreePVar p gp = pvs
-                          | otherwise           = [p] `union` pvs
+                        pvs' = addBoundVariable p pvs
                         p1'
                           | p1l `elem` pvs = cleanLabels (pdrsAlphaConvert p1 [(p1l,npv)] [],pvs')
                           | otherwise      = cleanLabels (p1,pvs')
@@ -179,9 +171,7 @@ pdrsToCleanPDRS gp = fst (cleanLabels (gp,[]))
                         npv  = head (newPVars 1 pdrs pdrs)
                 cleanCons ((PCon p (Or p1 p2):pcs),pvs)     = ((PCon p (Or (fst p1') (fst p2')):(fst pcs')),(snd pcs'))
                   where p1l  = pdrsLabel p1
-                        pvs'
-                          | pdrsIsFreePVar p gp = pvs
-                          | otherwise           = [p] `union` pvs
+                        pvs' = addBoundVariable p pvs
                         p1'
                           | p1l `elem` pvs = cleanLabels (pdrsAlphaConvert p1 [(p1l,npv)] [],pvs')
                           | otherwise      = cleanLabels (p1,pvs')
@@ -191,20 +181,16 @@ pdrsToCleanPDRS gp = fst (cleanLabels (gp,[]))
                         pcs' = cleanCons (pcs,(snd p2'))  
                         npv  = head (newPVars 1 pdrs pdrs)
                 cleanCons ((PCon p (Prop r p1):pcs),pvs)    = ((PCon p (Prop r (fst p1')):(fst pcs')),(snd pcs'))
-                  where p1'  = cleanLabels (p1,pvs')
-                        pvs'
-                          | pdrsIsFreePVar p gp = pvs
-                          | otherwise           = [p] `union` pvs
+                  where p1'  = cleanLabels (p1,addBoundVariable p pvs)
                         pcs' = cleanCons (pcs,(snd p1'))
                 cleanCons ((PCon p (Diamond p1):pcs),pvs)   = ((PCon p (Diamond (fst p1')):(fst pcs')),(snd pcs'))
-                  where p1'  = cleanLabels (p1,pvs')
-                        pvs'
-                          | pdrsIsFreePVar p gp = pvs
-                          | otherwise           = [p] `union` pvs
+                  where p1'  = cleanLabels (p1,addBoundVariable p pvs)
                         pcs' = cleanCons (pcs,(snd p1'))
                 cleanCons ((PCon p (Box p1):pcs),pvs)       = ((PCon p (Box (fst p1')):(fst pcs')),(snd pcs'))
-                  where p1'  = cleanLabels (p1,pvs')
-                        pvs'
-                          | pdrsIsFreePVar p gp = pvs
-                          | otherwise           = [p] `union` pvs
+                  where p1'  = cleanLabels (p1,addBoundVariable p pvs)
                         pcs' = cleanCons (pcs,(snd p1'))
+                addBoundVariable :: PVar -> [PVar] -> [PVar]
+                addBoundVariable p pvs
+                  | pdrsIsFreePVar p gp = pvs
+                  | otherwise           = [p] `union` pvs
+
