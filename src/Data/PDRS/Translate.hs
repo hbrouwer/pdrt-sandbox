@@ -16,6 +16,7 @@ module Data.PDRS.Translate
   accommodatePDRS
 , pdrsToFOL
 , pdrsToDRS
+, pdrsToCleanPDRS
 ) where
 
 import qualified Data.DRS.Structure as D
@@ -133,3 +134,77 @@ stripPVars (PDRS _ _ u c)  = D.DRS (map (pdrsRefToDRSRef . (\(PRef _ r) -> r)) u
         stripPCon (PCon _ (Prop r p1))  = D.Prop    (pdrsRefToDRSRef r) (stripPVars p1)
         stripPCon (PCon _ (Diamond p1)) = D.Diamond (stripPVars p1)
         stripPCon (PCon _ (Box p1))     = D.Box     (stripPVars p1)
+
+-- | New stuff
+pdrsToCleanPDRS :: PDRS -> PDRS
+pdrsToCleanPDRS gp = fst (cleanLabels (gp,[]))
+  where cleanLabels :: (PDRS,[PVar]) -> (PDRS,[PVar])
+        cleanLabels (lp@(LambdaPDRS _),pvs) = (lp,pvs)
+        cleanLabels ((AMerge p1 p2),pvs)   = (AMerge (fst p1') (fst p2'),snd p2')
+          where p1' = cleanLabels (p1,pvs)
+                p2' = cleanLabels (p2,snd p1')
+        cleanLabels ((PMerge p1 p2),pvs)   = (PMerge (fst p1') (fst p2'),snd p2')
+          where p1' = cleanLabels (p1,pvs)
+                p2' = cleanLabels (p2,snd p1')
+        cleanLabels (pdrs@(PDRS l m u c),pvs)
+          | l `elem` pvs = cleanLabels (pdrsAlphaConvert pdrs [(l,head (newPVars 1 pdrs pdrs))] [],pvs)
+          | otherwise    = (PDRS l m u (fst c'),(snd c'))
+          where c' = cleanCons (c,(l:pvs'))
+                pvs' = pvs `union` map (\(PRef p _) -> p) (filter (\(PRef p _) -> not(pdrsIsFreePVar p gp)) u)
+                cleanCons :: ([PCon],[PVar]) -> ([PCon],[PVar])
+                cleanCons ([],pvs)                          = ([],pvs)
+                cleanCons ((pc@(PCon p (Rel _ _)):pcs),pvs) = (pc : (fst pcs'), (snd pcs'))
+                  where pcs' = cleanCons (pcs,pvs')
+                        pvs'
+                          | pdrsIsFreePVar p gp = pvs
+                          | otherwise           = [p] `union` pvs
+                cleanCons ((PCon p (Neg p1):pcs),pvs)       = ((PCon p (Neg (fst p1')):(fst pcs')),(snd pcs'))
+                  where p1'  = cleanLabels (p1,pvs')
+                        pvs'
+                          | pdrsIsFreePVar p gp = pvs
+                          | otherwise           = [p] `union` pvs
+                        pcs' = cleanCons (pcs,(snd p1'))
+                cleanCons ((PCon p (Imp p1 p2):pcs),pvs)    = ((PCon p (Imp (fst p1') (fst p2')):(fst pcs')),(snd pcs'))
+                  where p1l  = pdrsLabel p1
+                        pvs'
+                          | pdrsIsFreePVar p gp = pvs
+                          | otherwise           = [p] `union` pvs
+                        p1'
+                          | p1l `elem` pvs = cleanLabels (pdrsAlphaConvert p1 [(p1l,npv)] [],pvs')
+                          | otherwise      = cleanLabels (p1,pvs')
+                        p2'
+                          | p1l `elem` pvs = cleanLabels (pdrsAlphaConvert p2 [(p1l,npv)] [],snd p1')
+                          | otherwise      = cleanLabels (p2,snd p1')
+                        pcs' = cleanCons (pcs,(snd p2'))  
+                        npv  = head (newPVars 1 pdrs pdrs)
+                cleanCons ((PCon p (Or p1 p2):pcs),pvs)     = ((PCon p (Or (fst p1') (fst p2')):(fst pcs')),(snd pcs'))
+                  where p1l  = pdrsLabel p1
+                        pvs'
+                          | pdrsIsFreePVar p gp = pvs
+                          | otherwise           = [p] `union` pvs
+                        p1'
+                          | p1l `elem` pvs = cleanLabels (pdrsAlphaConvert p1 [(p1l,npv)] [],pvs')
+                          | otherwise      = cleanLabels (p1,pvs')
+                        p2'
+                          | p1l `elem` pvs = cleanLabels (pdrsAlphaConvert p2 [(p1l,npv)] [],snd p1')
+                          | otherwise      = cleanLabels (p2,snd p1')
+                        pcs' = cleanCons (pcs,(snd p2'))  
+                        npv  = head (newPVars 1 pdrs pdrs)
+                cleanCons ((PCon p (Prop r p1):pcs),pvs)    = ((PCon p (Prop r (fst p1')):(fst pcs')),(snd pcs'))
+                  where p1'  = cleanLabels (p1,pvs')
+                        pvs'
+                          | pdrsIsFreePVar p gp = pvs
+                          | otherwise           = [p] `union` pvs
+                        pcs' = cleanCons (pcs,(snd p1'))
+                cleanCons ((PCon p (Diamond p1):pcs),pvs)   = ((PCon p (Diamond (fst p1')):(fst pcs')),(snd pcs'))
+                  where p1'  = cleanLabels (p1,pvs')
+                        pvs'
+                          | pdrsIsFreePVar p gp = pvs
+                          | otherwise           = [p] `union` pvs
+                        pcs' = cleanCons (pcs,(snd p1'))
+                cleanCons ((PCon p (Box p1):pcs),pvs)       = ((PCon p (Box (fst p1')):(fst pcs')),(snd pcs'))
+                  where p1'  = cleanLabels (p1,pvs')
+                        pvs'
+                          | pdrsIsFreePVar p gp = pvs
+                          | otherwise           = [p] `union` pvs
+                        pcs' = cleanCons (pcs,(snd p1'))

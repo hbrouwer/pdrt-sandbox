@@ -16,6 +16,8 @@ module Data.PDRS.Merge (
 , pdrsPMerge
 , (<<*>>)
 , pdrsResolveMerges
+, pdrsDisjoin
+, newPVars
 ) where
 
 import Data.DRS.Merge (newDRSRefs)
