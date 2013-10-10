@@ -27,5 +27,3 @@ import Data.DRS.Translate as DRS
 import Data.DRS.Variables as DRS
 
 import Data.FOL (showFOLForm, printFOLForm)
-
-import Data.DRS.Format.Latex as DRS
