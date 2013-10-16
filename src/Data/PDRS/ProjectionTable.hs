@@ -57,7 +57,7 @@ pdrsToItems (PDRS l _ u c) = universeToItems u l ++ pconsToItems c l
 
 universeToItems :: [PRef] -> PVar -> [Item]
 universeToItems [] _                         = []
-universeToItems ((PRef p r):prs) l = (Ref r,l,[p]) : universeToItems prs l
+universeToItems (PRef p r:prs) l = (Ref r,l,[p]) : universeToItems prs l
 
 pconsToItems :: [PCon] -> PVar -> [Item]
 pconsToItems [] _ = []
@@ -70,9 +70,7 @@ pconsToItems (PCon p (PDRS.Diamond p1):pcs) l = (Diamond (pdrsLabel p1),l,[p]) :
 pconsToItems (PCon p (PDRS.Box p1):pcs)     l = (Box     (pdrsLabel p1),l,[p]) : pdrsToItems p1     ++ pconsToItems pcs l
 
 showPTable :: PTable -> String
-showPTable (PTable is) =
-  "[Type]\t[Content]\t[Intro st]\t[Proj. st]\n"
-  ++ foldl (++) [] (map showItem is)
+showPTable (PTable is) = "[Type]\t[Content]\t[Intro st]\t[Proj. st]\n" ++ concatMap showItem is
 
 showItem :: Item -> String
 showItem (c,is,ps) =

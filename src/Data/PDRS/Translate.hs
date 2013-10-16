@@ -154,7 +154,7 @@ cleanPRefs lp@(PDRS l m u c) gp prs = PDRS l m (map (convert prs) u) (map clean 
           | r == r' && pdrsIsAccessibleContext p p' lp = npr
           | otherwise                                  = convert prs pr
         clean :: PCon -> PCon
-        clean (PCon p (Rel r d))    = PCon p (Rel     r (map prefToPDRSRef (map (convert prs . (`pdrsRefToPRef` p)) d)))
+        clean (PCon p (Rel r d))    = PCon p (Rel     r (map (prefToPDRSRef . convert prs . (`pdrsRefToPRef` p)) d))
         clean (PCon p (Neg p1))     = PCon p (Neg     (cleanPRefs p1 gp prs))
         clean (PCon p (Imp p1 p2))  = PCon p (Imp     (cleanPRefs p1 gp prs) (cleanPRefs p2 gp prs))
         clean (PCon p (Or  p1 p2))  = PCon p (Or      (cleanPRefs p1 gp prs) (cleanPRefs p2 gp prs))
