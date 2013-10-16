@@ -19,6 +19,7 @@ module Data.PDRS
 import Data.PDRS.LambdaCalculus as PDRS
 import Data.PDRS.Merge as PDRS
 import Data.PDRS.ProjectionGraph as PDRS
+import Data.PDRS.ProjectionTable as PDRS
 import Data.PDRS.Properties as PDRS
 import Data.PDRS.Show as PDRS
 import Data.PDRS.Structure as PDRS
