@@ -14,19 +14,27 @@ module Data.PDRS.Variables
 (
   pdrsRefToDRSRef
 , drsRefToPDRSRef
+, pdrsRefToPRef
+, prefToPDRSRef
+, prefToPVar
 , pdrsUniverse
-, pdrsPReferents
+, pdrsUniverses
+, pdrsPRefs
 , pdrsVariables
 , pdrsPVars
-, pdrsAssertedPVars
-, pdrsAssertedPDRSRefs
 , pdrsLambdas
-, pdrsBoundRef
+, pdrsBoundPRef
+, pdrsBoundPVar
+, pdrsPRefBoundByPRef
 , pdrsIsAccessibleContext
 , pdrsIsFreePVar
+, newPVars
+, newPDRSRefs
+, newPRefs
 ) where
 
 import Data.DRS.Structure (DRSRef (..))
+import Data.DRS.Variables (newDRSRefs)
 import Data.PDRS.ProjectionGraph
 import Data.PDRS.Structure
 
@@ -43,6 +51,15 @@ drsRefToPDRSRef :: DRSRef -> PDRSRef
 drsRefToPDRSRef (LambdaDRSRef lt) = LambdaPDRSRef lt
 drsRefToPDRSRef (DRSRef r)        = PDRSRef r
 
+pdrsRefToPRef :: PDRSRef -> PVar -> PRef
+pdrsRefToPRef pr pv = PRef pv pr
+
+prefToPDRSRef :: PRef -> PDRSRef 
+prefToPDRSRef (PRef _ pr) = pr
+
+prefToPVar :: PRef -> PVar
+prefToPVar (PRef pv _) = pv
+
 -- | Returns the universe of a PDRS
 pdrsUniverse :: PDRS -> [PRef]
 pdrsUniverse (LambdaPDRS _) = []
@@ -50,21 +67,36 @@ pdrsUniverse (AMerge p1 p2) = pdrsUniverse p1 `union` pdrsUniverse p2
 pdrsUniverse (PMerge p1 p2) = pdrsUniverse p1 `union` pdrsUniverse p2
 pdrsUniverse (PDRS _ _ u _) = u
 
--- | Returns the list of all projected referents in a PDRS
-pdrsPReferents :: PDRS -> [PRef]
-pdrsPReferents (LambdaPDRS _) = []
-pdrsPReferents (AMerge p1 p2) = pdrsPReferents p1 `union` pdrsPReferents p2
-pdrsPReferents (PMerge p1 p2) = pdrsPReferents p1 `union` pdrsPReferents p2
-pdrsPReferents (PDRS _ _ u c) = u `union` preferents c
-  where preferents :: [PCon] -> [PRef]
-        preferents []                       = []
-        preferents (PCon _ (Rel _ _):cs)    = preferents cs
-        preferents (PCon _ (Neg p1):cs)     = pdrsPReferents p1 `union` preferents cs
-        preferents (PCon _ (Imp p1 p2):cs)  = pdrsPReferents p1 `union` pdrsPReferents p2 `union` preferents cs
-        preferents (PCon _ (Or p1 p2):cs)   = pdrsPReferents p1 `union` pdrsPReferents p2 `union` preferents cs
-        preferents (PCon _ (Prop _ p1):cs)  = pdrsPReferents p1 `union` preferents cs
-        preferents (PCon _ (Diamond p1):cs) = pdrsPReferents p1 `union` preferents cs
-        preferents (PCon _ (Box p1):cs)     = pdrsPReferents p1 `union` preferents cs
+-- | Returns the list of all projected universes in a PDRS
+pdrsUniverses :: PDRS -> [PRef]
+pdrsUniverses (LambdaPDRS _) = []
+pdrsUniverses (AMerge p1 p2) = pdrsUniverses p1 `union` pdrsUniverses p2
+pdrsUniverses (PMerge p1 p2) = pdrsUniverses p1 `union` pdrsUniverses p2
+pdrsUniverses (PDRS _ _ u c) = u `union` universes c
+  where universes :: [PCon] -> [PRef]
+        universes []                       = []
+        universes (PCon _ (Rel _ _):cs)    = universes cs
+        universes (PCon _ (Neg p1):cs)     = pdrsUniverses p1 `union` universes cs
+        universes (PCon _ (Imp p1 p2):cs)  = pdrsUniverses p1 `union` pdrsUniverses p2 `union` universes cs
+        universes (PCon _ (Or p1 p2):cs)   = pdrsUniverses p1 `union` pdrsUniverses p2 `union` universes cs
+        universes (PCon _ (Prop _ p1):cs)  = pdrsUniverses p1 `union` universes cs
+        universes (PCon _ (Diamond p1):cs) = pdrsUniverses p1 `union` universes cs
+        universes (PCon _ (Box p1):cs)     = pdrsUniverses p1 `union` universes cs
+
+pdrsPRefs :: PDRS -> [PRef]
+pdrsPRefs (LambdaPDRS _) = []
+pdrsPRefs (AMerge p1 p2) = pdrsPRefs p1 `union` pdrsPRefs p2
+pdrsPRefs (PMerge p1 p2) = pdrsPRefs p1 `union` pdrsPRefs p2
+pdrsPRefs (PDRS _ _ u c) = u `union` prefs c
+  where prefs :: [PCon] -> [PRef]
+        prefs []                       = []
+        prefs (PCon p (Rel _ d):cs)    = map (PRef p) d     ++  prefs cs
+        prefs (PCon _ (Neg p1):cs)     = pdrsPRefs p1 `union` prefs cs
+        prefs (PCon _ (Imp p1 p2):cs)  = pdrsPRefs p1 `union` pdrsPRefs p2 `union` prefs cs
+        prefs (PCon _ (Or p1 p2):cs)   = pdrsPRefs p1 `union` pdrsPRefs p2 `union` prefs cs
+        prefs (PCon p (Prop r p1):cs)  = PRef p   r        :       pdrsPRefs p1 `union` prefs cs
+        prefs (PCon _ (Diamond p1):cs) = pdrsPRefs p1 `union` prefs cs
+        prefs (PCon _ (Box p1):cs)     = pdrsPRefs p1 `union` prefs cs
 
 -- | Returns the list of all variables in a PDRS
 pdrsVariables :: PDRS -> [PDRSRef]
@@ -85,39 +117,6 @@ pdrsVariables (PDRS _ _ u c) = map (\(PRef _ r) -> r) u `union` variables c
 -- | Returns the list of all projection variables in a PDRS
 pdrsPVars :: PDRS -> [PVar]
 pdrsPVars p = vertices (projectionGraph p)
-
--- | Returns the list of all asserted projection variables in a PDRS
-pdrsAssertedPVars :: PDRS -> [PVar]
-pdrsAssertedPVars p = assertedPVars p (pdrsPVars p)
-  where assertedPVars :: PDRS -> [PVar] -> [PVar]
-        assertedPVars _ []               = []
-        assertedPVars (LambdaPDRS _) _   = []
-        assertedPVars (AMerge p1 p2) pvs = assertedPVars p1 pvs `union` assertedPVars p2 pvs
-        assertedPVars (PMerge _  p2) pvs = assertedPVars p2 pvs
-        assertedPVars (PDRS l _ _ _) (pv:pvs)
-          | isAsserted = pv : assertedPVars p pvs
-          | otherwise  = assertedPVars p pvs
-          where isAsserted = l == pv || (pdrsIsAccessibleContext pv l p && not(pdrsIsAccessibleContext l pv p))
-
--- | Returns the list of all asserted PDRS referents in a PDRS
-pdrsAssertedPDRSRefs :: PDRS -> [PDRSRef]
-pdrsAssertedPDRSRefs p = assertedPDRSRefs p (pdrsAssertedPVars p)
-  where assertedPDRSRefs :: PDRS -> [PVar] -> [PDRSRef]
-        assertedPDRSRefs (LambdaPDRS _) _   = []
-        assertedPDRSRefs (AMerge p1 p2) pvs = assertedPDRSRefs p1 pvs `union` assertedPDRSRefs p2 pvs
-        assertedPDRSRefs (PMerge _  p2) pvs = assertedPDRSRefs p2 pvs
-        assertedPDRSRefs (PDRS _ _ u c) pvs = arefs u          `union` arefsInCons c
-          where arefs :: [PRef] -> [PDRSRef]
-                arefs u = map (\(PRef _ r) -> r) (filter (\(PRef p _) -> p `elem` pvs) u)
-                arefsInCons :: [PCon] -> [PDRSRef]
-                arefsInCons []                       = []
-                arefsInCons (PCon _ (Rel _ _):cs)    = arefsInCons cs
-                arefsInCons (PCon _ (Neg p1):cs)     = assertedPDRSRefs p1 pvs `union` arefsInCons cs
-                arefsInCons (PCon _ (Imp p1 p2):cs)  = assertedPDRSRefs p1 pvs `union` assertedPDRSRefs p2 pvs `union` arefsInCons cs
-                arefsInCons (PCon _ (Or p1 p2):cs)   = assertedPDRSRefs p1 pvs `union` assertedPDRSRefs p2 pvs `union` arefsInCons cs
-                arefsInCons (PCon _ (Prop _ p1):cs)  = assertedPDRSRefs p1 pvs `union` arefsInCons cs
-                arefsInCons (PCon _ (Diamond p1):cs) = assertedPDRSRefs p1 pvs `union` arefsInCons cs
-                arefsInCons (PCon _ (Box p1):cs)     = assertedPDRSRefs p1 pvs `union` arefsInCons cs
 
 -- | Returns the list of all lambda variables in a PDRS
 pdrsLambdas :: PDRS -> [DRSVar]
@@ -151,29 +150,72 @@ lambdasPCons (PCon p (Prop r p1):cs)  = lambdasRefs [r] `union` lambdas p1 `unio
 lambdasPCons (PCon _ (Diamond p1):cs) = lambdas p1      `union` lambdasPCons cs
 lambdasPCons (PCon _ (Box p1):cs)     = lambdas p1      `union` lambdasPCons cs
 
--- | Returns whether project referent @r@ is bound in the PDRS @p@
-pdrsBoundRef :: PRef -> PDRS -> Bool
-pdrsBoundRef (PRef p r) p1
-  | p `elem` vs = bound vs
-  | otherwise   = False
-  where pg = projectionGraph p1
-        vs = vertices pg
+pdrsBoundPRef :: PRef -> PDRS -> PDRS -> Bool
+pdrsBoundPRef (PRef p r) lp gp = bound (vertices pg)
+  where pg = projectionGraph gp
         bound :: [PVar] -> Bool
         bound [] = False
         bound (pv:pvs)
-          | path pg p pv = PRef pv r `elem` pdrsPReferents p1 || bound pvs
-          | otherwise    = bound pvs
+          | path pg (pdrsLabel lp) pv && path pg p pv = PRef pv r `elem` pdrsUniverses gp || bound pvs
+          | otherwise                                 = bound pvs
+
+pdrsPRefBoundByPRef :: PRef -> PDRS -> PRef -> PDRS -> Bool
+pdrsPRefBoundByPRef pr1@(PRef p1 r1) lp1 pr2@(PRef p2 r2) lp2 = r1 == r2
+  && pr2 `elem` pdrsUniverses lp2
+  && pdrsIsAccessibleContext p1 p2 lp2
+  && pdrsIsAccessibleContext (pdrsLabel lp1) p2 lp2
 
 -- | Returns whether PDRS context @p2@ is accessible from PDRS context @p1@
 -- in PDRS @p@
 pdrsIsAccessibleContext :: PVar -> PVar -> PDRS -> Bool
 pdrsIsAccessibleContext p1 p2 p = path (projectionGraph p) p1 p2
 
--- | Returns whether @pv@ is a free projection variable in PDRS @p@
 pdrsIsFreePVar :: PVar -> PDRS -> Bool
-pdrsIsFreePVar pv p = path pg (pdrsLabel p) pv || not(any pathBack (vertices pg))
+pdrsIsFreePVar pv p
+  | pv == pdrsLabel p = False
+  | otherwise         = path pg (pdrsLabel p) pv || not(any pathBack (vertices pg))
   where pg = projectionGraph p
         pathBack :: PVar -> Bool
-        pathBack v
-          | path pg pv v && path pg (pdrsLabel p) v = True
-          | otherwise                               = False
+        pathBack v = path pg pv v && path pg (pdrsLabel p) v
+ 
+pdrsBoundPVar :: PVar -> PDRS -> PDRS -> Bool
+pdrsBoundPVar _ _ (LambdaPDRS _) = False
+pdrsBoundPVar pv lp (AMerge p1 p2) = pdrsBoundPVar pv lp p1 || pdrsBoundPVar pv lp p2
+pdrsBoundPVar pv lp (PMerge p1 p2) = pdrsBoundPVar pv lp p1 || pdrsBoundPVar pv lp p2
+pdrsBoundPVar pv lp gp@(PDRS l _ _ c)
+  | pv == pdrsLabel lp     = True
+  | pv == l                = True
+  | isBoundByLabel pv lp c = True
+  | otherwise              = False
+  where isBoundByLabel :: PVar -> PDRS -> [PCon] -> Bool
+        isBoundByLabel pv lp = any bound
+          where bound :: PCon -> Bool
+                bound (PCon _ (Rel _ _))    = False
+                bound (PCon _ (Neg p1))     = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+                bound (PCon _ (Imp p1 p2))  = pv == pdrsLabel p1 && isSubPDRS lp p2
+                  ||  isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+                  ||  isSubPDRS lp p2 && pdrsBoundPVar pv lp p2
+                bound (PCon _ (Or p1 p2))   = pv == pdrsLabel p1 && isSubPDRS lp p2
+                  ||  isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+                  ||  isSubPDRS lp p2 && pdrsBoundPVar pv lp p2
+                bound (PCon _ (Prop _ p1))  = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+                bound (PCon _ (Diamond p1)) = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+                bound (PCon _ (Box p1))     = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+
+newPVars :: [PVar] -> [PVar] -> [PVar]
+newPVars opvs []   = opvs
+newPVars opvs epvs = take (length opvs) [(maximum epvs + 1)..]
+
+newPDRSRefs :: [PDRSRef] -> [PDRSRef] -> [PDRSRef]
+newPDRSRefs ors []  = ors
+newPDRSRefs ors ers = map drsRefToPDRSRef (newDRSRefs (map pdrsRefToDRSRef ors) (map pdrsRefToDRSRef ers))
+
+newPRefs :: [PRef] -> [PVar] -> [PDRSRef] -> [PRef]
+newPRefs prs epvs ers = packPRefs (newPVars ps epvs) (newPDRSRefs rs ers)
+  where (ps,rs) = unpackPRefs prs ([],[])
+        unpackPRefs :: [PRef] -> ([PVar],[PDRSRef]) -> ([PVar],[PDRSRef])
+        unpackPRefs [] uprs                 = uprs
+        unpackPRefs (PRef p r:prs) (pvs,rs) = unpackPRefs prs (p:pvs,r:rs)
+        packPRefs :: [PVar] -> [PDRSRef] -> [PRef]
+        packPRefs [] []           = []
+        packPRefs (pv:pvs) (r:rs) = PRef pv r : packPRefs pvs rs

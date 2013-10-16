@@ -50,16 +50,16 @@ data DRSCon =
   | Box DRS           -- ^ A necessary DRS
   deriving (Eq)
 
--- Returns whether DRS @d1@ is a direct sub-DRS of DRS @d2@
+-- | Returns whether DRS @d1@ is a direct or indirect sub-DRS of DRS @d2@
 isSubDRS :: DRS -> DRS -> Bool
 isSubDRS d1 (LambdaDRS _) = False
-isSubDRS d1 (Merge d2 d3) = d2 == d1 || d3 == d1
-isSubDRS d1 (DRS _ c)     = any subDRS c
+isSubDRS d1 (Merge d2 d3) = isSubDRS d1 d2 || isSubDRS d1 d3
+isSubDRS d1 d2@(DRS _ c)  = d1 == d2 || any subDRS c
   where subDRS :: DRSCon -> Bool
         subDRS (Rel _ _)    = False
-        subDRS (Neg d3)     = d3 == d1
-        subDRS (Imp d3 d4)  = d3 == d1 || d4 == d1
-        subDRS (Or d3 d4)   = d3 == d1 || d4 == d1
-        subDRS (Prop _ d3)  = d3 == d1
-        subDRS (Diamond d3) = d3 == d1
-        subDRS (Box d3)     = d3 == d1
+        subDRS (Neg d3)     = isSubDRS d1 d3
+        subDRS (Imp d3 d4)  = isSubDRS d1 d3 || isSubDRS d1 d4
+        subDRS (Or d3 d4)   = isSubDRS d1 d3 || isSubDRS d1 d4
+        subDRS (Prop _ d3)  = isSubDRS d1 d3
+        subDRS (Diamond d3) = isSubDRS d1 d3
+        subDRS (Box d3)     = isSubDRS d1 d3

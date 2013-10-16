@@ -21,6 +21,7 @@ module Data.PDRS.Structure
 , PDRSCon (..)
 , DRSRel
 , pdrsLabel
+, isSubPDRS
 ) where
 
 import Data.DRS.Structure (DRSRel, DRSVar)
@@ -66,3 +67,18 @@ data PDRSCon =
 -- | Returns the label of a PDRS
 pdrsLabel :: PDRS -> PVar
 pdrsLabel (PDRS l _ _ _) = l
+
+-- | Returns whether PDRS @p1@ is a direct or indirect sub-PDRS of PDRS @p2@
+isSubPDRS :: PDRS -> PDRS -> Bool
+isSubPDRS p1 (LambdaPDRS _)    = False
+isSubPDRS p1 (AMerge p2 p3)    = isSubPDRS p1 p2 || isSubPDRS p1 p3
+isSubPDRS p1 (PMerge p2 p3)    = isSubPDRS p1 p2 || isSubPDRS p1 p3
+isSubPDRS p1 p2@(PDRS _ _ _ c) = p1 == p2 || any subPDRS c
+  where subPDRS :: PCon -> Bool
+        subPDRS (PCon _ (Rel _ _ ))   = False
+        subPDRS (PCon _ (Neg p3))     = isSubPDRS p1 p3
+        subPDRS (PCon _ (Imp p3 p4))  = isSubPDRS p1 p3 || isSubPDRS p1 p4
+        subPDRS (PCon _ (Or p3 p4))   = isSubPDRS p1 p3 || isSubPDRS p1 p4
+        subPDRS (PCon _ (Prop _ p3))  = isSubPDRS p1 p3
+        subPDRS (PCon _ (Diamond p3)) = isSubPDRS p1 p3
+        subPDRS (PCon _ (Box p3))     = isSubPDRS p1 p3

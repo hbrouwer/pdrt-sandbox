@@ -15,7 +15,6 @@ module Data.DRS.Merge
   drsMerge
 , (<<+>>)
 , drsResolveMerges
-, newDRSRefs
 ) where
 
 import Data.DRS.LambdaCalculus
@@ -57,20 +56,5 @@ drsResolveMerges (DRS u c)        = DRS u (map resolve c)
 -- referents to new referents
 drsDisjoin :: DRS -> DRS -> DRS
 drsDisjoin d1 d2 = drsAlphaConvert d2 (zip ors nrs)
-  where ors = drsVariables d1 `intersect` drsReferents d2
-        nrs = newDRSRefs ors (drsReferents d1 `union` drsReferents d2)
-
--- | Returns a list of new referents, based on a list of old referents and a 
--- list of existing referents
-newDRSRefs :: [DRSRef] -> [DRSRef] -> [DRSRef]
-newDRSRefs [] _        = []
-newDRSRefs (r:rs) refs = nr : newDRSRefs rs (nr:refs)
-  where nr = newRef 0
-        newRef :: Int -> DRSRef
-        newRef n
-          | r' `elem` refs = newRef (n + 1)
-          | otherwise      = r'
-          where r' =
-                  case r of
-                   (LambdaDRSRef (dv,lp)) -> LambdaDRSRef (dv ++ show n, lp)
-                   (DRSRef dv)            -> DRSRef       (dv ++ show n)
+  where ors = drsVariables d1 `intersect` drsUniverses d2
+        nrs = newDRSRefs ors (drsUniverses d1 `union` drsUniverses d2)

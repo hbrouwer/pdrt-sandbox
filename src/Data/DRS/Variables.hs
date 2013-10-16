@@ -14,10 +14,11 @@ module Data.DRS.Variables
 (
   drsRefToDRSVar
 , drsUniverse
-, drsReferents
+, drsUniverses
 , drsVariables
 , drsLambdas
 , drsBoundRef
+, newDRSRefs
 ) where
 
 import Data.DRS.Structure
@@ -35,20 +36,20 @@ drsUniverse (LambdaDRS _) = []
 drsUniverse (Merge d1 d2) = drsUniverse d1 `union` drsUniverse d2
 drsUniverse (DRS u _)     = u
 
--- | Returns the list of all referents in a DRS
-drsReferents :: DRS -> [DRSRef]
-drsReferents (LambdaDRS _) = []
-drsReferents (Merge d1 d2) = drsReferents d1 `union` drsReferents d2
-drsReferents (DRS u c)     = u `union` referents c
-  where referents :: [DRSCon] -> [DRSRef]
-        referents []              = []
-        referents (Rel _ _:cs)    = referents cs
-        referents (Neg d1:cs)     = drsReferents d1 `union` referents cs
-        referents (Imp d1 d2:cs)  = drsReferents d1 `union` drsReferents d2 `union` referents cs
-        referents (Or d1 d2:cs)   = drsReferents d1 `union` drsReferents d2 `union` referents cs
-        referents (Prop _ d1:cs)  = drsReferents d1 `union` referents cs
-        referents (Diamond d1:cs) = drsReferents d1 `union` referents cs
-        referents (Box d1:cs)     = drsReferents d1 `union` referents cs
+-- | Returns the list of all universes in a DRS
+drsUniverses :: DRS -> [DRSRef]
+drsUniverses (LambdaDRS _) = []
+drsUniverses (Merge d1 d2) = drsUniverses d1 `union` drsUniverses d2
+drsUniverses (DRS u c)     = u `union` universes c
+  where universes :: [DRSCon] -> [DRSRef]
+        universes []              = []
+        universes (Rel _ _:cs)    = universes cs
+        universes (Neg d1:cs)     = drsUniverses d1 `union` universes cs
+        universes (Imp d1 d2:cs)  = drsUniverses d1 `union` drsUniverses d2 `union` universes cs
+        universes (Or d1 d2:cs)   = drsUniverses d1 `union` drsUniverses d2 `union` universes cs
+        universes (Prop _ d1:cs)  = drsUniverses d1 `union` universes cs
+        universes (Diamond d1:cs) = drsUniverses d1 `union` universes cs
+        universes (Box d1:cs)     = drsUniverses d1 `union` universes cs
 
 -- | Returns the list of all variables in a DRS
 drsVariables :: DRS -> [DRSRef]
@@ -95,27 +96,39 @@ lambdasCons (Box d1:cs)     = lambdas d1      `union` lambdasCons cs
 -- | Returns whether DRS referent @d@ in local DRS @ld@ is bound in the
 -- global DRS @gd@
 drsBoundRef :: DRSRef -> DRS -> DRS -> Bool
-drsBoundRef _ (LambdaDRS _) _  = False
-drsBoundRef r (Merge d1 d2) gd = drsBoundRef r d1 gd || drsBoundRef r d2 gd
+drsBoundRef _ _ (LambdaDRS _)  = False
+drsBoundRef r ld (Merge d1 d2) = drsBoundRef r ld d1 || drsBoundRef r ld d2
 drsBoundRef r ld@(DRS lu _) gd@(DRS gu gc)
   | r `elem` lu           = True
   | r `elem` gu           = True
   | hasAntecedent r ld gc = True
   | otherwise             = False
+  where hasAntecedent :: DRSRef -> DRS -> [DRSCon] -> Bool
+        hasAntecedent r ld = any antecedent
+          where antecedent :: DRSCon -> Bool
+                antecedent (Rel _ _)     = False
+                antecedent (Neg d1)      = isSubDRS ld d1 && drsBoundRef r ld d1
+                antecedent (Imp d1 d2)   = (r `elem` drsUniverse d1 && isSubDRS ld d2)
+                  || (isSubDRS ld d1 && drsBoundRef r ld d1)
+                  || (isSubDRS ld d2 && drsBoundRef r ld d2)
+                antecedent (Or d1 d2)    = (r `elem` drsUniverse d1 && isSubDRS ld d2)
+                  || (isSubDRS ld d1 && drsBoundRef r ld d1)
+                  || (isSubDRS ld d2 && drsBoundRef r ld d2)
+                antecedent (Prop _ d1)   = isSubDRS ld d1 && drsBoundRef r ld d1
+                antecedent (Diamond d1)  = isSubDRS ld d1 && drsBoundRef r ld d1
+                antecedent (Box d1)      = isSubDRS ld d1 && drsBoundRef r ld d1
 
--- | Returns wehther DRS referent @d@ in local DRS @ld@ is bound by an
--- antecedent in the DRS conditions @gc@
-hasAntecedent :: DRSRef -> DRS -> [DRSCon] -> Bool
-hasAntecedent r ld = any antecedent
-  where antecedent :: DRSCon -> Bool
-        antecedent (Rel _ _)     = False
-        antecedent (Neg d1)      = isSubDRS ld d1 && drsBoundRef r ld d1
-        antecedent (Imp d1 d2)   = (r `elem` drsUniverse d1 && d2 == ld)
-          || (isSubDRS ld d1 && drsBoundRef r ld d1)
-          || (isSubDRS ld d2 && drsBoundRef r ld d2)
-        antecedent (Or d1 d2)    = (r `elem` drsUniverse d1 && d2 == ld)
-          || (isSubDRS ld d1 && drsBoundRef r ld d1)
-          || (isSubDRS ld d2 && drsBoundRef r ld d2)
-        antecedent (Prop _ d1)   = isSubDRS ld d1 && drsBoundRef r ld d1
-        antecedent (Diamond d1)  = isSubDRS ld d1 && drsBoundRef r ld d1
-        antecedent (Box d1)      = isSubDRS ld d1 && drsBoundRef r ld d1
+-- | Returns a list of new referents, based on a list of old referents and a 
+-- list of existing referents
+newDRSRefs :: [DRSRef] -> [DRSRef] -> [DRSRef]
+newDRSRefs [] _        = []
+newDRSRefs (r:rs) refs = nr : newDRSRefs rs (nr:refs)
+  where nr = newRef 0
+        newRef :: Int -> DRSRef
+        newRef n
+          | r' `elem` refs = newRef (n + 1)
+          | otherwise      = r'
+          where r' =
+                  case r of
+                   (LambdaDRSRef (dv,lp)) -> LambdaDRSRef (dv ++ show n, lp)
+                   (DRSRef dv)            -> DRSRef       (dv ++ show n)
