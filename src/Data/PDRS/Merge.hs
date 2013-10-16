@@ -33,7 +33,7 @@ pdrsAMerge p1 p2 = amerge rp1 (pdrsDisjoin rp2 (pdrsPVars rp1) (pdrsVariables rp
         rp2 = pdrsResolveMerges p2
         amerge :: PDRS -> PDRS -> PDRS
         amerge p (PDRS l m u c) = PDRS l (m `union` m') (u `union` u') (c `union` c')
-          where (PDRS l' m' u' c') = pdrsAlphaConvert p [((pdrsLabel p),l)] []
+          where (PDRS l' m' u' c') = pdrsAlphaConvert p [(pdrsLabel p,l)] []
         
 -- | Infix notation for 'pdrsAMerge'
 (<<+>>) :: PDRS -> PDRS -> PDRS

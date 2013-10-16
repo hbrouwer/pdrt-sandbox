@@ -151,8 +151,11 @@ lambdasPCons (PCon _ (Diamond p1):cs) = lambdas p1      `union` lambdasPCons cs
 lambdasPCons (PCon _ (Box p1):cs)     = lambdas p1      `union` lambdasPCons cs
 
 pdrsBoundPRef :: PRef -> PDRS -> PDRS -> Bool
-pdrsBoundPRef (PRef p r) lp gp = bound (vertices pg)
+pdrsBoundPRef (PRef p r) lp gp
+  | p `elem` vs = bound vs
+  | otherwise   = False
   where pg = projectionGraph gp
+        vs = vertices pg
         bound :: [PVar] -> Bool
         bound [] = False
         bound (pv:pvs)
@@ -168,7 +171,12 @@ pdrsPRefBoundByPRef pr1@(PRef p1 r1) lp1 pr2@(PRef p2 r2) lp2 = r1 == r2
 -- | Returns whether PDRS context @p2@ is accessible from PDRS context @p1@
 -- in PDRS @p@
 pdrsIsAccessibleContext :: PVar -> PVar -> PDRS -> Bool
-pdrsIsAccessibleContext p1 p2 p = path (projectionGraph p) p1 p2
+pdrsIsAccessibleContext p1 p2 p 
+  | not (p1 `elem` vs) || not (p2 `elem` vs) = False
+  | path pg p1 p2                            = True
+  | otherwise                                = False
+  where pg = projectionGraph p
+        vs = vertices pg
 
 pdrsIsFreePVar :: PVar -> PDRS -> Bool
 pdrsIsFreePVar pv p
