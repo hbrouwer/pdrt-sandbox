@@ -151,7 +151,7 @@ cleanPRefs lp@(PDRS l m u c) gp prs = PDRS l m (map (convert prs) u) (map clean 
   where convert :: [(PRef,PRef)] -> PRef -> PRef
         convert [] pr                                  = pr
         convert  ((PRef p' r',npr):prs) pr@(PRef p r)
-          | r == r' && pdrsIsAccessibleContext p p' lp = npr
+          | r == r' && pdrsIsAccessibleContext p p' gp = npr
           | otherwise                                  = convert prs pr
         clean :: PCon -> PCon
         clean (PCon p (Rel r d))    = PCon p (Rel     r (map (prefToPDRSRef . convert prs . (`pdrsRefToPRef` p)) d))
@@ -178,7 +178,7 @@ cleanPVars (lp@(PDRS l m u c),pvs) gp
         upv = filter (not . flip (`pdrsBoundPVar` lp) gp) (map prefToPVar u)
         mpv = filter (not . flip (`pdrsBoundPVar` lp) gp) (concatMap (\(x,y) -> [x,y]) m)
         clean :: ([PCon],[PVar]) -> ([PCon],[PVar])
-        clean tp@([],pvs) = tp
+        clean tp@([],pvs)  = tp
         clean (pc@(PCon p (Rel _ _)):pcs,pvs) = (pc:ccs,pvs1)
           where (ccs,pvs1) = clean (pcs,addUnboundPVar p lp pvs)
         clean (PCon p (Neg p1):pcs,pvs)       = (PCon p (Neg cp1):ccs,pvs2)
@@ -189,14 +189,14 @@ cleanPVars (lp@(PDRS l m u c),pvs) gp
                 (cp2,pvs3) = cleanPVars (pdrsAlphaConvert p2 npv [],pvs2) gp
                 (ccs,pvs4) = clean (pcs,pvs3)
                 pvs1 = addUnboundPVar p lp pvs
-                opv  = pvs' `intersect` [pdrsLabel p1]
+                opv  = pvs1 `intersect` [pdrsLabel p1]
                 npv  = zip opv (newPVars opv (pdrsPVars gp `union` pdrsPVars lp))
         clean (PCon p (Or  p1 p2):pcs,pvs)    = (PCon p (Or cp1 cp2):ccs,pvs4)
           where (cp1,pvs2) = cleanPVars (pdrsAlphaConvert p1 npv [],pvs1) gp
                 (cp2,pvs3) = cleanPVars (pdrsAlphaConvert p2 npv [],pvs2) gp
                 (ccs,pvs4) = clean (pcs,pvs3)
                 pvs1 = addUnboundPVar p lp pvs
-                opv  = pvs' `intersect` [pdrsLabel p1]
+                opv  = pvs1 `intersect` [pdrsLabel p1]
                 npv  = zip opv (newPVars opv (pdrsPVars gp `union` pdrsPVars lp))
         clean (PCon p (Prop r p1):pcs,pvs)    = (PCon p (Prop r cp1):ccs,pvs2)
           where (cp1,pvs1) = cleanPVars (p1,addUnboundPVar p lp pvs) gp
@@ -227,9 +227,9 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp prs = filter (dup prs) u ++ dups c (prs `un
         dups (PCon p (Rel _ d):pcs)    prs = filter (dup prs) d'       ++ dups pcs (prs `union` d')
           where d' = map (`pdrsRefToPRef` p) d
         dups (PCon _ (Neg p1):pcs)     prs = unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` pdrsPRefs p1)
-        dups (PCon _ (Imp p1 p2):pcs)  prs = unboundDupPRefs p1 gp prs ++ unboundDupPRefs p2 gp prs ++ dups pcs (prs `union` pdrsPRefs p1 `union` pdrsPRefs p2)
-        dups (PCon _ (Or p1 p2):pcs)   prs = unboundDupPRefs p1 gp prs ++ unboundDupPRefs p2 gp prs ++ dups pcs (prs `union` pdrsPRefs p1 `union` pdrsPRefs p2)
-        dups (PCon p (Prop r p1):pcs)  prs = filter (dup prs) [r']     ++ unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` [r']         `union` pdrsPRefs p1)
+        dups (PCon _ (Imp p1 p2):pcs)  prs = unboundDupPRefs p1 gp prs ++ unboundDupPRefs p2 gp prs ++ dups pcs (prs `union` pdrsUniverses p1 `union` pdrsUniverses p2)
+        dups (PCon _ (Or p1 p2):pcs)   prs = unboundDupPRefs p1 gp prs ++ unboundDupPRefs p2 gp prs ++ dups pcs (prs `union` pdrsUniverses p1 `union` pdrsUniverses p2)
+        dups (PCon p (Prop r p1):pcs)  prs = filter (dup prs) [r']     ++ unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` [r']             `union` pdrsUniverses p1)
           where r' = pdrsRefToPRef r p
-        dups (PCon _ (Diamond p1):pcs) prs = unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` pdrsPRefs p1)
-        dups (PCon _ (Box p1):pcs)     prs = unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` pdrsPRefs p1)
+        dups (PCon _ (Diamond p1):pcs) prs = unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` pdrsUniverses p1)
+        dups (PCon _ (Box p1):pcs)     prs = unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` pdrsUniverses p1)

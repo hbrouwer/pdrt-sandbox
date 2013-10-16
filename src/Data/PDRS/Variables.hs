@@ -163,7 +163,8 @@ pdrsBoundPRef (PRef p r) lp gp
           | otherwise                                 = bound pvs
 
 pdrsPRefBoundByPRef :: PRef -> PDRS -> PRef -> PDRS -> Bool
-pdrsPRefBoundByPRef pr1@(PRef p1 r1) lp1 pr2@(PRef p2 r2) lp2 = r1 == r2
+pdrsPRefBoundByPRef (PRef p1 r1) lp1 pr2@(PRef p2 r2) lp2 =
+  r1 == r2
   && pr2 `elem` pdrsUniverses lp2
   && pdrsIsAccessibleContext p1 p2 lp2
   && pdrsIsAccessibleContext (pdrsLabel lp1) p2 lp2
@@ -223,7 +224,8 @@ newPRefs prs epvs ers = packPRefs (newPVars ps epvs) (newPDRSRefs rs ers)
   where (ps,rs) = unpackPRefs prs ([],[])
         unpackPRefs :: [PRef] -> ([PVar],[PDRSRef]) -> ([PVar],[PDRSRef])
         unpackPRefs [] uprs                 = uprs
-        unpackPRefs (PRef p r:prs) (pvs,rs) = unpackPRefs prs (p:pvs,r:rs)
+        unpackPRefs (PRef p r:prs) (pvs,rs) = unpackPRefs prs (pvs ++ [p],rs ++ [r])
+--        unpackPRefs (PRef p r:prs) (pvs,rs) = unpackPRefs prs (p:pvs,r:rs)
         packPRefs :: [PVar] -> [PDRSRef] -> [PRef]
         packPRefs [] []           = []
         packPRefs (pv:pvs) (r:rs) = PRef pv r : packPRefs pvs rs
