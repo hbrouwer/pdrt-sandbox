@@ -158,7 +158,9 @@ showDRSBox (Merge d1 d2)
 showDRSBox (DRS u c)         = showHorizontalLine l boxTopLeft boxTopRight
   ++ showContent l ul ++ showHorizontalLine l boxMiddleLeft boxMiddleRight
   ++ showContent l cl ++ showHorizontalLine l boxBottomLeft boxBottomRight
-  where ul = showUniverse u "  "
+  where ul
+          | not(null u) = showUniverse u "  "
+          | otherwise   = " "
         cl = showConditions c
         l  = 4 + maximum (map length (lines ul) `union` map length (lines cl))
 

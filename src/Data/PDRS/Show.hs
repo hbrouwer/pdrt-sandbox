@@ -128,7 +128,9 @@ showPDRSBox (PDRS pl m u c)    = showHeaderLine l pl
   ++ showContent l ul ++ showHorizontalLine l boxMiddleLeft boxMiddleRight
   ++ showContent l cl ++ showHorizontalLine l boxMiddleLeft boxMiddleRight
   ++ showContent l ml ++ showHorizontalLine l boxBottomLeft boxBottomRight
-  where ul = showUniverse u
+  where ul
+          | not(null u) = showUniverse u
+          | otherwise   = " "
         cl = showConditions c
         ml = showMAPs m
         l  = 4 + maximum (map length (lines ul) `union` map length (lines cl) `union` map length (lines ml) `union` [length (show pl)])
@@ -182,7 +184,7 @@ showHeaderLine l pl = [boxTopLeft] ++ dl ++ sl ++ dr ++ [boxTopRight] ++ "\n"
 
 -- | Shows the universe @u@ of a PDRS
 showUniverse :: [PRef] -> String
-showUniverse u = intercalate "  " (map showPRef u)
+showUniverse u  = intercalate "  " (map showPRef u)
   where showPRef :: PRef -> String
         showPRef (PRef p r) = show p ++ " " ++ modPointer ++ " " ++ (drsRefToDRSVar . pdrsRefToDRSRef) r
 
