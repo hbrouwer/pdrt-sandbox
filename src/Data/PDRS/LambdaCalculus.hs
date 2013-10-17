@@ -14,6 +14,7 @@ and function composition
 module Data.PDRS.LambdaCalculus
 (
   pdrsAlphaConvert
+, alphaConvertSubPDRS
 , pdrsBetaReduce
 , (<<@>>)
 , pdrsFunctionCompose

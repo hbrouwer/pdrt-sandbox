@@ -15,6 +15,7 @@ and function composition
 module Data.DRS.LambdaCalculus
 (
   drsAlphaConvert
+, alphaConvertSubDRS
 , alphaConvertVar
 , drsBetaReduce
 , (<<@>>)
