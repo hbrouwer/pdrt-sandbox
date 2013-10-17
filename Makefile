@@ -18,10 +18,15 @@ install:
 clean:
 	runhaskell Setup.hs clean
 
+### distribution ###
+
+sdist:
+	runhaskell Setup.hs sdist
+
 ### haddock ###
 
 haddock:
-	runhaskell Setup.hs haddock
+	runhaskell Setup.hs haddock --haddock-option --ignore-all-exports
 
 ### hlint ###
 
