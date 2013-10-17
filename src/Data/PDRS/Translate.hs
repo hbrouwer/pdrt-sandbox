@@ -17,6 +17,8 @@ module Data.PDRS.Translate
 , pdrsToFOL
 , pdrsToDRS
 , pdrsToCleanPDRS
+, cleanPVars
+, unboundDupPRefs
 ) where
 
 import qualified Data.DRS.Structure as D
@@ -135,13 +137,10 @@ stripPVars (PDRS _ _ u c)  = D.DRS (map (pdrsRefToDRSRef . (\(PRef _ r) -> r)) u
         stripPCon (PCon _ (Diamond p1)) = D.Diamond (stripPVars p1)
         stripPCon (PCon _ (Box p1))     = D.Box     (stripPVars p1)
 
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-
 pdrsToCleanPDRS :: PDRS -> PDRS
-pdrsToCleanPDRS gp = cleanPRefs cgp cgp (zip prs (newPRefs prs [] (pdrsVariables cgp)))
+pdrsToCleanPDRS gp = cleanPRefs cgp cgp (zip prs (newPRefs prs (pdrsVariables cgp)))
   where cgp = fst $ cleanPVars (gp,[]) gp
-        prs = unboundDupPRefs cgp cgp []
+        prs = snd $ unboundDupPRefs cgp cgp []
 
 cleanPRefs :: PDRS -> PDRS -> [(PRef,PRef)] -> PDRS
 cleanPRefs lp@(LambdaPDRS _) _  _   = lp
@@ -149,10 +148,11 @@ cleanPRefs (AMerge p1 p2)    gp prs = AMerge (cleanPRefs p1 gp prs) (cleanPRefs 
 cleanPRefs (PMerge p1 p2)    gp prs = PMerge (cleanPRefs p1 gp prs) (cleanPRefs p2 gp prs)
 cleanPRefs lp@(PDRS l m u c) gp prs = PDRS l m (map (convert prs) u) (map clean c)
   where convert :: [(PRef,PRef)] -> PRef -> PRef
-        convert [] pr                                  = pr
-        convert  ((PRef p' r',npr):prs) pr@(PRef p r)
-          | r == r' && pdrsIsAccessibleContext p p' gp = npr
-          | otherwise                                  = convert prs pr
+        convert [] pr                                   = pr
+        convert  ((pr'@(PRef p' r'),npr):prs) pr@(PRef p r)
+          | pr == pr'                                   = npr
+          | r == r' && pdrsPRefBoundByPRef pr lp pr' gp = npr
+          | otherwise                                   = convert prs pr
         clean :: PCon -> PCon
         clean (PCon p (Rel r d))    = PCon p (Rel     r (map (prefToPDRSRef . convert prs . (`pdrsRefToPRef` p)) d))
         clean (PCon p (Neg p1))     = PCon p (Neg     (cleanPRefs p1 gp prs))
@@ -212,24 +212,51 @@ cleanPVars (lp@(PDRS l m u c),pvs) gp
           | not(pdrsBoundPVar pv p gp) = [pv] `union` pvs
           | otherwise                  = pvs
 
-unboundDupPRefs :: PDRS -> PDRS -> [PRef] -> [PRef]
-unboundDupPRefs (LambdaPDRS _) _ _    = []
-unboundDupPRefs (AMerge p1 p2)    gp prs = unboundDupPRefs p1 gp prs ++ unboundDupPRefs p2 gp prs
-unboundDupPRefs (PMerge p1 p2)    gp prs = unboundDupPRefs p1 gp prs ++ unboundDupPRefs p2 gp prs
-unboundDupPRefs lp@(PDRS _ _ u c) gp prs = filter (dup prs) u ++ dups c (prs `union` u)
-  where dup :: [PRef] -> PRef -> Bool
+unboundDupPRefs :: PDRS -> PDRS -> [PRef] -> ([PRef],[PRef])
+unboundDupPRefs (LambdaPDRS _)    _  eps = (eps,[])
+unboundDupPRefs (AMerge p1 p2)    gp eps = (eps2,dps1 ++ dps2)
+  where (eps1,dps1) = unboundDupPRefs p1 gp eps
+        (eps2,dps2) = unboundDupPRefs p2 gp eps1
+unboundDupPRefs (PMerge p1 p2)    gp eps = (eps2,dps1 ++ dps2)
+  where (eps1,dps1) = unboundDupPRefs p1 gp eps
+        (eps2,dps2) = unboundDupPRefs p2 gp eps1
+unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (dup eps) u ++ dps1)
+  where (eps1,dps1) = dups c (eps ++ unboundPRefs u)
+        dup :: [PRef] -> PRef -> Bool
         dup [] _                                             = False
         dup (pr'@(PRef _ r'):prs) pr@(PRef _ r)
           | r == r' && not(pdrsPRefBoundByPRef pr lp pr' gp) = True
           | otherwise                                        = dup prs pr
-        dups :: [PCon] -> [PRef] -> [PRef]
-        dups [] _ = []
-        dups (PCon p (Rel _ d):pcs)    prs = filter (dup prs) d'       ++ dups pcs (prs `union` d')
-          where d' = map (`pdrsRefToPRef` p) d
-        dups (PCon _ (Neg p1):pcs)     prs = unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` pdrsPRefs p1)
-        dups (PCon _ (Imp p1 p2):pcs)  prs = unboundDupPRefs p1 gp prs ++ unboundDupPRefs p2 gp prs ++ dups pcs (prs `union` pdrsUniverses p1 `union` pdrsUniverses p2)
-        dups (PCon _ (Or p1 p2):pcs)   prs = unboundDupPRefs p1 gp prs ++ unboundDupPRefs p2 gp prs ++ dups pcs (prs `union` pdrsUniverses p1 `union` pdrsUniverses p2)
-        dups (PCon p (Prop r p1):pcs)  prs = filter (dup prs) [r']     ++ unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` [r']             `union` pdrsUniverses p1)
-          where r' = pdrsRefToPRef r p
-        dups (PCon _ (Diamond p1):pcs) prs = unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` pdrsUniverses p1)
-        dups (PCon _ (Box p1):pcs)     prs = unboundDupPRefs p1 gp prs ++ dups pcs (prs `union` pdrsUniverses p1)
+        dups :: [PCon] -> [PRef] -> ([PRef],[PRef])
+        dups [] eps = (eps,[])
+        dups (PCon p (Rel _ d):pcs)     eps = (eps2,filter (dup eps) prs ++ dps2)
+          where (eps2,dps2) = dups pcs (eps ++ unboundPRefs prs)
+                prs = map (`pdrsRefToPRef` p) d
+        dups (PCon p (Neg p1):pcs)     eps = (eps2,dps1 ++ dps2)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = dups pcs eps1
+        dups (PCon p (Imp p1 p2):pcs)  eps = (eps3,dps1 ++ dps2 ++ dps3)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = unboundDupPRefs p2 gp eps1
+                (eps3,dps3) = dups pcs eps2
+        dups (PCon p (Or p1 p2):pcs)   eps = (eps3,dps1 ++ dps2 ++ dps3)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = unboundDupPRefs p2 gp eps1
+                (eps3,dps3) = dups pcs eps2
+        dups (PCon p (Prop r p1):pcs)  eps = (eps3,dps1 ++ dps2 ++ dps3)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = dups pcs eps1
+                (eps3,dps3) = (eps2 ++ unboundPRefs [pr],filter (dup eps) [pr])
+                pr          = pdrsRefToPRef r p
+        dups (PCon p (Diamond p1):pcs) eps = (eps2,dps1 ++ dps2)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = dups pcs eps1
+        dups (PCon p (Box p1):pcs)     eps = (eps2,dps1 ++ dps2)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = dups pcs eps1
+        unboundPRefs :: [PRef] -> [PRef]
+        unboundPRefs []                 = []
+        unboundPRefs (pr:prs)
+            | not $ any (flip (pdrsPRefBoundByPRef pr lp) gp) u = pr : unboundPRefs prs
+            | otherwise                                         = unboundPRefs prs
+            where u = delete pr (pdrsUniverses gp)

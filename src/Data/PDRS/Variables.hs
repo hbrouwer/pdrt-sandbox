@@ -19,7 +19,6 @@ module Data.PDRS.Variables
 , prefToPVar
 , pdrsUniverse
 , pdrsUniverses
-, pdrsPRefs
 , pdrsVariables
 , pdrsPVars
 , pdrsLambdas
@@ -82,21 +81,6 @@ pdrsUniverses (PDRS _ _ u c) = u `union` universes c
         universes (PCon _ (Prop _ p1):cs)  = pdrsUniverses p1 `union` universes cs
         universes (PCon _ (Diamond p1):cs) = pdrsUniverses p1 `union` universes cs
         universes (PCon _ (Box p1):cs)     = pdrsUniverses p1 `union` universes cs
-
-pdrsPRefs :: PDRS -> [PRef]
-pdrsPRefs (LambdaPDRS _) = []
-pdrsPRefs (AMerge p1 p2) = pdrsPRefs p1 `union` pdrsPRefs p2
-pdrsPRefs (PMerge p1 p2) = pdrsPRefs p1 `union` pdrsPRefs p2
-pdrsPRefs (PDRS _ _ u c) = u `union` prefs c
-  where prefs :: [PCon] -> [PRef]
-        prefs []                       = []
-        prefs (PCon p (Rel _ d):cs)    = map (PRef p) d     ++  prefs cs
-        prefs (PCon _ (Neg p1):cs)     = pdrsPRefs p1 `union` prefs cs
-        prefs (PCon _ (Imp p1 p2):cs)  = pdrsPRefs p1 `union` pdrsPRefs p2 `union` prefs cs
-        prefs (PCon _ (Or p1 p2):cs)   = pdrsPRefs p1 `union` pdrsPRefs p2 `union` prefs cs
-        prefs (PCon p (Prop r p1):cs)  = PRef p   r        :       pdrsPRefs p1 `union` prefs cs
-        prefs (PCon _ (Diamond p1):cs) = pdrsPRefs p1 `union` prefs cs
-        prefs (PCon _ (Box p1):cs)     = pdrsPRefs p1 `union` prefs cs
 
 -- | Returns the list of all variables in a PDRS
 pdrsVariables :: PDRS -> [PDRSRef]
@@ -219,13 +203,12 @@ newPDRSRefs :: [PDRSRef] -> [PDRSRef] -> [PDRSRef]
 newPDRSRefs ors []  = ors
 newPDRSRefs ors ers = map drsRefToPDRSRef (newDRSRefs (map pdrsRefToDRSRef ors) (map pdrsRefToDRSRef ers))
 
-newPRefs :: [PRef] -> [PVar] -> [PDRSRef] -> [PRef]
-newPRefs prs epvs ers = packPRefs (newPVars ps epvs) (newPDRSRefs rs ers)
+newPRefs :: [PRef] -> [PDRSRef] -> [PRef]
+newPRefs prs ers = packPRefs ps (newPDRSRefs rs ers)
   where (ps,rs) = unpackPRefs prs ([],[])
         unpackPRefs :: [PRef] -> ([PVar],[PDRSRef]) -> ([PVar],[PDRSRef])
         unpackPRefs [] uprs                 = uprs
         unpackPRefs (PRef p r:prs) (pvs,rs) = unpackPRefs prs (pvs ++ [p],rs ++ [r])
---        unpackPRefs (PRef p r:prs) (pvs,rs) = unpackPRefs prs (p:pvs,r:rs)
         packPRefs :: [PVar] -> [PDRSRef] -> [PRef]
         packPRefs [] []           = []
         packPRefs (pv:pvs) (r:rs) = PRef pv r : packPRefs pvs rs
