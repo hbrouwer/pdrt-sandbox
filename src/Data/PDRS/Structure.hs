@@ -41,13 +41,13 @@ type PVar = Int
 
 -- | A projected referent (a projection pointer and a DRS referent)
 data PRef = PRef PVar PDRSRef
-  deriving (Eq, Show)
+  deriving (Eq)
 
 -- | A PDRS referent
 data PDRSRef =
   LambdaPDRSRef (DRSVar, Int) -- ^ A lambda PDRS referent (with its argument position)
   | PDRSRef DRSVar            -- ^ A PDRS referent
-  deriving (Eq, Show)
+  deriving (Eq)
 
 -- | A projected condition (a projection pointer and a PDRS condition)
 data PCon = PCon PVar PDRSCon
