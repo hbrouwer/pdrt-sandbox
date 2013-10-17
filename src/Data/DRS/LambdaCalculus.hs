@@ -4,7 +4,7 @@ Module      :  Data.DRS.LambdaCalculus
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
 License     :  Apache-2.0
 
-Maintainer  :  me@hbrouwer.eu
+Maintainer  :  me@hbrouwer.eu, n.j.venhuizen@rug.nl
 Stability   :  provisional
 Portability :  portable
 
