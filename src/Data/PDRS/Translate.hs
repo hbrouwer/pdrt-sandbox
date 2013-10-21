@@ -13,8 +13,8 @@ to DRS translation
 
 module Data.PDRS.Translate
 (
-  accommodatePDRS
-, pdrsToFOL
+--  accommodatePDRS
+  pdrsToFOL
 , pdrsToDRS
 ) where
 
@@ -30,81 +30,68 @@ import Data.PDRS.Variables
 
 import Data.List (delete, intersect, union)
 
--- | Translates a *presuppositional PDRS*, a PDRS with free pointers, into
--- an *accommodated PDRS*, a PDRS without free pointers. This is achieved by
--- accommodating all presupposed content into the global context.
-accommodatePDRS :: PDRS -> PDRS
-accommodatePDRS lp@(LambdaPDRS _) = lp
-accommodatePDRS (AMerge p1 p2)    = AMerge (accommodatePDRS p1) (accommodatePDRS p2)
-accommodatePDRS (PMerge p1 p2)    = PMerge (accommodatePDRS p1) (accommodatePDRS p2)
-accommodatePDRS p@(PDRS l _ _ _)  = pdrsAlphaConvert p (zip fps (replicate (length fps) l)) []
-  where fps = filter (`pdrsIsFreePVar` p) (delete l (vertices pg))
-        pg  = projectionGraph p
-
 -- | Translates a PDRS into FOL
 pdrsToFOL :: PDRS -> F.FOLForm
 pdrsToFOL p = drsToFOL (pdrsToDRS p)
 
 -- | Translates a PDRS into a DRS
 pdrsToDRS :: PDRS -> D.DRS
-pdrsToDRS p = stripPVars $ movePContent (emptyPDRS p) $ accommodatePDRS $ pdrsResolveMerges p
+pdrsToDRS p = stripPVars $ movePContent gp (emptyPDRS gp) gp
+  where gp = pdrsToCleanPDRS (pdrsResolveMerges p)
 
 -- | Moves projected content in PDRS to its interpretation site in PDRS @p@
-movePContent :: PDRS -> PDRS -> PDRS
-movePContent lp@(LambdaPDRS _) _ = lp
-movePContent (AMerge p1 p2)    p = movePContent p2 (movePContent p1 p)
-movePContent (PMerge p1 p2)    p = movePContent p2 (movePContent p1 p)
-movePContent (PDRS _ _ u c)    p = movePCons c (movePRefs u p)
+-- based on global PDRS @gp@
+movePContent :: PDRS -> PDRS -> PDRS -> PDRS
+movePContent lp@(LambdaPDRS _) _ _  = lp
+movePContent (AMerge p1 p2)    p gp = movePContent p2 (movePContent p1 p gp) gp
+movePContent (PMerge p1 p2)    p gp = movePContent p2 (movePContent p1 p gp) gp
+movePContent (PDRS _ _ u c)    p gp = move c (insertPRefs u p gp)
+  where move :: [PCon] -> PDRS -> PDRS
+        move [] p                          = p
+        move (pc@(PCon _ (Rel _ _)):pcs) p = move pcs (insertPCon pc p gp)
+        move (PCon pv (Neg p1):pcs)      p = move pcs (movePContent p1 (insertPCon (PCon pv (Neg     (emptyPDRS p1))) p gp) gp)
+        move (PCon pv (Imp p1 p2):pcs)   p = move pcs (movePContent p2 (movePContent p1 (insertPCon (PCon pv (Imp (emptyPDRS p1) (emptyPDRS p2))) p gp) gp) gp)
+        move (PCon pv (Or  p1 p2):pcs)   p = move pcs (movePContent p2 (movePContent p1 (insertPCon (PCon pv (Or  (emptyPDRS p1) (emptyPDRS p2))) p gp) gp) gp)
+        move (PCon pv (Prop r p1):pcs)   p = move pcs (movePContent p1 (insertPCon (PCon pv (Prop r  (emptyPDRS p1))) p gp) gp)
+        move (PCon pv (Diamond p1):pcs)  p = move pcs (movePContent p1 (insertPCon (PCon pv (Diamond (emptyPDRS p1))) p gp) gp)
+        move (PCon pv (Box p1):pcs)      p = move pcs (movePContent p1 (insertPCon (PCon pv (Box     (emptyPDRS p1))) p gp) gp)
 
--- | Moves projected referents to their interpretation site in PDRS @p@
-movePRefs :: [PRef] -> PDRS -> PDRS
-movePRefs [] p                   = p
-movePRefs (pr@(PRef pv d):prs) p = movePRefs prs (insertPRef pr p)
+-- | Inserts projected referents @prs@ in a PDRS @p@ at the correct
+-- interpretation site, based on the global PDRS @gp@
+insertPRefs :: [PRef] -> PDRS -> PDRS -> PDRS
+insertPRefs [] pdrs _             = pdrs
+insertPRefs _ lp@(LambdaPDRS _) _ = lp
+insertPRefs prs (AMerge p1 p2) gp = AMerge (insertPRefs prs p1 gp) (insertPRefs prs p2 gp)
+insertPRefs prs (PMerge p1 p2) gp = PMerge (insertPRefs prs p1 gp) (insertPRefs prs p2 gp)
+insertPRefs (pr@(PRef pv _):prs) (PDRS l m u c) gp
+  | pv == l || pdrsIsFreePVar pv gp    = insertPRefs prs (PDRS l m (u `union` [pr]) c) gp
+  | otherwise                          = insertPRefs prs (PDRS l m u (map insert c))   gp
+  where insert :: PCon -> PCon
+        insert pc@(PCon _ (Rel _ _)) = pc
+        insert (PCon p (Neg p1))     = PCon p (Neg     (insertPRefs [pr] p1 gp))
+        insert (PCon p (Imp p1 p2))  = PCon p (Imp     (insertPRefs [pr] p1 gp) (insertPRefs [pr] p2 gp))
+        insert (PCon p (Or p1 p2))   = PCon p (Or      (insertPRefs [pr] p1 gp) (insertPRefs [pr] p2 gp))
+        insert (PCon p (Prop r p1))  = PCon p (Prop r  (insertPRefs [pr] p1 gp))
+        insert (PCon p (Diamond p1)) = PCon p (Diamond (insertPRefs [pr] p1 gp))
+        insert (PCon p (Box p1))     = PCon p (Box     (insertPRefs [pr] p1 gp))
 
--- | Inserts projected referent @pr@ in PDRS @p@ at its interpretation site
-insertPRef :: PRef -> PDRS -> PDRS
-insertPRef _ lp@(LambdaPDRS _) = lp
-insertPRef pr (AMerge p1 p2)   = AMerge (insertPRef pr p1) (insertPRef pr p2)
-insertPRef pr (PMerge p1 p2)   = PMerge (insertPRef pr p1) (insertPRef pr p2)
-insertPRef pr@(PRef pv _) (PDRS l m u c)
-  | l == pv   = PDRS l m (u `union` [pr]) c
-  | otherwise = PDRS l m u (map insert c)
+-- | Inserts projected condition @pc@ in PDRS @p@ at its interpretation
+-- site, based on the global PDRS @gp@
+insertPCon :: PCon -> PDRS -> PDRS -> PDRS
+insertPCon _ lp@(LambdaPDRS _) _ = lp
+insertPCon pc (AMerge p1 p2) gp = AMerge (insertPCon pc p1 gp) (insertPCon pc p2 gp)
+insertPCon pc (PMerge p1 p2) gp = PMerge (insertPCon pc p1 gp) (insertPCon pc p2 gp)
+insertPCon pc@(PCon pv _) pdrs@(PDRS l m u c) gp
+  | pv == l || pdrsIsFreePVar pv gp = PDRS l m u (c ++ [pc])
+  | otherwise                       = PDRS l m u (map insert c)
     where insert :: PCon -> PCon
-          insert pc@(PCon _ (Rel _ _)) = pc
-          insert (PCon p (Neg p1))     = PCon p (Neg     (insertPRef pr p1))
-          insert (PCon p (Imp p1 p2))  = PCon p (Imp     (insertPRef pr p1) (insertPRef pr p1))
-          insert (PCon p (Or p1 p2))   = PCon p (Or      (insertPRef pr p1) (insertPRef pr p1))
-          insert (PCon p (Prop r p1))  = PCon p (Prop r  (insertPRef pr p1))
-          insert (PCon p (Diamond p1)) = PCon p (Diamond (insertPRef pr p1))
-          insert (PCon p (Box p1))     = PCon p (Box     (insertPRef pr p1))
-
--- | Moves projected conditions to their interpretation site in PDRS @p@
-movePCons :: [PCon] -> PDRS -> PDRS
-movePCons [] p = p
-movePCons (pc@(PCon _ (Rel _ _)):pcs) p = movePCons pcs (insertPCon pc p)
-movePCons (PCon pv (Neg p1):pcs)      p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Neg     (emptyPDRS p1))) p))
-movePCons (PCon pv (Imp p1 p2):pcs)   p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Imp     (emptyPDRS p1) (emptyPDRS p2))) p))
-movePCons (PCon pv (Or  p1 p2):pcs)   p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Or      (emptyPDRS p1) (emptyPDRS p2))) p))
-movePCons (PCon pv (Prop r p1):pcs)   p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Prop r  (emptyPDRS p1))) p))
-movePCons (PCon pv (Diamond p1):pcs)  p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Diamond (emptyPDRS p1))) p))
-movePCons (PCon pv (Box p1):pcs)      p = movePCons pcs (movePContent p1 (insertPCon (PCon pv (Box     (emptyPDRS p1))) p))
-
--- | Inserts projected condition @pc@ in PDRS @p@ at its interpretation site
-insertPCon :: PCon -> PDRS -> PDRS
-insertPCon _ lp@(LambdaPDRS _) = lp
-insertPCon pc (AMerge p1 p2)   = AMerge (insertPCon pc p1) (insertPCon pc p2)
-insertPCon pc (PMerge p1 p2)   = PMerge (insertPCon pc p1) (insertPCon pc p2)
-insertPCon pc@(PCon pv _) (PDRS l m u c)
-  | l == pv   = PDRS l m u (c ++ [pc])
-  | otherwise = PDRS l m u (map insert c)
-    where insert :: PCon -> PCon
-          insert pc@(PCon _ (Rel _ _)) = pc
-          insert (PCon p (Neg p1))     = PCon p (Neg     (insertPCon pc p1))
-          insert (PCon p (Imp p1 p2))  = PCon p (Imp     (insertPCon pc p1) (insertPCon pc p1))
-          insert (PCon p (Or p1 p2))   = PCon p (Or      (insertPCon pc p1) (insertPCon pc p1))
-          insert (PCon p (Prop r p1))  = PCon p (Prop r  (insertPCon pc p1))
-          insert (PCon p (Diamond p1)) = PCon p (Diamond (insertPCon pc p1))
-          insert (PCon p (Box p1))     = PCon p (Box     (insertPCon pc p1))
+          insert pc'@(PCon _ (Rel _ _)) = pc'
+          insert (PCon p (Neg p1))     = PCon p (Neg     (insertPCon pc p1 gp))
+          insert (PCon p (Imp p1 p2))  = PCon p (Imp     (insertPCon pc p1 gp) (insertPCon pc p2 gp))
+          insert (PCon p (Or p1 p2))   = PCon p (Or      (insertPCon pc p1 gp) (insertPCon pc p2 gp))
+          insert (PCon p (Prop r p1))  = PCon p (Prop r  (insertPCon pc p1 gp))
+          insert (PCon p (Diamond p1)) = PCon p (Diamond (insertPCon pc p1 gp))
+          insert (PCon p (Box p1))     = PCon p (Box     (insertPCon pc p1 gp))
 
 -- | Returns an empty PDRS, if possible with the same label as PDRS @p@
 emptyPDRS :: PDRS -> PDRS
