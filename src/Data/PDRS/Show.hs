@@ -42,65 +42,56 @@ import Data.PDRS.Variables
 import Data.List (intercalate, union)
 import Data.Tuple (swap)
 
--- PDRS Notation
+-- * Exported
+
+
+-- | 'PDRS' notation.
 data PDRSNotation p =
   Set p      -- ^ Set notation
   | Linear p -- ^ Linear notation
   | Boxes p  -- ^ Box notation
 
--- | Derive and instance of the Show typeclass for PDRS
+-- | Derive and instance of the Show typeclass for 'PDRS'.
 instance Show PDRS where
   show p = '\n' : showPDRS (Boxes p)
 
--- | Typeclass for showable, but unresolved PDRSs
+-- | Typeclass for 'showablePDRS's, that are unresolved.
 class ShowablePDRS p where 
   resolve :: p -> Int -> Int -> PDRS
 
--- | Derive an instance of ShowablePDRS for a resolved PDRS
+-- | Derive an instance of 'ShowablePDRS' for a resolved 'PDRS'.
 instance ShowablePDRS PDRS where
   resolve p _ _ = p
 
--- | Derive an instance of ShowablePDRS for a PDRS that requires
--- at least one PDRS referent to resolve
+-- | Derive an instance of 'ShowablePDRS' for a 'PDRS' that requires
+-- at least one 'PDRS' referent to resolve.
 instance (ShowablePDRS p) => ShowablePDRS (PDRSRef -> p) where
   resolve up nr np = resolve (up rv) (nr + 1) np
     where rv = LambdaPDRSRef ('r' : show nr, nr + np)
 
--- | Derive an instance of ShowablePDRS for a PDRS that requires
--- at least one PDRS to resolve
+-- | Derive an instance of 'ShowablePDRS' for a 'PDRS' that requires
+-- at least one 'PDRS' to resolve.
 instance (ShowablePDRS p) => ShowablePDRS (PDRS -> p) where
   resolve up nr np = resolve (up lv) nr (np + 1)
     where lv = LambdaPDRS ('k' : show np, nr + np)
 
--- | Derive an instance of Show for a PDRS that requires
--- at least one PDRS referent to resolve
+-- | Derive an instance of 'Show' for a 'PDRS' that requires
+-- at least one 'PDRS' referent to resolve.
 instance (ShowablePDRS p) => Show (PDRSRef -> p) where
   show p = show (resolve p 0 0)
 
--- | Derive an instance of Show for a PDRS that requires
--- at least one PDRS to resolve
+-- | Derive an instance of 'Show' for a 'PDRS' that requires
+-- at least one 'PDRS' to resolve.
 instance (ShowablePDRS p) => Show (PDRS -> p) where
   show p = show (resolve p 0 0)
 
--- | Derive an instance of Show for PDRS Notation
+-- | Derive an instance of 'Show' for 'PDRSNotation'.
 instance (ShowablePDRS p) => Show (PDRSNotation p) where
   show (Boxes p)  = '\n' : showPDRS (Boxes  (resolve p 0 0))
   show (Linear p) = '\n' : showPDRS (Linear (resolve p 0 0))
   show (Set p)    = '\n' : showPDRS (Set    (resolve p 0 0))
 
--- | Assertive merge symbol
-opAMerge = "\x002B"
--- | Projective merge symbol
-opPMerge = "\x002A"
-
--- | Pointer symbol
-modPointer = "\x2190"
--- | Equals symbol
-modEquals  = "\x003D"
--- | Subordination symbol
-modSubord  = "\x2264"
-
--- | Shows a PDRS
+-- | Shows a 'PDRS'.
 showPDRS :: PDRSNotation PDRS -> String
 showPDRS n =
   case n of
@@ -111,7 +102,79 @@ showPDRS n =
     (Set p)    -> showPDRSLambdas rp ++ showPDRSSet rp  ++ "\n" 
       where rp = pdrsResolveMerges p
 
--- | Show a PDRS in Box notation
+-- | Prints a 'PDRS'.
+printPDRS :: PDRS -> IO ()
+printPDRS p = putStrLn $ '\n' : showPDRS (Boxes p)
+
+-- | Shows an assertive merge between 'PDRS' @p1@ and 'PDRS' @p@.
+showAMerge :: PDRS -> PDRS -> String
+showAMerge p1 p2 = showConcat b1 (showModifier opAMerge 2 (showConcat b2 (showModifier "=" 2 mb)))
+  where b1 = showPDRS (Boxes p1)
+        b2 = showPDRS (Boxes p2)
+        mb = showPDRS (Boxes (p1 <<+>> p2))
+
+-- | Prints an assertive merge between 'PDRS' @p1@ and 'PDRS' @p@.
+printAMerge :: PDRS -> PDRS -> IO ()
+printAMerge p1 p2 = putStrLn $ '\n' : showAMerge p1 p2
+
+-- | Shows a projective merge between 'PDRS' @p1@ and 'PDRS' @p@.
+showPMerge :: PDRS -> PDRS -> String
+showPMerge p1 p2 = showConcat b1 (showModifier opPMerge 2 (showConcat b2 (showModifier "=" 2 mb)))
+  where b1 = showPDRS (Boxes p1)
+        b2 = showPDRS (Boxes p2)
+        mb = showPDRS (Boxes (p1 <<*>> p2))
+
+-- | Print a projective merge between 'PDRS' @p1@ and 'PDRS' @p@.
+printPMerge :: PDRS -> PDRS -> IO ()
+printPMerge p1 p2 = putStrLn $ '\n' : showPMerge p1 p2
+
+-- | Shows the beta reduction of an 'unresolved PDRS'@ @p1@ with a 'PDRS' @p2@.
+showPDRSBetaReduct :: (ShowablePDRS p) => (PDRS -> p) -> PDRS -> String
+showPDRSBetaReduct p1 p2 = showConcat (showConcat (showModifier "(" 2 b1) (showModifier ")" 2 b2)) (showModifier "=" 2 br)
+  where b1 = showPDRS (Boxes (resolve p1 0 0))
+        b2 = showPDRS (Boxes p2)
+        br = showPDRS (Boxes (resolve (p1 p2) 0 0))
+
+-- | Prints the beta reduction of an @'unresolved PDRS'@ @p1@ with a 'PDRS' @p2@.
+printPDRSBetaReduct :: (ShowablePDRS p) => (PDRS -> p) -> PDRS -> IO ()
+printPDRSBetaReduct p1 p2 = putStrLn $ '\n' : showPDRSBetaReduct p1 p2
+
+-- | Shows the beta reduction of an @'unresolved PDRS'@ @p@ with a PDRS referent @r@.
+showPDRSRefBetaReduct :: (ShowablePDRS p) => (PDRSRef -> p) -> PDRSRef -> String
+showPDRSRefBetaReduct p r@(PDRSRef v) = showConcat (showConcat (showModifier "(" 2 bx) (showModifier ")" 2 rv)) (showModifier "=" 2 br)
+  where bx = showPDRS (Boxes (resolve p 0 0))
+        rv = showPadding (v ++ "\n")
+        br = showPDRS (Boxes (resolve (p r) 0 0))
+
+-- | Prints the beta reduction of an @'unresolved PDRS'@ @p@ with a 'PDRSRef' @r@.
+printPDRSRefBetaReduct :: (ShowablePDRS p) => (PDRSRef -> p) -> PDRSRef -> IO ()
+printPDRSRefBetaReduct p r = putStrLn $ '\n' : showPDRSRefBetaReduct p r
+
+
+-- * Private
+
+
+-- | Assertive merge symbol.
+opAMerge :: [Char]
+opAMerge = "\x002B" 
+
+-- | Projective merge symbol.
+opPMerge :: [Char]
+opPMerge = "\x002A"; 
+
+-- | Pointer symbol.
+modPointer :: [Char]
+modPointer = "\x2190";
+
+-- | Equals symbol.
+modEquals :: [Char]
+modEquals  = "\x003D"; 
+
+-- | Subordination symbol.
+modSubord :: [Char]
+modSubord  = "\x2264"; 
+
+-- | Show a 'PDRS' in 'Box' notation.
 showPDRSBox :: PDRS -> String
 showPDRSBox (LambdaPDRS (v,_)) = v ++ "\n"
 showPDRSBox (AMerge p1 p2)
@@ -135,7 +198,7 @@ showPDRSBox (PDRS pl m u c)    = showHeaderLine l pl
         ml = showMAPs m
         l  = 4 + maximum (map length (lines ul) `union` map length (lines cl) `union` map length (lines ml) `union` [length (show pl)])
 
--- | Show a PDRS in Linear notation
+-- | Show a 'PDRS' in 'Linear' notation.
 showPDRSLinear :: PDRS -> String
 showPDRSLinear (LambdaPDRS (v,_)) = v
 showPDRSLinear (AMerge p1 p2)
@@ -154,7 +217,7 @@ showPDRSLinear (PDRS l m u c)     = show l ++ ":[" ++ showUniverseTuples u ++ "|
         showCon (PCon p (Diamond p1)) = "(" ++ show p ++ "," ++ opDiamond ++ showPDRSLinear p1 ++ ")"
         showCon (PCon p (Box p1))     = "(" ++ show p ++ "," ++ opBox ++ showPDRSLinear p1 ++ ")"
 
--- | Show a PDRS in Set notation
+-- | Show a 'PDRS' in 'Set' notation.
 showPDRSSet :: PDRS -> String
 showPDRSSet (LambdaPDRS (v,_)) = v
 showPDRSSet (AMerge p1 p2)
@@ -173,7 +236,7 @@ showPDRSSet (PDRS l m u c)     = "<" ++ show l ++ ",{" ++ showMAPsTuples m ++ "}
         showCon (PCon p (Diamond p1)) = "(" ++ show p ++ "," ++ opDiamond ++ showPDRSSet p1 ++ ")"
         showCon (PCon p (Box p1))     = "(" ++ show p ++ "," ++ opBox ++ showPDRSSet p1 ++ ")"
 
--- | Shows a horizontal line of width @l@ that label @pl@ in its center
+-- | Shows a horizontal line of width @l@ that label @pl@ in its center.
 showHeaderLine :: Int -> PVar -> String
 showHeaderLine l pl = [boxTopLeft] ++ dl ++ sl ++ dr ++ [boxTopRight] ++ "\n"
   where sl = show pl
@@ -182,19 +245,19 @@ showHeaderLine l pl = [boxTopLeft] ++ dl ++ sl ++ dr ++ [boxTopRight] ++ "\n"
         lf = floor   (fromIntegral (length sl) / 2)
         lc = ceiling (fromIntegral (length sl) / 2)
 
--- | Shows the universe @u@ of a PDRS
+-- | Shows the universe @u@ of a 'PDRS'.
 showUniverse :: [PRef] -> String
 showUniverse u  = intercalate "  " (map showPRef u)
   where showPRef :: PRef -> String
         showPRef (PRef p r) = show p ++ " " ++ modPointer ++ " " ++ (drsRefToDRSVar . pdrsRefToDRSRef) r
 
--- | Shows the universe @u@ of a PDRS as tuples
+-- | Shows the universe @u@ of a 'PDRS' as tuples.
 showUniverseTuples :: [PRef] -> String
 showUniverseTuples u = intercalate "," (map showPRef u)
   where showPRef :: PRef -> String
         showPRef (PRef p r) = "(" ++ show p ++ "," ++ (drsRefToDRSVar . pdrsRefToDRSRef) r ++ ")"
 
--- | Shows the projected conditions @c@ of a PDRS
+-- | Shows the projected conditions @c@ of a 'PDRS'.
 showConditions :: [PCon] -> String
 showConditions [] = " "
 showConditions c  = foldr ((++) . showPCon) "" c
@@ -233,77 +296,30 @@ showConditions c  = foldr ((++) . showPCon) "" c
         projection :: PVar -> String
         projection p = show p ++ " " ++ modPointer
 
--- | Shows the minimally accessible PDRSs @m@ of a PDRS
-showMAPs :: [(PVar,PVar)] -> String
+-- | Shows the 'MAP's @m@ of a 'PDRS'.
+showMAPs :: [MAP] -> String
 showMAPs m = showUnique m []
-  where showUnique :: [(PVar,PVar)] -> [(PVar,PVar)] -> String
+  where showUnique :: [MAP] -> [MAP] -> String
         showUnique [] _ = " "
         showUnique (m@(pv1,pv2):ms) sms
           | swap m `elem` ms  = showUnique ms (m:sms)
           | swap m `elem` sms = show pv1 ++ " " ++ modEquals ++ " " ++ show pv2 ++ "  " ++ showUnique ms (m:sms)
           | otherwise         = show pv1 ++ " " ++ modSubord ++ " " ++ show pv2 ++ "  " ++ showUnique ms (m:sms)
 
--- | Shows the minimally accessible PDRSs @m@ of a PDRS as tuples
-showMAPsTuples :: [(PVar,PVar)] -> String
+-- | Shows the 'MAP's @m@ of a 'PDRS' as tuples.
+showMAPsTuples :: [MAP] -> String
 showMAPsTuples m = intercalate "," (map show (unique m []))
-  where unique :: [(PVar,PVar)] -> [(PVar,PVar)] -> [(PVar,PVar)]
+  where unique :: [MAP] -> [MAP] -> [MAP]
         unique [] _ = []
         unique (m@(pv1,pv2):ms) sms
           | swap m `elem` ms  = unique ms (m:sms)
           | swap m `elem` sms = m : unique ms (m:sms)
           | otherwise         = m : unique ms (m:sms)
 
--- | Shows lambda abstractions over PDRS @p@
+-- | Shows lambda abstractions over 'PDRS' @p@.
 showPDRSLambdas :: PDRS -> String
 showPDRSLambdas p = show (pdrsLambdas p)
   where show :: [DRSVar] -> String
         show []     = []
         show (l:ls) = opLambda ++ l ++ "." ++ show ls
 
--- | Prints a PDRS
-printPDRS :: PDRS -> IO ()
-printPDRS p = putStrLn $ '\n' : showPDRS (Boxes p)
-
--- | Shows an assertive merge between PDRS @p1@ and PDRS @p@
-showAMerge :: PDRS -> PDRS -> String
-showAMerge p1 p2 = showConcat b1 (showModifier opAMerge 2 (showConcat b2 (showModifier "=" 2 mb)))
-  where b1 = showPDRS (Boxes p1)
-        b2 = showPDRS (Boxes p2)
-        mb = showPDRS (Boxes (p1 <<+>> p2))
-
--- | Prints an assertive merge between PDRS @p1@ and PDRS @p@
-printAMerge :: PDRS -> PDRS -> IO ()
-printAMerge p1 p2 = putStrLn $ '\n' : showAMerge p1 p2
-
--- | Shows a projective merge between PDRS @p1@ and PDRS @p@
-showPMerge :: PDRS -> PDRS -> String
-showPMerge p1 p2 = showConcat b1 (showModifier opPMerge 2 (showConcat b2 (showModifier "=" 2 mb)))
-  where b1 = showPDRS (Boxes p1)
-        b2 = showPDRS (Boxes p2)
-        mb = showPDRS (Boxes (p1 <<*>> p2))
-
--- | Print a projective merge between PDRS @p1@ and PDRS @p@
-printPMerge :: PDRS -> PDRS -> IO ()
-printPMerge p1 p2 = putStrLn $ '\n' : showPMerge p1 p2
-
--- | Shows the beta reduction of an unresolved PDRS @p1@ with a PDRS @p2@
-showPDRSBetaReduct :: (ShowablePDRS p) => (PDRS -> p) -> PDRS -> String
-showPDRSBetaReduct p1 p2 = showConcat (showConcat (showModifier "(" 2 b1) (showModifier ")" 2 b2)) (showModifier "=" 2 br)
-  where b1 = showPDRS (Boxes (resolve p1 0 0))
-        b2 = showPDRS (Boxes p2)
-        br = showPDRS (Boxes (resolve (p1 p2) 0 0))
-
--- | Prints the beta reduction of an unresolved PDRS @p1@ with a PDRS @p2@
-printPDRSBetaReduct :: (ShowablePDRS p) => (PDRS -> p) -> PDRS -> IO ()
-printPDRSBetaReduct p1 p2 = putStrLn $ '\n' : showPDRSBetaReduct p1 p2
-
--- | Shows the beta reduction of an unresolved PDRS @p@ with a PDRS referent @r@
-showPDRSRefBetaReduct :: (ShowablePDRS p) => (PDRSRef -> p) -> PDRSRef -> String
-showPDRSRefBetaReduct p r@(PDRSRef v) = showConcat (showConcat (showModifier "(" 2 bx) (showModifier ")" 2 rv)) (showModifier "=" 2 br)
-  where bx = showPDRS (Boxes (resolve p 0 0))
-        rv = showPadding (v ++ "\n")
-        br = showPDRS (Boxes (resolve (p r) 0 0))
-
--- | Shows the beta reduction of an unresolved PDRS @p@ with a PDRS referent @r@
-printPDRSRefBetaReduct :: (ShowablePDRS p) => (PDRSRef -> p) -> PDRSRef -> IO ()
-printPDRSRefBetaReduct p r = putStrLn $ '\n' : showPDRSRefBetaReduct p r
