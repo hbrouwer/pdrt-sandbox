@@ -27,7 +27,9 @@ import Data.PDRS.Variables
 
 import Data.List (delete, intersect, nub, union)
 
+---------------------------------------------------------------------------
 -- * Exported
+---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
 -- | Applies assertive merge to 'PDRS' @p1@ and 'PDRS' @p2@.
@@ -112,7 +114,9 @@ pdrsToCleanPDRS gp = cleanPRefs cgp cgp (zip prs (newPRefs prs (pdrsVariables cg
   where cgp = fst $ cleanPVars (gp,[]) gp
         prs = snd $ unboundDupPRefs cgp cgp []
 
+---------------------------------------------------------------------------
 -- * Private
+---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
 -- | Cleans a 'PDRS' on the basis of a conversion list for 'PRefs' @prs@, where:
