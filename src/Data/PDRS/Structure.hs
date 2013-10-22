@@ -15,6 +15,7 @@ module Data.PDRS.Structure
   PDRS (..)
 , DRSVar
 , PVar
+, MAP
 , PRef (..)
 , PDRSRef (..)
 , PCon (..)
@@ -26,49 +27,55 @@ module Data.PDRS.Structure
 
 import Data.DRS.Structure (DRSRel, DRSVar)
 
--- | Projective Discourse Representation Structure (PDRS)
+-- * Exported
+
+-- | Projective Discourse Representation Structure.
 data PDRS =
-  LambdaPDRS (DRSVar,Int)                 -- ^ A lambda PDRS (with its argument position)
-  | AMerge PDRS PDRS                      -- ^ An assertive merge between two PDRSs
-  | PMerge PDRS PDRS                      -- ^ A projective merge between two PDRSs
-  -- | A PDRS (a label, a list of minimally accessible PDRSs,
-  -- a set of projected referents, and a set of projected conditions
-  | PDRS PVar [(PVar,PVar)] [PRef] [PCon]
+  LambdaPDRS (DRSVar,Int)         -- ^ A lambda 'PDRS' (and its argument position)
+  | AMerge PDRS PDRS              -- ^ An assertive merge between two 'PDRS's
+  | PMerge PDRS PDRS              -- ^ A projective merge between two 'PDRS's
+  | PDRS PVar [MAP] [PRef] [PCon] -- ^ A 'PDRS', consisting of a 'PVar' (a label), 
+                                  -- a list of 'MAP's, a set of 'PRef's, and a set of 'PCon's
   deriving (Eq)
 
--- | Projection variable (a label or pointer)
+-- | Projection variable (a label or pointer).
 type PVar = Int
 
--- | A projected referent (a projection pointer and a DRS referent)
+-- | Minimally Accessible 'PDRS', represented as a tuple between a 'PVar'
+-- and another 'PVar' that is /minimally accessible/ from the first 'PVar'.
+type MAP = (PVar,PVar)
+
+-- | A projected referent, consisting of a 'PVar' and a 'PDRSRef'.
 data PRef = PRef PVar PDRSRef
   deriving (Eq)
 
--- | A PDRS referent
+-- | A 'PDRS' referent.
 data PDRSRef =
   LambdaPDRSRef (DRSVar, Int) -- ^ A lambda PDRS referent (with its argument position)
   | PDRSRef DRSVar            -- ^ A PDRS referent
   deriving (Eq)
 
--- | A projected condition (a projection pointer and a PDRS condition)
+-- | A projected condition, consisting of a 'PVar' and a 'PDRSCon'.
 data PCon = PCon PVar PDRSCon
   deriving (Eq)
 
--- | A PDRS Condition
+-- | A 'PDRS' condition.
 data PDRSCon = 
   Rel DRSRel [PDRSRef] -- ^ A relation defined on a set of referents
-  | Neg PDRS           -- ^ A negated PDRS
-  | Imp PDRS PDRS      -- ^ An implication between two PDRSs
-  | Or PDRS PDRS       -- ^ A disjunction between two PDRSs
-  | Prop PDRSRef PDRS  -- ^ A proposition PDRS
-  | Diamond PDRS       -- ^ A possible PDRS
-  | Box PDRS           -- ^ A necessary PDRS
+  | Neg PDRS           -- ^ A negated 'PDRS'
+  | Imp PDRS PDRS      -- ^ An implication between two 'PDRS's
+  | Or PDRS PDRS       -- ^ A disjunction between two 'PDRS's
+  | Prop PDRSRef PDRS  -- ^ A proposition 'PDRS'
+  | Diamond PDRS       -- ^ A possible 'PDRS'
+  | Box PDRS           -- ^ A necessary 'PDRS'
   deriving (Eq)
 
--- | Returns the label of a PDRS
+-- | Returns the label of a 'PDRS'.
 pdrsLabel :: PDRS -> PVar
 pdrsLabel (PDRS l _ _ _) = l
 
--- | Returns whether PDRS @p1@ is a direct or indirect sub-PDRS of PDRS @p2@
+-- | Returns whether 'PDRS' @p1@ is a direct or indirect sub-'PDRS' of
+-- 'PDRS' @p2@.
 isSubPDRS :: PDRS -> PDRS -> Bool
 isSubPDRS p1 (LambdaPDRS _)    = False
 isSubPDRS p1 (AMerge p2 p3)    = isSubPDRS p1 p2 || isSubPDRS p1 p3
@@ -82,3 +89,4 @@ isSubPDRS p1 p2@(PDRS _ _ _ c) = p1 == p2 || any subPDRS c
         subPDRS (PCon _ (Prop _ p3))  = isSubPDRS p1 p3
         subPDRS (PCon _ (Diamond p3)) = isSubPDRS p1 p3
         subPDRS (PCon _ (Box p3))     = isSubPDRS p1 p3
+
