@@ -44,7 +44,7 @@ pdrsToFOL p = drsToFOL (pdrsToDRS p)
 ---------------------------------------------------------------------------
 pdrsToDRS :: PDRS -> D.DRS
 pdrsToDRS p = stripPVars $ movePContent gp (emptyPDRS gp) gp
-  where gp = pdrsToCleanPDRS (pdrsResolveMerges p)
+  where gp = pdrsPurify (pdrsResolveMerges p)
 
 ---------------------------------------------------------------------------
 -- * Private

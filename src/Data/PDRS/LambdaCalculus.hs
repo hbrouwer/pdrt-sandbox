@@ -8,98 +8,372 @@ Stability   :  provisional
 Portability :  portable
 
 PDRS lambda calculus; alpha conversion, beta reduction,
-and function composition
+function composition, and `PDRS purification'
 -}
 
 module Data.PDRS.LambdaCalculus
 (
   pdrsAlphaConvert
-, alphaConvertSubPDRS
 , pdrsBetaReduce
 , (<<@>>)
 , pdrsFunctionCompose
-, (<<.>>)  
+, (<<.>>)
+, pdrsPurify
+
 ) where
 
 import Data.DRS.LambdaCalculus (alphaConvertVar)
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 
--- | Applies alpha conversion to a PDRS on the basis of conversion lists
--- for projection variables and PDRS referents
+import Data.List (delete, intersect, nub, union)
+
+---------------------------------------------------------------------------
+-- * Exported
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Applies alpha conversion to a 'PDRS' on the basis of conversion lists
+-- for 'PVar's and 'PDRSRef's.
+---------------------------------------------------------------------------
 pdrsAlphaConvert :: PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> PDRS
-pdrsAlphaConvert p = alphaConvertSubPDRS p p
+pdrsAlphaConvert p = renameSubPDRS p p
 
--- | Applies alpha conversion to a PDRS @sp@, which is a sub-PDRS of the
--- global PDRS @gp@, on the basis of conversion lists for projection
--- variables @ps@ and PDRS referents @rs@
-alphaConvertSubPDRS :: PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> PDRS
-alphaConvertSubPDRS lp@(LambdaPDRS _) _ _ _    = lp
-alphaConvertSubPDRS (AMerge p1 p2) gp ps rs    = AMerge p1' p2'
-  where p1' = alphaConvertSubPDRS p1 gp ps rs
-        p2' = alphaConvertSubPDRS p2 gp ps rs
-alphaConvertSubPDRS (PMerge p1 p2) gp ps rs    = PMerge p1' p2'
-  where p1' = alphaConvertSubPDRS p1 gp ps rs
-        p2' = alphaConvertSubPDRS p2 gp ps rs
-alphaConvertSubPDRS lp@(PDRS l m u c) gp ps rs = PDRS l' m' u' c'
-  where l' = alphaConvertVar l ps
-        m' = alphaConvertMAPs m lp gp ps
-        u' = alphaConvertPRefs u lp gp ps rs
-        c' = alphaConvertPCons c lp gp ps rs
+---------------------------------------------------------------------------
+-- | Apply beta reduction on an 'AbstractPDRS' with a 'PDRSAtom'.
+---------------------------------------------------------------------------
+pdrsBetaReduce :: (AbstractPDRS a, PDRSAtom b) => (b -> a) -> b -> a
+pdrsBetaReduce a = a
 
-alphaConvertMAPs :: [(PVar,PVar)] -> PDRS -> PDRS -> [(PVar,PVar)] -> [(PVar,PVar)]
-alphaConvertMAPs m lp gp ps = map (\(l1,l2) -> (convertPVar l1 lp gp ps, convertPVar l2 lp gp ps)) m
+-- | Infix notation for 'pdrsBetaReduce'.
+(<<@>>) :: (AbstractPDRS a, PDRSAtom b) => (b -> a) -> b -> a
+up <<@>> ap = up `pdrsBetaReduce` ap
 
-alphaConvertPRefs :: [PRef] -> PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> [PRef]
-alphaConvertPRefs u lp gp ps rs = map (\(PRef p r) -> PRef (convertPVar p lp gp ps) (alphaConvertVar r rs)) u
+---------------------------------------------------------------------------
+-- | Apply function composition to two 'unresolved PDRS's, yielding
+-- a new 'unresolved PDRS'.
+---------------------------------------------------------------------------
+pdrsFunctionCompose :: (b -> c) -> (a -> b) -> a -> c
+pdrsFunctionCompose = (.)
 
-alphaConvertPCons :: [PCon] -> PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> [PCon]
-alphaConvertPCons c lp gp ps rs = map convertPCon c
-  where convertPCon :: PCon -> PCon
-        convertPCon (PCon p (Rel r d))    = PCon p'                       (Rel     r (map (flip (flip (flip (convertPDRSRef p') lp) gp) rs) d))
-          where p' = convertPVar p lp gp ps
-        convertPCon (PCon p (Neg p1))     = PCon (convertPVar p lp gp ps) (Neg     (alphaConvertSubPDRS p1 gp ps rs))
-        convertPCon (PCon p (Imp p1 p2))  = PCon (convertPVar p lp gp ps) (Imp     (alphaConvertSubPDRS p1 gp ps rs) (alphaConvertSubPDRS p2 gp ps rs))
-        convertPCon (PCon p (Or p1 p2))   = PCon (convertPVar p lp gp ps) (Or      (alphaConvertSubPDRS p1 gp ps rs) (alphaConvertSubPDRS p2 gp ps rs))
-        convertPCon (PCon p (Prop r p1))  = PCon p'                       (Prop    (convertPDRSRef p' r lp gp rs)    (alphaConvertSubPDRS p1 gp ps rs))
-          where p' = convertPVar p lp gp ps
-        convertPCon (PCon p (Diamond p1)) = PCon (convertPVar p lp gp ps) (Diamond (alphaConvertSubPDRS p1 gp ps rs))
-        convertPCon (PCon p (Box  p1))    = PCon (convertPVar p lp gp ps) (Box     (alphaConvertSubPDRS p1 gp ps rs))
+-- | Infix notation for 'pdrsFunctionCompose'.
+(<<.>>) :: (b -> c) -> (a -> b) -> a -> c
+a1 <<.>> a2 = a1 `pdrsFunctionCompose` a2
 
-convertPDRSRef :: PVar -> PDRSRef -> PDRS -> PDRS -> [(PDRSRef,PDRSRef)] -> PDRSRef
-convertPDRSRef pv r lp gp rs
-  | pdrsBoundPRef (PRef pv r) lp gp = alphaConvertVar r rs
-  | otherwise                       = r
+---------------------------------------------------------------------------
+-- | Converts a 'PDRS' into a /pure/ 'PDRS' by first purifying its
+-- projection variables, and then pyrifying its projected referents, where:
+--
+-- [A 'PDRS' is pure /iff/:]
+--
+-- * There are no occurrences of duplicate, unbound uses of the same
+--   variable ('PVar' or 'PDRSRef').
+---------------------------------------------------------------------------
+pdrsPurify :: PDRS -> PDRS
+pdrsPurify gp = purifyPRefs cgp cgp (zip prs (newPRefs prs (pdrsVariables cgp)))
+  where cgp = fst $ purifyPVars (gp,[]) gp
+        prs = snd $ unboundDupPRefs cgp cgp []
 
-convertPVar :: PVar -> PDRS -> PDRS -> [(PVar,PVar)] -> PVar
-convertPVar pv lp gp ps
-  | pdrsBoundPVar pv lp gp = alphaConvertVar pv ps
-  | otherwise              = pv
 
--- | Type class for a PDRSAtom, which is either a PDRS or a PDRSRef
+---------------------------------------------------------------------------
+-- * Private
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Type class for a 'PDRSAtom', which is either a 'PDRS' or a 'PDRSRef'.
+---------------------------------------------------------------------------
 class PDRSAtom a
 instance PDRSAtom PDRS
 instance PDRSAtom PDRSRef
 
--- | Type class for an AbstractPDRS, which is either a resolved PDRS, or
--- an unresolved PDRS that takes a PDRSAtom and yields an AbstractPDRS
+---------------------------------------------------------------------------
+-- | Type class for an 'AbstractPDRS', which is either a resolved 'PDRS',
+-- or an unresolved 'PDRS' that takes a 'PDRSAtom' and yields an 
+-- 'AbstractPDRS'.
+---------------------------------------------------------------------------
 class AbstractPDRS a
 instance AbstractPDRS PDRS
 instance (PDRSAtom a, AbstractPDRS b) => AbstractPDRS (a -> b)
 
--- | Apply beta reduction on an AbstractPDRS with a PDRSAtom
-pdrsBetaReduce :: (AbstractPDRS a, PDRSAtom b) => (b -> a) -> b -> a
-pdrsBetaReduce a = a
+---------------------------------------------------------------------------
+-- | Applies alpha conversion to a 'PDRS' @sp@, which is a sub-'PDRS' of
+-- the global 'PDRS' @gp@, on the basis of conversion lists for 'PVar's
+-- @ps@ and 'PDRSRef's @rs@.
+---------------------------------------------------------------------------
+renameSubPDRS :: PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> PDRS
+renameSubPDRS lp@(LambdaPDRS _) _ _ _    = lp
+renameSubPDRS (AMerge p1 p2) gp ps rs    = AMerge p1' p2'
+  where p1' = renameSubPDRS p1 gp ps rs
+        p2' = renameSubPDRS p2 gp ps rs
+renameSubPDRS (PMerge p1 p2) gp ps rs    = PMerge p1' p2'
+  where p1' = renameSubPDRS p1 gp ps rs
+        p2' = renameSubPDRS p2 gp ps rs
+renameSubPDRS lp@(PDRS l m u c) gp ps rs = PDRS l' m' u' c'
+  where l' = alphaConvertVar l ps
+        m' = renameMAPs m lp gp ps
+        u' = renameUniverse u lp gp ps rs
+        c' = renamePCons c lp gp ps rs
 
--- | Infix notation for 'drsBetaReduce'
-(<<@>>) :: (AbstractPDRS a, PDRSAtom b) => (b -> a) -> b -> a
-up <<@>> ap = up `pdrsBetaReduce` ap
+---------------------------------------------------------------------------
+-- | Applies alpha conversion to a list of 'MAP's @m@, on the basis of a
+-- conversion list for projection variables @ps@.
+---------------------------------------------------------------------------
+renameMAPs :: [MAP] -> PDRS -> PDRS -> [(PVar,PVar)] -> [MAP]
+renameMAPs m lp gp ps = map (\(l1,l2) -> (renamePVar l1 lp gp ps, renamePVar l2 lp gp ps)) m
 
--- | Apply function composition to two unresolved PDRSs, yielding
--- a new unresolved PDRS
-pdrsFunctionCompose :: (b -> c) -> (a -> b) -> a -> c
-pdrsFunctionCompose = (.)
+---------------------------------------------------------------------------
+-- |  Applies alpha conversion to a list of 'PRef's @u@, on the basis of
+-- a conversion list for 'PVar's @ps@ and 'PDRSRef's @rs@.
+---------------------------------------------------------------------------
+renameUniverse :: [PRef] -> PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> [PRef]
+renameUniverse u lp gp ps rs = map (\(PRef p r) -> PRef (renamePVar p lp gp ps) (alphaConvertVar r rs)) u
 
--- | Infix notation for 'pdrsFunctionCompose'
-(<<.>>) :: (b -> c) -> (a -> b) -> a -> c
-a1 <<.>> a2 = a1 `pdrsFunctionCompose` a2
+---------------------------------------------------------------------------
+-- | Applies alpha conversion to a list of 'PCon's @c@ in
+-- in local 'PDRS' @lp@ in global 'PDRS' @gp@, on the basis of
+-- conversion lists for 'PVar's @ps@ and 'PDRSRef's @rs@.
+---------------------------------------------------------------------------
+renamePCons :: [PCon] -> PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> [PCon]
+renamePCons c lp gp ps rs = map rename c
+  where rename :: PCon -> PCon
+        rename (PCon p (Rel r d))    = PCon p' (Rel   r (map (flip (flip (flip (renamePDRSRef p') lp) gp) rs) d))
+          where p' = renamePVar p lp gp ps
+        rename (PCon p (Neg p1))     = PCon p' (Neg     (renameSubPDRS p1 gp ps rs))
+          where p' = renamePVar p lp gp ps
+        rename (PCon p (Imp p1 p2))  = PCon p' (Imp     (renameSubPDRS p1 gp ps rs)  (renameSubPDRS p2 gp ps rs))
+          where p' = renamePVar p lp gp ps
+        rename (PCon p (Or p1 p2))   = PCon p' (Or      (renameSubPDRS p1 gp ps rs)  (renameSubPDRS p2 gp ps rs))
+          where p' = renamePVar p lp gp ps
+        rename (PCon p (Prop r p1))  = PCon p' (Prop    (renamePDRSRef p' r lp gp rs)(renameSubPDRS p1 gp ps rs))
+          where p' = renamePVar p lp gp ps
+        rename (PCon p (Diamond p1)) = PCon p' (Diamond (renameSubPDRS p1 gp ps rs))
+          where p' = renamePVar p lp gp ps
+        rename (PCon p (Box  p1))    = PCon p' (Box     (renameSubPDRS p1 gp ps rs))
+          where p' = renamePVar p lp gp ps
+
+---------------------------------------------------------------------------
+-- |  Applies alpha conversion to a list of projected referents @u@, in
+--local 'PDRS' @lp@ in global 'PDRS' @gp@,on the basis of a conversion list
+--for projection variables @ps@ and 'PDRS' referents @rs@
+---------------------------------------------------------------------------
+renamePDRSRef :: PVar -> PDRSRef -> PDRS -> PDRS -> [(PDRSRef,PDRSRef)] -> PDRSRef
+renamePDRSRef pv r lp gp rs
+  | pdrsBoundPRef (PRef pv r) lp gp = alphaConvertVar r rs
+  | otherwise                       = r
+
+---------------------------------------------------------------------------
+-- | Converts a 'PVar' into a new 'PVar' in case it occurs bound in 
+-- local 'PDRS' @lp@ in global 'PDRS' @gp@.
+---------------------------------------------------------------------------
+renamePVar :: PVar -> PDRS -> PDRS -> [(PVar,PVar)] -> PVar
+renamePVar pv lp gp ps
+  | pdrsBoundPVar pv lp gp = alphaConvertVar pv ps
+  | otherwise              = pv
+
+---------------------------------------------------------------------------
+-- | Replaces duplicate uses of projection referents by new 'PRef's, where:
+--
+-- [Given conversion pair @(pr',npr)@, 'PRef' @pr@ is replaced by @npr@ 
+-- /iff/]
+--
+-- * @pr@ equals @pr'@, or
+--
+-- * @pr@ and @pr'@ have the same referent and @pr@ is bound by
+--   @pr'@ in global 'PDRS' @gp@, or
+--
+-- * @pr@ and @pr'@ have the same referent and both occur free
+--   in subordinated contexts in @gp@.
+---------------------------------------------------------------------------
+purifyPRefs :: PDRS -> PDRS -> [(PRef,PRef)] -> PDRS
+purifyPRefs lp@(LambdaPDRS _) _  _   = lp
+purifyPRefs (AMerge p1 p2)    gp prs = AMerge (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs)
+purifyPRefs (PMerge p1 p2)    gp prs = PMerge (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs)
+purifyPRefs lp@(PDRS l m u c) gp prs = PDRS l m (map (convert prs) u) (map purify c)
+  where -- | Converts a 'PRef' @pr@ based on a conversion list
+        convert :: [(PRef,PRef)] -> PRef -> PRef
+        convert [] pr                                    = pr
+        convert  ((pr'@(PRef p' r'),npr):prs) pr@(PRef p r)
+          | pr == pr'                                    = npr
+          | r  == r' && pdrsPRefBoundByPRef pr lp pr' gp = npr
+          | r  == r' && not(pdrsBoundPRef pr lp gp) 
+            && (pdrsIsAccessibleContext p p' gp)         = npr
+          | otherwise                                    = convert prs pr
+        -- | A projected condition is /purify/ iff all its subordinated
+        -- referents have been converted based on the conversion list.
+        purify :: PCon -> PCon
+        purify (PCon p (Rel r d))    = PCon p (Rel   r (map (purifyPDRSRef p) d))
+        purify (PCon p (Neg p1))     = PCon p (Neg     (purifyPRefs p1 gp prs))
+        purify (PCon p (Imp p1 p2))  = PCon p (Imp     (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs))
+        purify (PCon p (Or  p1 p2))  = PCon p (Or      (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs))
+        purify (PCon p (Prop r p1))  = PCon p (Prop    (purifyPDRSRef p r)     (purifyPRefs p1 gp prs))
+        purify (PCon p (Diamond p1)) = PCon p (Diamond (purifyPRefs p1 gp prs))
+        purify (PCon p (Box p1))     = PCon p (Box     (purifyPRefs p1 gp prs))
+        purifyPDRSRef :: PVar -> PDRSRef -> PDRSRef
+        purifyPDRSRef p r = prefToPDRSRef (convert prs (pdrsRefToPRef r p))
+
+---------------------------------------------------------------------------
+-- | Replaces duplicate uses of projection variables by new variables.
+--
+-- [This function implements the following algorithm:]
+--
+-- (1) start with the global 'PDRS' and an empty list of seen projection
+--    variables @pvs@ (in 'pdrsPurifyPDRS');
+-- 
+-- 2. check the label @l@ of the first atomic 'PDRS' @pdrs@ against @pvs@
+--    and, if necessary, alpha-convert @pdrs@ replacing @l@ for a new 'PVar';
+-- 
+-- 3. add the label and all free 'PVar's from the universe and set of 'MAP's
+--    of @pdrs@ to the list of seen projection variables @pvs@;
+-- 
+-- 4. go through all conditions of @pdrs@, while updating @pvs@ by adding
+--    'PVar's that occur free;
+---------------------------------------------------------------------------
+purifyPVars :: (PDRS,[PVar]) -> PDRS -> (PDRS,[PVar])
+purifyPVars (lp@(LambdaPDRS _),pvs) _  = (lp,pvs)
+purifyPVars (AMerge p1 p2,pvs)      gp = (AMerge cp1 cp2,pvs2)
+  where (cp1,pvs1) = purifyPVars (p1,pvs)  gp
+        (cp2,pvs2) = purifyPVars (p2,pvs1) gp
+purifyPVars (PMerge p1 p2,pvs)      gp = (PMerge cp1 cp2,pvs2)
+  where (cp1,pvs1) = purifyPVars (p1,pvs)  gp
+        (cp2,pvs2) = purifyPVars (p2,pvs1) gp
+-- | Step 2.
+-- If necessary, update label @l@ in the entire local 'PDRS';
+-- otherwise, purify conditions based on updated list of seen 'PVar's.
+purifyPVars (lp@(PDRS l m u c),pvs) gp
+  | l `elem` pvs   = purifyPVars (pdrsAlphaConvert lp [(l,l')] [],pvs) gp 
+  | otherwise      = (PDRS l m u ccs,pvs')
+  where (l':[])    = newPVars [l] (pdrsPVars gp `union` pdrsPVars lp)
+        -- | Step 3.
+        (ccs,pvs') = purify (c,l:pvs `union` upv `union` mpv)
+        upv = filter (not . flip (`pdrsBoundPVar` lp) gp) (map prefToPVar u)
+        mpv = filter (not . flip (`pdrsBoundPVar` lp) gp) (concatMap (\(x,y) -> [x,y]) m)
+        -- | Step 4.
+        purify :: ([PCon],[PVar]) -> ([PCon],[PVar])
+        purify tp@([],pvs)  = tp
+        purify (pc@(PCon p (Rel _ _)):pcs,pvs) = (pc:ccs,pvs1)
+          where (ccs,pvs1) = purify (pcs,addUnboundPVar p lp pvs)
+        purify (PCon p (Neg p1):pcs,pvs)       = (PCon p (Neg cp1):ccs,pvs2)
+          where -- | If an embedded 'PDRS' is encountered, step 2 is
+                -- recursively called.
+                (cp1,pvs1) = purifyPVars (p1,addUnboundPVar p lp pvs) gp
+                (ccs,pvs2) = purify (pcs,pvs1)
+        purify (PCon p (Imp p1 p2):pcs,pvs)    = (PCon p (Imp cp1 cp2):ccs,pvs4)
+          where -- | For binary operators an extra conversion step is
+                -- required since the label of the first 'PDRS' can bind
+                -- 'PVar's in the second 'PDRS'.
+                (cp1,pvs2) = purifyPVars (renameSubPDRS p1 gp npv [],pvs1) gp
+                (cp2,pvs3) = purifyPVars (renameSubPDRS p2 gp npv [],pvs2) gp
+                (ccs,pvs4) = purify (pcs,pvs3)
+                pvs1 = addUnboundPVar p lp pvs
+                opv  = pvs1 `intersect` [pdrsLabel p1]
+                npv  = zip opv (newPVars opv (pdrsPVars gp `union` pdrsPVars lp))
+        purify (PCon p (Or p1 p2):pcs,pvs)     = (PCon p (Or cp1 cp2):ccs,pvs4)
+          where (cp1,pvs2) = purifyPVars (renameSubPDRS p1 gp npv [],pvs1) gp
+                (cp2,pvs3) = purifyPVars (renameSubPDRS p2 gp npv [],pvs2) gp
+                (ccs,pvs4) = purify (pcs,pvs3)
+                pvs1 = addUnboundPVar p lp pvs
+                opv  = pvs1 `intersect` [pdrsLabel p1]
+                npv  = zip opv (newPVars opv (pdrsPVars gp `union` pdrsPVars lp))
+        purify (PCon p (Prop r p1):pcs,pvs)    = (PCon p (Prop r cp1):ccs,pvs2)
+          where (cp1,pvs1) = purifyPVars (p1,addUnboundPVar p lp pvs) gp
+                (ccs,pvs2) = purify (pcs,pvs1)
+        purify (PCon p (Diamond p1):pcs,pvs)   = (PCon p (Diamond cp1):ccs,pvs2)
+          where (cp1,pvs1) = purifyPVars (p1,addUnboundPVar p lp pvs) gp
+                (ccs,pvs2) = purify (pcs,pvs1)
+        purify (PCon p (Box p1):pcs,pvs)       = (PCon p (Box cp1):ccs,pvs2)
+          where (cp1,pvs1) = purifyPVars (p1,addUnboundPVar p lp pvs) gp
+                (ccs,pvs2) = purify (pcs,pvs1)
+        -- | Given a list of seen projection variables @pvs@, 'PVar' @pv@ is
+        -- added to @pvs@ /iff/ @pv@ is not bound in global 'PDRS' @gp@.
+        addUnboundPVar :: PVar -> PDRS -> [PVar] -> [PVar]
+        addUnboundPVar pv p pvs
+          | not(pdrsBoundPVar pv p gp) = [pv] `union` pvs
+          | otherwise                  = pvs
+
+---------------------------------------------------------------------------
+-- | Returns a tuple of existing 'PRef's @eps@ and unbound duplicate 'PRef's
+-- @dps@ in a 'PDRS', based on a list of seen 'PRef's @prs@, where:
+--
+-- [@pr = ('PRef' p r)@ is duplicate in 'PDRS' @gp@ /iff/]
+--
+-- * There exists a @p'@, such that @pr' = ('PRef' p' r)@ is an element
+--   of @prs@, and @pr@ and @pr'@ are /independent/.
+---------------------------------------------------------------------------
+unboundDupPRefs :: PDRS -> PDRS -> [PRef] -> ([PRef],[PRef])
+unboundDupPRefs (LambdaPDRS _)    _  eps = (eps,[])
+unboundDupPRefs (AMerge p1 p2)    gp eps = (eps2,dps1 ++ dps2)
+  where (eps1,dps1) = unboundDupPRefs p1 gp eps
+        (eps2,dps2) = unboundDupPRefs p2 gp eps1
+unboundDupPRefs (PMerge p1 p2)    gp eps = (eps2,dps1 ++ dps2)
+  where (eps1,dps1) = unboundDupPRefs p1 gp eps
+        (eps2,dps2) = unboundDupPRefs p2 gp eps1
+unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
+  where (eps1,dps1) = dups c (eps ++ uu)
+        uu = unboundPRefs u
+        -- | Returns whether 'PRef' @pr@ is /duplicate/ wrt a list of 'PRef's.
+        dup :: PRef -> [PRef] -> Bool
+        dup _ []                                       = False
+        dup pr@(PRef _ r) (pr'@(PRef _ r'):prs)
+          | r == r' && independentPRefs pr [pr'] lp gp = True
+          | otherwise                                  = dup pr prs
+        -- | Returns a tuple of existing 'PRef's @eps'@ and duplicate
+        -- 'PRef's @dps'@, based on a list of 'PCon's and a list of existing
+        -- 'PRef's @eps@. 
+        dups :: [PCon] -> [PRef] -> ([PRef],[PRef])
+        dups [] eps = (eps,[])
+        dups (PCon p (Rel _ d):pcs)    eps = (eps2,dps1 ++ dps2)
+          where (eps2,dps2) = dups pcs (eps ++ prs)
+                prs  = unboundPRefs $ map (`pdrsRefToPRef` p) d
+                dps1 = filter (flip (flip (`independentPRefs` dps1) lp) gp) dps
+                dps  = filter (`dup` eps) prs
+        dups (PCon p (Neg p1):pcs)     eps = (eps2,dps1 ++ dps2)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = dups pcs eps1
+        dups (PCon p (Imp p1 p2):pcs)  eps = (eps3,dps1 ++ dps2 ++ dps3)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = unboundDupPRefs p2 gp eps1
+                (eps3,dps3) = dups pcs eps2
+        dups (PCon p (Or p1 p2):pcs)   eps = (eps3,dps1 ++ dps2 ++ dps3)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = unboundDupPRefs p2 gp eps1
+                (eps3,dps3) = dups pcs eps2
+        dups (PCon p (Prop r p1):pcs)  eps = (eps3,dps1 ++ dps2 ++ dps3)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = dups pcs eps1
+                (eps3,dps3) = (eps2 ++ unboundPRefs [pr],filter (`dup` eps) [pr])
+                pr          = pdrsRefToPRef r p
+        dups (PCon p (Diamond p1):pcs) eps = (eps2,dps1 ++ dps2)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = dups pcs eps1
+        dups (PCon p (Box p1):pcs)     eps = (eps2,dps1 ++ dps2)
+          where (eps1,dps1) = unboundDupPRefs p1 gp eps
+                (eps2,dps2) = dups pcs eps1
+        -- | Returns whether a referent is bound by some other referent
+        -- than itself.
+        unboundPRefs :: [PRef] -> [PRef]
+        unboundPRefs [] = []
+        unboundPRefs (pr:prs)
+          | not $ any (flip (pdrsPRefBoundByPRef pr lp) gp) u = pr : unboundPRefs prs
+          | otherwise                                         = unboundPRefs prs
+          where u = delete pr (pdrsUniverses gp)
+
+---------------------------------------------------------------------------
+-- | Returns whether a 'PRef' @pr@ is /independent/ based on a list of
+-- 'PRef's @prs@, where:
+--
+-- [@pr = ('PRef' p r)@ is independent w.r.t. @prs@ /iff/]
+--
+-- (1) @pr@ is not bound by any 'PRef' in @prs@; and
+--
+-- 2. it is not the case that @pr@ occurs free and there is some
+--    element of @prs@ that is accessible from @pr@. (NB. this only
+--    holds if both @pr@ and @pr'@ occur free in accessible contexts,
+--    in which case they are not independent).
+---------------------------------------------------------------------------
+independentPRefs :: PRef -> [PRef] -> PDRS -> PDRS -> Bool
+independentPRefs _ [] _ _                                          = True
+independentPRefs pr@(PRef p r) prs lp gp
+  | any (flip (pdrsPRefBoundByPRef pr lp) gp) prs                  = False
+  | not(pdrsBoundPRef pr lp gp) 
+    && any (\(PRef p' _) -> (pdrsIsAccessibleContext p p' gp)) prs = False
+  | otherwise                                                      = True
