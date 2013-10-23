@@ -19,14 +19,13 @@ module Data.PDRS.LambdaCalculus
 , pdrsFunctionCompose
 , (<<.>>)
 , pdrsPurify
-
 ) where
 
 import Data.DRS.LambdaCalculus (alphaConvertVar)
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 
-import Data.List (delete, intersect, nub, union)
+import Data.List (delete, intersect, nub, partition, union)
 
 ---------------------------------------------------------------------------
 -- * Exported
@@ -71,7 +70,7 @@ a1 <<.>> a2 = a1 `pdrsFunctionCompose` a2
 ---------------------------------------------------------------------------
 pdrsPurify :: PDRS -> PDRS
 pdrsPurify gp = purifyPRefs cgp cgp (zip prs (newPRefs prs (pdrsVariables cgp)))
-  where cgp = fst $ purifyPVars (gp,[]) gp
+  where cgp = fst $ purifyPVars (gp,pdrsFreePVars gp gp) gp
         prs = snd $ unboundDupPRefs cgp cgp []
 
 
@@ -236,59 +235,47 @@ purifyPVars (AMerge p1 p2,pvs)      gp = (AMerge cp1 cp2,pvs2)
 purifyPVars (PMerge p1 p2,pvs)      gp = (PMerge cp1 cp2,pvs2)
   where (cp1,pvs1) = purifyPVars (p1,pvs)  gp
         (cp2,pvs2) = purifyPVars (p2,pvs1) gp
--- | Step 2.
--- If necessary, update label @l@ in the entire local 'PDRS';
--- otherwise, purify conditions based on updated list of seen 'PVar's.
-purifyPVars (lp@(PDRS l m u c),pvs) gp
-  | l `elem` pvs   = purifyPVars (pdrsAlphaConvert lp [(l,l')] [],pvs) gp 
-  | otherwise      = (PDRS l m u ccs,pvs')
-  where (l':[])    = newPVars [l] (pdrsPVars gp `union` pdrsPVars lp)
-        -- | Step 3.
-        (ccs,pvs') = purify (c,l:pvs `union` upv `union` mpv)
-        upv = filter (not . flip (`pdrsBoundPVar` lp) gp) (map prefToPVar u)
-        mpv = filter (not . flip (`pdrsBoundPVar` lp) gp) (concatMap (\(x,y) -> [x,y]) m)
-        -- | Step 4.
+purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs2)
+-- In case we do not want to rename ambiguous bindings:
+-- purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs1 `union` pvs2)
+  where (PDRS l1 m1 u1 c1) = pdrsAlphaConvert lp (zip ol (newPVars ol (pdrsPVars gp `union` pvs))) []
+        ol        = [l] `intersect` pvs
+        (c2,pvs2) = purify (c1,pvs `union` pvs1)
+        -- In case we do not want to rename ambiguous bindings:
+        -- (c2,pvs2) = purify (c1,pvs)
+        pvs1      = l1:(concatMap (\(x,y) -> [x,y]) m1) `union` (map prefToPVar u1)
         purify :: ([PCon],[PVar]) -> ([PCon],[PVar])
-        purify tp@([],pvs)  = tp
+        purify ([],pvs)                        = ([],pvs)
         purify (pc@(PCon p (Rel _ _)):pcs,pvs) = (pc:ccs,pvs1)
-          where (ccs,pvs1) = purify (pcs,addUnboundPVar p lp pvs)
+          where (ccs,pvs1) = purify (pcs,p:pvs)
         purify (PCon p (Neg p1):pcs,pvs)       = (PCon p (Neg cp1):ccs,pvs2)
-          where -- | If an embedded 'PDRS' is encountered, step 2 is
-                -- recursively called.
-                (cp1,pvs1) = purifyPVars (p1,addUnboundPVar p lp pvs) gp
+          where (cp1,pvs1) = purifyPVars (p1,p:pvs) gp
                 (ccs,pvs2) = purify (pcs,pvs1)
-        purify (PCon p (Imp p1 p2):pcs,pvs)    = (PCon p (Imp cp1 cp2):ccs,pvs4)
-          where -- | For binary operators an extra conversion step is
-                -- required since the label of the first 'PDRS' can bind
-                -- 'PVar's in the second 'PDRS'.
-                (cp1,pvs2) = purifyPVars (renameSubPDRS p1 gp npv [],pvs1) gp
-                (cp2,pvs3) = purifyPVars (renameSubPDRS p2 gp npv [],pvs2) gp
-                (ccs,pvs4) = purify (pcs,pvs3)
-                pvs1 = addUnboundPVar p lp pvs
-                opv  = pvs1 `intersect` [pdrsLabel p1]
-                npv  = zip opv (newPVars opv (pdrsPVars gp `union` pdrsPVars lp))
-        purify (PCon p (Or p1 p2):pcs,pvs)     = (PCon p (Or cp1 cp2):ccs,pvs4)
-          where (cp1,pvs2) = purifyPVars (renameSubPDRS p1 gp npv [],pvs1) gp
-                (cp2,pvs3) = purifyPVars (renameSubPDRS p2 gp npv [],pvs2) gp
-                (ccs,pvs4) = purify (pcs,pvs3)
-                pvs1 = addUnboundPVar p lp pvs
-                opv  = pvs1 `intersect` [pdrsLabel p1]
-                npv  = zip opv (newPVars opv (pdrsPVars gp `union` pdrsPVars lp))
+        purify (PCon p (Imp p1 p2):pcs,pvs)    = (PCon p (Imp cp1 cp2):ccs,pvs3)
+          where (cp1,pvs1) = purifyPVars (renameSubPDRS p1 gp nps [],p:pvs) gp
+                (cp2,pvs2) = purifyPVars (renameSubPDRS p2 gp nps [],pvs1) gp
+                (ccs,pvs3) = purify (pcs,pvs2)
+                nps  = zip ops (newPVars ops (pdrsPVars gp `union` pvs))
+                ops  = p:pvs `intersect` [pdrsLabel p1]
+                -- In case we do not want to rename ambiguous bindings:
+                -- ops = pdrsLabels p2 \\ p:pvs `intersect` [pdrsLabel p1]
+        purify (PCon p (Or p1 p2):pcs,pvs)     = (PCon p (Or cp1 cp2):ccs,pvs3)
+          where (cp1,pvs1) = purifyPVars (renameSubPDRS p1 gp nps [],p:pvs) gp
+                (cp2,pvs2) = purifyPVars (renameSubPDRS p2 gp nps [],pvs1) gp
+                (ccs,pvs3) = purify (pcs,pvs2)
+                nps  = zip ops (newPVars ops (pdrsPVars gp `union` pvs))
+                ops  = p:pvs `intersect` [pdrsLabel p1]
+                -- In case we do not want to rename ambiguous bindings:
+                -- ops = pdrsLabels p2 \\ p:pvs `intersect` [pdrsLabel p1]
         purify (PCon p (Prop r p1):pcs,pvs)    = (PCon p (Prop r cp1):ccs,pvs2)
-          where (cp1,pvs1) = purifyPVars (p1,addUnboundPVar p lp pvs) gp
+          where (cp1,pvs1) = purifyPVars (p1,p:pvs) gp
                 (ccs,pvs2) = purify (pcs,pvs1)
         purify (PCon p (Diamond p1):pcs,pvs)   = (PCon p (Diamond cp1):ccs,pvs2)
-          where (cp1,pvs1) = purifyPVars (p1,addUnboundPVar p lp pvs) gp
+          where (cp1,pvs1) = purifyPVars (p1,p:pvs) gp
                 (ccs,pvs2) = purify (pcs,pvs1)
         purify (PCon p (Box p1):pcs,pvs)       = (PCon p (Box cp1):ccs,pvs2)
-          where (cp1,pvs1) = purifyPVars (p1,addUnboundPVar p lp pvs) gp
+          where (cp1,pvs1) = purifyPVars (p1,p:pvs) gp
                 (ccs,pvs2) = purify (pcs,pvs1)
-        -- | Given a list of seen projection variables @pvs@, 'PVar' @pv@ is
-        -- added to @pvs@ /iff/ @pv@ is not bound in global 'PDRS' @gp@.
-        addUnboundPVar :: PVar -> PDRS -> [PVar] -> [PVar]
-        addUnboundPVar pv p pvs
-          | not(pdrsBoundPVar pv p gp) = [pv] `union` pvs
-          | otherwise                  = pvs
 
 ---------------------------------------------------------------------------
 -- | Returns a tuple of existing 'PRef's @eps@ and unbound duplicate 'PRef's
@@ -322,10 +309,9 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
         dups :: [PCon] -> [PRef] -> ([PRef],[PRef])
         dups [] eps = (eps,[])
         dups (PCon p (Rel _ d):pcs)    eps = (eps2,dps1 ++ dps2)
-          where (eps2,dps2) = dups pcs (eps ++ prs)
-                prs  = unboundPRefs $ map (`pdrsRefToPRef` p) d
-                dps1 = filter (flip (flip (`independentPRefs` dps1) lp) gp) dps
-                dps  = filter (`dup` eps) prs
+          where (eps2,dps2) = dups pcs (eps ++ upd)
+                upd  = unboundPRefs $ map (`pdrsRefToPRef` p) d
+                dps1 = filter (\pd -> dup pd eps) upd
         dups (PCon p (Neg p1):pcs)     eps = (eps2,dps1 ++ dps2)
           where (eps1,dps1) = unboundDupPRefs p1 gp eps
                 (eps2,dps2) = dups pcs eps1
@@ -351,11 +337,7 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
         -- | Returns whether a referent is bound by some other referent
         -- than itself.
         unboundPRefs :: [PRef] -> [PRef]
-        unboundPRefs [] = []
-        unboundPRefs (pr:prs)
-          | not $ any (flip (pdrsPRefBoundByPRef pr lp) gp) u = pr : unboundPRefs prs
-          | otherwise                                         = unboundPRefs prs
-          where u = delete pr (pdrsUniverses gp)
+        unboundPRefs prs = snd $ partition (\pr -> any (flip (pdrsPRefBoundByPRef pr lp) gp) (delete pr (pdrsUniverses gp))) prs
 
 ---------------------------------------------------------------------------
 -- | Returns whether a 'PRef' @pr@ is /independent/ based on a list of
