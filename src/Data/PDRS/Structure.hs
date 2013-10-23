@@ -57,7 +57,7 @@ type MAP = (PVar,PVar)
 -- | A projected referent, consisting of a 'PVar' and a 'PDRSRef'.
 ---------------------------------------------------------------------------
 data PRef = PRef PVar PDRSRef
-  deriving (Eq)
+  deriving (Eq,Show)
 
 ---------------------------------------------------------------------------
 -- | A 'PDRS' referent.
@@ -65,7 +65,7 @@ data PRef = PRef PVar PDRSRef
 data PDRSRef =
   LambdaPDRSRef (DRSVar, Int) -- ^ A lambda PDRS referent (with its argument position)
   | PDRSRef DRSVar            -- ^ A PDRS referent
-  deriving (Eq)
+  deriving (Eq,Show)
 
 ---------------------------------------------------------------------------
 -- | A projected condition, consisting of a 'PVar' and a 'PDRSCon'.

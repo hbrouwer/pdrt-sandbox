@@ -73,7 +73,6 @@ pdrsPurify gp = purifyPRefs cgp cgp (zip prs (newPRefs prs (pdrsVariables cgp)))
   where cgp = fst $ purifyPVars (gp,pdrsFreePVars gp gp) gp
         prs = snd $ unboundDupPRefs cgp cgp []
 
-
 ---------------------------------------------------------------------------
 -- * Private
 ---------------------------------------------------------------------------
@@ -172,8 +171,7 @@ renamePVar pv lp gp ps
 ---------------------------------------------------------------------------
 -- | Replaces duplicate uses of projection referents by new 'PRef's, where:
 --
--- [Given conversion pair @(pr',npr)@, 'PRef' @pr@ is replaced by @npr@ 
--- /iff/]
+-- [Given conversion pair @(pr',npr)@, @pr@ is replaced by @npr@ /iff/]
 --
 -- * @pr@ equals @pr'@, or
 --
@@ -221,11 +219,10 @@ purifyPRefs lp@(PDRS l m u c) gp prs = PDRS l m (map (convert prs) u) (map purif
 -- 2. check the label @l@ of the first atomic 'PDRS' @pdrs@ against @pvs@
 --    and, if necessary, alpha-convert @pdrs@ replacing @l@ for a new 'PVar';
 -- 
--- 3. add the label and all free 'PVar's from the universe and set of 'MAP's
+-- 3. add the label and all 'PVar's from the universe and set of 'MAP's
 --    of @pdrs@ to the list of seen projection variables @pvs@;
 -- 
--- 4. go through all conditions of @pdrs@, while updating @pvs@ by adding
---    'PVar's that occur free;
+-- 4. go through all conditions of @pdrs@, while continually updating @pvs@ 
 ---------------------------------------------------------------------------
 purifyPVars :: (PDRS,[PVar]) -> PDRS -> (PDRS,[PVar])
 purifyPVars (lp@(LambdaPDRS _),pvs) _  = (lp,pvs)
@@ -235,15 +232,18 @@ purifyPVars (AMerge p1 p2,pvs)      gp = (AMerge cp1 cp2,pvs2)
 purifyPVars (PMerge p1 p2,pvs)      gp = (PMerge cp1 cp2,pvs2)
   where (cp1,pvs1) = purifyPVars (p1,pvs)  gp
         (cp2,pvs2) = purifyPVars (p2,pvs1) gp
-purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs2)
+-- | Step 2.
 -- In case we do not want to rename ambiguous bindings:
 -- purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs1 `union` pvs2)
+purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs2)
   where (PDRS l1 m1 u1 c1) = pdrsAlphaConvert lp (zip ol (newPVars ol (pdrsPVars gp `union` pvs))) []
         ol        = [l] `intersect` pvs
         (c2,pvs2) = purify (c1,pvs `union` pvs1)
-        -- In case we do not want to rename ambiguous bindings:
+        -- ^ In case we do not want to rename ambiguous bindings:
         -- (c2,pvs2) = purify (c1,pvs)
+        -- | Step 3.
         pvs1      = l1:(concatMap (\(x,y) -> [x,y]) m1) `union` (map prefToPVar u1)
+        -- | Step 4.
         purify :: ([PCon],[PVar]) -> ([PCon],[PVar])
         purify ([],pvs)                        = ([],pvs)
         purify (pc@(PCon p (Rel _ _)):pcs,pvs) = (pc:ccs,pvs1)
@@ -257,7 +257,7 @@ purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs2)
                 (ccs,pvs3) = purify (pcs,pvs2)
                 nps  = zip ops (newPVars ops (pdrsPVars gp `union` pvs))
                 ops  = p:pvs `intersect` [pdrsLabel p1]
-                -- In case we do not want to rename ambiguous bindings:
+                -- ^ In case we do not want to rename ambiguous bindings:
                 -- ops = pdrsLabels p2 \\ p:pvs `intersect` [pdrsLabel p1]
         purify (PCon p (Or p1 p2):pcs,pvs)     = (PCon p (Or cp1 cp2):ccs,pvs3)
           where (cp1,pvs1) = purifyPVars (renameSubPDRS p1 gp nps [],p:pvs) gp
@@ -265,7 +265,7 @@ purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs2)
                 (ccs,pvs3) = purify (pcs,pvs2)
                 nps  = zip ops (newPVars ops (pdrsPVars gp `union` pvs))
                 ops  = p:pvs `intersect` [pdrsLabel p1]
-                -- In case we do not want to rename ambiguous bindings:
+                -- ^ In case we do not want to rename ambiguous bindings:
                 -- ops = pdrsLabels p2 \\ p:pvs `intersect` [pdrsLabel p1]
         purify (PCon p (Prop r p1):pcs,pvs)    = (PCon p (Prop r cp1):ccs,pvs2)
           where (cp1,pvs1) = purifyPVars (p1,p:pvs) gp
@@ -337,7 +337,8 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
         -- | Returns whether a referent is bound by some other referent
         -- than itself.
         unboundPRefs :: [PRef] -> [PRef]
-        unboundPRefs prs = snd $ partition (\pr -> any (flip (pdrsPRefBoundByPRef pr lp) gp) (delete pr (pdrsUniverses gp))) prs
+        unboundPRefs prs = snd $ partition (\pr ->
+          any (flip (pdrsPRefBoundByPRef pr lp) gp) (delete pr (pdrsUniverses gp))) prs
 
 ---------------------------------------------------------------------------
 -- | Returns whether a 'PRef' @pr@ is /independent/ based on a list of

@@ -47,14 +47,6 @@ import Data.Tuple (swap)
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
--- | 'PDRS' notation.
----------------------------------------------------------------------------
-data PDRSNotation p =
-  Set p      -- ^ Set notation
-  | Linear p -- ^ Linear notation
-  | Boxes p  -- ^ Box notation
-
----------------------------------------------------------------------------
 -- | Derive and instance of the Show typeclass for 'PDRS'.
 ---------------------------------------------------------------------------
 instance Show PDRS where
@@ -66,45 +58,41 @@ instance Show PDRS where
 class ShowablePDRS p where 
   resolve :: p -> Int -> Int -> PDRS
 
----------------------------------------------------------------------------
 -- | Derive an instance of 'ShowablePDRS' for a resolved 'PDRS'.
----------------------------------------------------------------------------
 instance ShowablePDRS PDRS where
   resolve p _ _ = p
 
----------------------------------------------------------------------------
 -- | Derive an instance of 'ShowablePDRS' for a 'PDRS' that requires
 -- at least one 'PDRS' referent to resolve.
----------------------------------------------------------------------------
 instance (ShowablePDRS p) => ShowablePDRS (PDRSRef -> p) where
   resolve up nr np = resolve (up rv) (nr + 1) np
     where rv = LambdaPDRSRef ('r' : show nr, nr + np)
 
----------------------------------------------------------------------------
 -- | Derive an instance of 'ShowablePDRS' for a 'PDRS' that requires
 -- at least one 'PDRS' to resolve.
----------------------------------------------------------------------------
 instance (ShowablePDRS p) => ShowablePDRS (PDRS -> p) where
   resolve up nr np = resolve (up lv) nr (np + 1)
     where lv = LambdaPDRS ('k' : show np, nr + np)
 
----------------------------------------------------------------------------
 -- | Derive an instance of 'Show' for a 'PDRS' that requires
 -- at least one 'PDRS' referent to resolve.
----------------------------------------------------------------------------
 instance (ShowablePDRS p) => Show (PDRSRef -> p) where
   show p = show (resolve p 0 0)
 
----------------------------------------------------------------------------
 -- | Derive an instance of 'Show' for a 'PDRS' that requires
 -- at least one 'PDRS' to resolve.
----------------------------------------------------------------------------
 instance (ShowablePDRS p) => Show (PDRS -> p) where
   show p = show (resolve p 0 0)
 
 ---------------------------------------------------------------------------
--- | Derive an instance of 'Show' for 'PDRSNotation'.
+-- | 'PDRS' notation.
 ---------------------------------------------------------------------------
+data PDRSNotation p =
+  Set p      -- ^ Set notation
+  | Linear p -- ^ Linear notation
+  | Boxes p  -- ^ Box notation
+
+-- | Derive an instance of 'Show' for 'PDRSNotation'.
 instance (ShowablePDRS p) => Show (PDRSNotation p) where
   show (Boxes p)  = '\n' : showPDRS (Boxes  (resolve p 0 0))
   show (Linear p) = '\n' : showPDRS (Linear (resolve p 0 0))

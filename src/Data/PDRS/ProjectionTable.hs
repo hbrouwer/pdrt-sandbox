@@ -12,7 +12,8 @@ PDRS projection table
 
 module Data.PDRS.ProjectionTable
 (
-  projectionTable
+  PTable
+, projectionTable
 , showPTable
 , printPTable
 ) where
@@ -27,51 +28,48 @@ import Data.PDRS.Variables
 
 import Data.List (intercalate)
 
-instance Show PTable where
-  show pt = '\n' : showPTable pt
+---------------------------------------------------------------------------
+-- * Exported
+---------------------------------------------------------------------------
 
+---------------------------------------------------------------------------
+-- | Projection table
+---------------------------------------------------------------------------
 data PTable = PTable [Item]
   deriving (Eq)
 
-type Item = (Content,PVar,PVar)
+-- | Derive and instance of the Show typeclass for 'PTable'.
+instance Show PTable where
+  show pt = '\n' : showPTable pt
 
-data Content =
-  Ref PDRSRef
-  | Rel DRSRel [PDRSRef]
-  | Neg PVar
-  | Imp PVar PVar
-  | Or PVar PVar
-  | Prop PDRSRef PVar
-  | Diamond PVar
-  | Box PVar
-  deriving (Eq)
-
+---------------------------------------------------------------------------
+-- | Derives the projection table of a 'PDRS'
+---------------------------------------------------------------------------
 projectionTable :: PDRS -> PTable
 projectionTable = PTable . pdrsToItems
 
-pdrsToItems :: PDRS -> [Item]
-pdrsToItems (LambdaPDRS _) = []
-pdrsToItems (AMerge p1 p2) = pdrsToItems p1 ++ pdrsToItems p2
-pdrsToItems (PMerge p1 p2) = pdrsToItems p1 ++ pdrsToItems p2
-pdrsToItems (PDRS l _ u c) = universeToItems u l ++ pconsToItems c l
-
-universeToItems :: [PRef] -> PVar -> [Item]
-universeToItems [] _                         = []
-universeToItems (PRef p r:prs) l = (Ref r,l,p) : universeToItems prs l
-
-pconsToItems :: [PCon] -> PVar -> [Item]
-pconsToItems [] _ = []
-pconsToItems (PCon p (PDRS.Rel r d):pcs)    l = (Rel r d,l,p)                : pconsToItems pcs l
-pconsToItems (PCon p (PDRS.Neg p1):pcs)     l = (Neg     (pdrsLabel p1),l,p) : pdrsToItems p1     ++ pconsToItems pcs l
-pconsToItems (PCon p (PDRS.Imp p1 p2):pcs)  l = (Imp     (pdrsLabel p1) (pdrsLabel p2),l,p) : pdrsToItems p1 ++ pdrsToItems p2 ++ pconsToItems pcs l
-pconsToItems (PCon p (PDRS.Or p1 p2):pcs)   l = (Or      (pdrsLabel p1) (pdrsLabel p2),l,p) : pdrsToItems p1 ++ pdrsToItems p2 ++ pconsToItems pcs l
-pconsToItems (PCon p (PDRS.Prop r p1):pcs)  l = (Prop r  (pdrsLabel p1),l,p) : pdrsToItems p1     ++ pconsToItems pcs l
-pconsToItems (PCon p (PDRS.Diamond p1):pcs) l = (Diamond (pdrsLabel p1),l,p) : pdrsToItems p1     ++ pconsToItems pcs l
-pconsToItems (PCon p (PDRS.Box p1):pcs)     l = (Box     (pdrsLabel p1),l,p) : pdrsToItems p1     ++ pconsToItems pcs l
-
+---------------------------------------------------------------------------
+-- | Shows a projection table
+---------------------------------------------------------------------------
 showPTable :: PTable -> String
 showPTable (PTable is) = "[Type]\t[Content]\t[Intro st]\t[Proj. st]\n" ++ concatMap showItem is
 
+---------------------------------------------------------------------------
+-- | Prints a projection table
+---------------------------------------------------------------------------
+printPTable :: PTable -> IO ()
+printPTable pt = putStrLn $ '\n' : showPTable pt
+
+---------------------------------------------------------------------------
+-- * Private
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Rows of a 'PTable'
+---------------------------------------------------------------------------
+type Item = (Content,PVar,PVar)
+
+-- | Shows an 'Item'
 showItem :: Item -> String
 showItem (c,is,ps) =
   case c of
@@ -87,5 +85,46 @@ showItem (c,is,ps) =
         showRef :: PDRSRef -> DRSVar
         showRef = drsRefToDRSVar . pdrsRefToDRSRef
 
-printPTable :: PTable -> IO ()
-printPTable pt = putStrLn $ '\n' : showPTable pt
+---------------------------------------------------------------------------
+-- | First column of a 'PTable'
+---------------------------------------------------------------------------
+data Content =
+  Ref PDRSRef
+  | Rel DRSRel [PDRSRef]
+  | Neg PVar
+  | Imp PVar PVar
+  | Or PVar PVar
+  | Prop PDRSRef PVar
+  | Diamond PVar
+  | Box PVar
+  deriving (Eq)
+
+---------------------------------------------------------------------------
+-- | Converts a 'PDRS' into a list of 'Item's
+---------------------------------------------------------------------------
+pdrsToItems :: PDRS -> [Item]
+pdrsToItems (LambdaPDRS _) = []
+pdrsToItems (AMerge p1 p2) = pdrsToItems p1 ++ pdrsToItems p2
+pdrsToItems (PMerge p1 p2) = pdrsToItems p1 ++ pdrsToItems p2
+pdrsToItems (PDRS l _ u c) = universeToItems u l ++ pconsToItems c l
+
+---------------------------------------------------------------------------
+-- | Converts the universe of a 'PDRS' into a list of 'Item's
+---------------------------------------------------------------------------
+universeToItems :: [PRef] -> PVar -> [Item]
+universeToItems [] _                         = []
+universeToItems (PRef p r:prs) l = (Ref r,l,p) : universeToItems prs l
+
+---------------------------------------------------------------------------
+-- | Converts a list of 'PCon's into a list of 'Item's
+---------------------------------------------------------------------------
+pconsToItems :: [PCon] -> PVar -> [Item]
+pconsToItems [] _ = []
+pconsToItems (PCon p (PDRS.Rel r d):pcs)    l = (Rel r d,l,p)                : pconsToItems pcs l
+pconsToItems (PCon p (PDRS.Neg p1):pcs)     l = (Neg     (pdrsLabel p1),l,p) : pdrsToItems p1     ++ pconsToItems pcs l
+pconsToItems (PCon p (PDRS.Imp p1 p2):pcs)  l = (Imp     (pdrsLabel p1) (pdrsLabel p2),l,p) : pdrsToItems p1 ++ pdrsToItems p2 ++ pconsToItems pcs l
+pconsToItems (PCon p (PDRS.Or p1 p2):pcs)   l = (Or      (pdrsLabel p1) (pdrsLabel p2),l,p) : pdrsToItems p1 ++ pdrsToItems p2 ++ pconsToItems pcs l
+pconsToItems (PCon p (PDRS.Prop r p1):pcs)  l = (Prop r  (pdrsLabel p1),l,p) : pdrsToItems p1     ++ pconsToItems pcs l
+pconsToItems (PCon p (PDRS.Diamond p1):pcs) l = (Diamond (pdrsLabel p1),l,p) : pdrsToItems p1     ++ pconsToItems pcs l
+pconsToItems (PCon p (PDRS.Box p1):pcs)     l = (Box     (pdrsLabel p1),l,p) : pdrsToItems p1     ++ pconsToItems pcs l
+
