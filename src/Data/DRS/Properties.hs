@@ -54,14 +54,14 @@ isPureDRS gd = isPure gd []
           where pureCons :: [DRSCon] -> [DRSRef] -> Bool
                 pureCons []              _  = True
                 pureCons (Rel _ ds:cs)   rs = pureRefs ds rs  && pureCons cs (rs ++ ds)
-                pureCons (Neg d1:cs)     rs = isPure d1 (rs)  && pureCons cs (rs ++ (drsVariables d1))
-                pureCons (Imp d1 d2:cs)  rs = isPure d1 (rs)  && isPure d2 rs'  && pureCons cs (rs' ++ drsVariables d2)
+                pureCons (Neg d1:cs)     rs = isPure d1 rs    && pureCons cs (rs ++ drsVariables d1)
+                pureCons (Imp d1 d2:cs)  rs = isPure d1 rs    && isPure d2 rs' && pureCons cs (rs' ++ drsVariables d2)
                   where rs' = rs ++ drsVariables d1
-                pureCons (Or d1 d2:cs)   rs = isPure d1 (rs)  && isPure d2 rs' && pureCons cs (rs' ++ drsVariables d2)
+                pureCons (Or d1 d2:cs)   rs = isPure d1 rs    && isPure d2 rs' && pureCons cs (rs' ++ drsVariables d2)
                   where rs' = rs ++ drsVariables d1
-                pureCons (Prop r d1:cs)  rs = pureRefs [r] rs && isPure d1 (rs) && pureCons cs (rs ++ drsVariables d1)
-                pureCons (Diamond d1:cs) rs = isPure d1 (rs)  && pureCons cs (rs ++ drsVariables d1)
-                pureCons (Box d1:cs)     rs = isPure d1 (rs)  && pureCons cs (rs ++ drsVariables d1)
+                pureCons (Prop r d1:cs)  rs = pureRefs [r] rs && isPure d1 rs  && pureCons cs (rs ++ drsVariables d1)
+                pureCons (Diamond d1:cs) rs = isPure d1 rs    && pureCons cs (rs ++ drsVariables d1)
+                pureCons (Box d1:cs)     rs = isPure d1 rs    && pureCons cs (rs ++ drsVariables d1)
                 pureRefs :: [DRSRef] -> [DRSRef] -> Bool
                 pureRefs rs srs = all (\r -> drsBoundRef r ld gd || r `notElem` srs) rs
 
