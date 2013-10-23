@@ -39,17 +39,17 @@ drsUniverse (DRS u _)     = u
 -- | Returns the list of all universes in a DRS
 drsUniverses :: DRS -> [DRSRef]
 drsUniverses (LambdaDRS _) = []
-drsUniverses (Merge d1 d2) = drsUniverses d1 `union` drsUniverses d2
-drsUniverses (DRS u c)     = u `union` universes c
+drsUniverses (Merge d1 d2) = drsUniverses d1 ++ drsUniverses d2
+drsUniverses (DRS u c)     = u ++ universes c
   where universes :: [DRSCon] -> [DRSRef]
         universes []              = []
         universes (Rel _ _:cs)    = universes cs
-        universes (Neg d1:cs)     = drsUniverses d1 `union` universes cs
-        universes (Imp d1 d2:cs)  = drsUniverses d1 `union` drsUniverses d2 `union` universes cs
-        universes (Or d1 d2:cs)   = drsUniverses d1 `union` drsUniverses d2 `union` universes cs
-        universes (Prop _ d1:cs)  = drsUniverses d1 `union` universes cs
-        universes (Diamond d1:cs) = drsUniverses d1 `union` universes cs
-        universes (Box d1:cs)     = drsUniverses d1 `union` universes cs
+        universes (Neg d1:cs)     = drsUniverses d1 ++ universes cs
+        universes (Imp d1 d2:cs)  = drsUniverses d1 ++ drsUniverses d2 ++ universes cs
+        universes (Or d1 d2:cs)   = drsUniverses d1 ++ drsUniverses d2 ++ universes cs
+        universes (Prop _ d1:cs)  = drsUniverses d1 ++ universes cs
+        universes (Diamond d1:cs) = drsUniverses d1 ++ universes cs
+        universes (Box d1:cs)     = drsUniverses d1 ++ universes cs
 
 -- | Returns the list of all variables in a DRS
 drsVariables :: DRS -> [DRSRef]

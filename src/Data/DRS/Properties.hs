@@ -46,19 +46,24 @@ isProperSubDRS sd@(DRS _ cs) gd = all properCon cs
 -- | Returns whether DRS @d@ is a *pure DRS*, where a *pure DRS* is
 -- defined as a DRS without otiose declarations of discourse referents
 isPureDRS :: DRS -> Bool
-isPureDRS d = isPure d []
+isPureDRS gd = isPure gd []
   where isPure :: DRS -> [DRSRef] -> Bool
-        isPure (LambdaDRS _) _  = True
-        isPure (Merge d1 d2) rs = isPure d1 rs && isPure d2 (rs ++ drsUniverse d1)
-        isPure (DRS u c) rs     = not (any (`elem` rs) u) && all isPureCon c
-          where isPureCon :: DRSCon -> Bool
-                isPureCon (Rel _ _)    = True
-                isPureCon (Neg d1)     = isPure d1 (u ++ rs)
-                isPureCon (Imp d1 d2)  = isPure d1 (u ++ rs) && isPure d2 (u ++ rs ++ drsUniverse d1)
-                isPureCon (Or d1 d2)   = isPure d1 (u ++ rs) && isPure d2 (u ++ rs ++ drsUniverse d1)
-                isPureCon (Prop _ d1)  = isPure d1 (u ++ rs)
-                isPureCon (Diamond d1) = isPure d1 (u ++ rs)
-                isPureCon (Box d1)     = isPure d1 (u ++ rs)
+        isPure (LambdaDRS _) _   = True
+        isPure (Merge d1 d2) srs = isPure d1 srs && isPure d2 (srs ++ drsVariables d1)
+        isPure ld@(DRS u c) srs  = not (any (`elem` srs) u) && pureCons c (srs ++ u)
+          where pureCons :: [DRSCon] -> [DRSRef] -> Bool
+                pureCons []              _  = True
+                pureCons (Rel _ ds:cs)   rs = pureRefs ds rs  && pureCons cs (rs ++ ds)
+                pureCons (Neg d1:cs)     rs = isPure d1 (rs)  && pureCons cs (rs ++ (drsVariables d1))
+                pureCons (Imp d1 d2:cs)  rs = isPure d1 (rs)  && isPure d2 rs'  && pureCons cs (rs' ++ drsVariables d2)
+                  where rs' = rs ++ drsVariables d1
+                pureCons (Or d1 d2:cs)   rs = isPure d1 (rs)  && isPure d2 rs' && pureCons cs (rs' ++ drsVariables d2)
+                  where rs' = rs ++ drsVariables d1
+                pureCons (Prop r d1:cs)  rs = pureRefs [r] rs && isPure d1 (rs) && pureCons cs (rs ++ drsVariables d1)
+                pureCons (Diamond d1:cs) rs = isPure d1 (rs)  && pureCons cs (rs ++ drsVariables d1)
+                pureCons (Box d1:cs)     rs = isPure d1 (rs)  && pureCons cs (rs ++ drsVariables d1)
+                pureRefs :: [DRSRef] -> [DRSRef] -> Bool
+                pureRefs rs srs = all (\r -> drsBoundRef r ld gd || r `notElem` srs) rs
 
 -- | Returns whether a DRS is resolved (containing no unresolved merges 
 -- or lambdas)
