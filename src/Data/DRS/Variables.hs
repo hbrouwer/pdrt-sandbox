@@ -16,13 +16,14 @@ module Data.DRS.Variables
 , drsUniverse
 , drsUniverses
 , drsVariables
+, drsFreeRefs
 , drsLambdas
 , drsBoundRef
 , newDRSRefs
 ) where
 
 import Data.DRS.Structure
-import Data.List (union, sortBy)
+import Data.List (partition, sortBy, union)
 import Data.Ord (comparing)
 
 -- | Converts a DRS referent @r@ to a DRS variable
@@ -51,7 +52,8 @@ drsUniverses (DRS u c)     = u ++ universes c
         universes (Diamond d1:cs) = drsUniverses d1 ++ universes cs
         universes (Box d1:cs)     = drsUniverses d1 ++ universes cs
 
--- | Returns the list of all variables in a DRS
+-- | Returns the list of all variables in a DRS 
+-- (equals 'drsUniverses' ++ 'drsFreeRefs')
 drsVariables :: DRS -> [DRSRef]
 drsVariables (LambdaDRS _) = []
 drsVariables (Merge d1 d2) = drsVariables d1 `union` drsVariables d2
@@ -65,6 +67,22 @@ drsVariables (DRS u c)     = u `union` variables c
         variables (Prop r d1:cs)  = [r]             `union` drsVariables d1 `union` variables cs
         variables (Diamond d1:cs) = drsVariables d1 `union` variables cs
         variables (Box d1:cs)     = drsVariables d1 `union` variables cs
+
+-- | Returns the list of all free referents in a DRS
+drsFreeRefs :: DRS -> DRS -> [DRSRef]
+drsFreeRefs (LambdaDRS _) _  = []
+drsFreeRefs (Merge d1 d2) gd = drsFreeRefs d1 gd `union` drsFreeRefs d2 gd
+drsFreeRefs ld@(DRS _ c)  gd = free c
+  where free :: [DRSCon] -> [DRSRef]
+        free []              = []
+        free (Rel _ d:cs)    = snd (partition (flip (`drsBoundRef` ld) gd) d) `union` free cs
+        free (Neg d1:cs)     = drsFreeRefs d1 gd `union` free cs
+        free (Imp d1 d2:cs)  = drsFreeRefs d1 gd `union` drsFreeRefs d2 gd `union` free cs
+        free (Or d1 d2:cs)   = drsFreeRefs d1 gd `union` drsFreeRefs d2 gd `union` free cs
+        free (Prop r d1:cs)  = snd (partition (flip (`drsBoundRef` ld) gd) [r]) `union` drsFreeRefs d1 gd `union` free cs
+        free (Diamond d1:cs) = drsFreeRefs d1 gd `union` free cs
+        free (Box d1:cs)     = drsFreeRefs d1 gd `union` free cs
+
 
 -- | Returns the ordered list of all lambda variables in a DRS
 drsLambdas :: DRS -> [DRSVar]

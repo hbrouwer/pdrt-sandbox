@@ -20,7 +20,9 @@ module Data.PDRS.Variables
 , pdrsUniverse
 , pdrsUniverses
 , pdrsVariables
+, pdrsFreePRefs
 , pdrsPVars
+, pdrsFreePVars
 , pdrsLambdas
 , pdrsBoundPRef
 , pdrsBoundPVar
@@ -37,7 +39,7 @@ import Data.DRS.Variables (newDRSRefs)
 import Data.PDRS.ProjectionGraph
 import Data.PDRS.Structure
 
-import Data.List (sortBy, union)
+import Data.List (partition, sortBy, union)
 import Data.Ord (comparing)
 
 -- | Converts a PDRS referent to a DRS referent
@@ -82,7 +84,7 @@ pdrsUniverses (PDRS _ _ u c) = u `union` universes c
         universes (PCon _ (Diamond p1):cs) = pdrsUniverses p1 `union` universes cs
         universes (PCon _ (Box p1):cs)     = pdrsUniverses p1 `union` universes cs
 
--- | Returns the list of all variables in a PDRS
+-- | Returns the list of all variables in a PDRS 
 pdrsVariables :: PDRS -> [PDRSRef]
 pdrsVariables (LambdaPDRS _) = []
 pdrsVariables (AMerge p1 p2) = pdrsVariables p1         `union` pdrsVariables p2
@@ -98,9 +100,45 @@ pdrsVariables (PDRS _ _ u c) = map (\(PRef _ r) -> r) u `union` variables c
         variables (PCon _ (Diamond p1):cs) = pdrsVariables p1 `union` variables cs
         variables (PCon _ (Box p1):cs)     = pdrsVariables p1 `union` variables cs
 
+-- | Returns the list of all free PRefs in a PDRS 
+pdrsFreePRefs :: PDRS -> PDRS -> [PRef]
+pdrsFreePRefs (LambdaPDRS _) _     = []
+pdrsFreePRefs (AMerge p1 p2) gp    = pdrsFreePRefs p1 gp `union` pdrsFreePRefs p2 gp
+pdrsFreePRefs (PMerge p1 p2) gp    = pdrsFreePRefs p1 gp `union` pdrsFreePRefs p2 gp
+pdrsFreePRefs lp@(PDRS _ _ u c) gp = free c
+  where freePRefs :: [PRef] -> [PRef]
+        freePRefs prs = snd (partition (flip (`pdrsBoundPRef` lp) gp) prs)
+        free :: [PCon] -> [PRef]
+        free []                       = []
+        free (PCon p (Rel _ d):cs)    = freePRefs (map (`pdrsRefToPRef` p) d)            `union` free cs
+        free (PCon _ (Neg p1):cs)     = pdrsFreePRefs p1 gp                              `union` free cs
+        free (PCon _ (Imp p1 p2):cs)  = pdrsFreePRefs p1 gp  `union` pdrsFreePRefs p2 gp `union` free cs
+        free (PCon _ (Or p1 p2):cs)   = pdrsFreePRefs p1 gp  `union` pdrsFreePRefs p2 gp `union` free cs
+        free (PCon p (Prop r p1):cs)  = freePRefs [PRef p r] `union` pdrsFreePRefs p1 gp `union` free cs
+        free (PCon _ (Diamond p1):cs) = pdrsFreePRefs p1 gp                              `union` free cs
+        free (PCon _ (Box p1):cs)     = pdrsFreePRefs p1 gp                              `union` free cs
+
 -- | Returns the list of all projection variables in a PDRS
 pdrsPVars :: PDRS -> [PVar]
 pdrsPVars p = vertices (projectionGraph p)
+
+-- | Returns the list of all free PVars in a PDRS
+pdrsFreePVars :: PDRS -> PDRS-> [PVar]
+pdrsFreePVars (LambdaPDRS _) _     = []
+pdrsFreePVars (AMerge p1 p2) gp    = pdrsFreePVars p1 gp `union` pdrsFreePVars p2 gp
+pdrsFreePVars (PMerge p1 p2) gp    = pdrsFreePVars p1 gp `union` pdrsFreePVars p2 gp
+pdrsFreePVars lp@(PDRS _ m u c) gp = freePVars (concatMap (\(x,y) -> [x,y]) m) `union` freePVars (map prefToPVar u) `union` free c
+  where freePVars :: [PVar] -> [PVar]
+        freePVars ps = snd (partition (flip (`pdrsBoundPVar` lp) gp) ps)
+        free :: [PCon] -> [PVar]
+        free [] = []
+        free (PCon p (Rel _ _):cs)    = freePVars [p] `union` free cs
+        free (PCon p (Neg p1):cs)     = freePVars [p] `union` pdrsFreePVars p1 gp `union` free cs
+        free (PCon p (Imp p1 p2):cs)  = freePVars [p] `union` pdrsFreePVars p1 gp `union` pdrsFreePVars p2 gp `union` free cs
+        free (PCon p (Or p1 p2):cs)   = freePVars [p] `union` pdrsFreePVars p1 gp `union` pdrsFreePVars p2 gp `union` free cs
+        free (PCon p (Prop _ p1):cs)  = freePVars [p] `union` pdrsFreePVars p1 gp `union` free cs
+        free (PCon p (Diamond p1):cs) = freePVars [p] `union` pdrsFreePVars p1 gp `union` free cs
+        free (PCon p (Box p1):cs)     = freePVars [p] `union` pdrsFreePVars p1 gp `union` free cs
 
 -- | Returns the list of all lambda variables in a PDRS
 pdrsLambdas :: PDRS -> [DRSVar]
