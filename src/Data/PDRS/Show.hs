@@ -13,7 +13,6 @@ PDRS pretty printing
 
 module Data.PDRS.Show
 (
--- * Pretty printing
   PDRSNotation (..)
 , showPDRS
 , printPDRS
@@ -47,7 +46,7 @@ import Data.Tuple (swap)
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
--- ** Instances of Show
+-- ** Show PDRS
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
@@ -89,7 +88,7 @@ instance (ShowablePDRS p) => Show (PDRS -> p) where
   show p = show (resolve p 0 0)
 
 ---------------------------------------------------------------------------
--- | 'PDRS' notation.
+-- | 'PDRS' notations.
 ---------------------------------------------------------------------------
 data PDRSNotation p =
   Set p      -- ^ Set notation
@@ -101,10 +100,6 @@ instance (ShowablePDRS p) => Show (PDRSNotation p) where
   show (Boxes p)  = '\n' : showPDRS (Boxes  (resolve p 0 0))
   show (Linear p) = '\n' : showPDRS (Linear (resolve p 0 0))
   show (Set p)    = '\n' : showPDRS (Set    (resolve p 0 0))
-
----------------------------------------------------------------------------
--- ** Show PDRS
----------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
 -- | Shows a 'PDRS'.
@@ -164,8 +159,8 @@ printPMerge p1 p2 = putStrLn $ '\n' : showPMerge p1 p2
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
--- | Shows the beta reduction of an 'unresolved PDRS'@ @p1@ with a
--- 'PDRS' @p2@.
+-- | Shows the beta reduction of an 'unresolved PDRS' @p1@ with a 'PDRS'
+-- @p2@.
 ---------------------------------------------------------------------------
 showPDRSBetaReduct :: (ShowablePDRS p) => (PDRS -> p) -> PDRS -> String
 showPDRSBetaReduct p1 p2 = showConcat (showConcat (showModifier "(" 2 b1) (showModifier ")" 2 b2)) (showModifier "=" 2 br)

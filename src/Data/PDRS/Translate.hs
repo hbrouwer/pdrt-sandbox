@@ -34,7 +34,7 @@ import Data.List (delete, intersect, union)
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
--- | Translates a 'PDRS' into a 'FOLForm'.
+-- | Translates a 'PDRS' into a 'F.FOLForm'.
 ---------------------------------------------------------------------------
 pdrsToFOL :: PDRS -> F.FOLForm
 pdrsToFOL p = drsToFOL (pdrsToDRS p)

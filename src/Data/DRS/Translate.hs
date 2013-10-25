@@ -22,15 +22,39 @@ import qualified Data.FOL as F
 
 import Data.List (intersect, union)
 
--- | Constants
-worldVar = "w"   -- World variable
-worldRel = "Acc" -- Accessibility relation between worlds
+---------------------------------------------------------------------------
+-- * Exported
+---------------------------------------------------------------------------
 
--- | Converts a DRS @d@ to a FOL formula
+---------------------------------------------------------------------------
+-- | Converts a 'DRS' @d@ to a 'F.FOLForm'
+---------------------------------------------------------------------------
 drsToFOL :: DRS -> F.FOLForm
 drsToFOL d = drsToMFOL d worldVar
 
+---------------------------------------------------------------------------
+-- * Private
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- **  Constants
+---------------------------------------------------------------------------
+
+-- | Symbol for world variable
+worldVar :: [Char]
+worldVar = "w"
+
+-- | Symbol for accessibility relation between worlds
+worldRel :: [Char]
+worldRel = "Acc"
+
+---------------------------------------------------------------------------
+-- **  Conversion to modal FOL
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
 -- | Converts a DRS to a modal FOL formula with world @w@
+---------------------------------------------------------------------------
 drsToMFOL :: DRS -> F.FOLVar -> F.FOLForm
 drsToMFOL (DRS [] c) w     = drsConsToMFOL c w
 drsToMFOL (DRS (r:rs) c) w = F.Exists (drsRefToDRSVar r) (drsToMFOL (DRS rs c) w)

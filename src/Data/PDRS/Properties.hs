@@ -12,9 +12,9 @@ PDRS properties
 
 module Data.PDRS.Properties 
 (
-  isResolvedPDRS
+  isLambdaPDRS
 , isMergePDRS
-, isLambdaPDRS
+, isResolvedPDRS
 , isPresupPDRS
 ) where
 
@@ -24,6 +24,24 @@ import Data.PDRS.Variables
 ---------------------------------------------------------------------------
 -- * Exported
 ---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Returns whether a PDRS is entirely a 'LambdaPDRS' (at its top-level)
+---------------------------------------------------------------------------
+isLambdaPDRS :: PDRS -> Bool
+isLambdaPDRS (LambdaPDRS {}) = True
+isLambdaPDRS (AMerge p1 p2)  = isLambdaPDRS p1 && isLambdaPDRS p2
+isLambdaPDRS (PMerge p1 p2)  = isLambdaPDRS p1 && isLambdaPDRS p2
+isLambdaPDRS (PDRS {})       = False
+
+---------------------------------------------------------------------------
+-- | Returns whether a 'PDRS' is an 'AMerge' or 'PMerge' (at its top-level)
+---------------------------------------------------------------------------
+isMergePDRS :: PDRS -> Bool
+isMergePDRS (LambdaPDRS {}) = False
+isMergePDRS (AMerge {})     = True
+isMergePDRS (PMerge {})     = True
+isMergePDRS (PDRS {})       = False
 
 ---------------------------------------------------------------------------
 -- | Returns whether a 'PDRS' is resolved (containing no unresolved merges 
@@ -45,24 +63,6 @@ isResolvedPDRS (PDRS _ _ u c)  = all isResolvedRef (map (\(PRef _ r) -> r) u) &&
         isResolvedPCon (PCon _ (Prop r p1))  = isResolvedRef r && isResolvedPDRS p1
         isResolvedPCon (PCon _ (Diamond p1)) = isResolvedPDRS p1
         isResolvedPCon (PCon _ (Box p1))     = isResolvedPDRS p1
-
----------------------------------------------------------------------------
--- | Returns whether a 'PDRS' is an 'AMerge' or 'PMerge' (at its top-level)
----------------------------------------------------------------------------
-isMergePDRS :: PDRS -> Bool
-isMergePDRS (LambdaPDRS {}) = False
-isMergePDRS (AMerge {})     = True
-isMergePDRS (PMerge {})     = True
-isMergePDRS (PDRS {})       = False
-
----------------------------------------------------------------------------
--- | Returns whether a PDRS is entirely a 'LambdaPDRS' (at its top-level)
----------------------------------------------------------------------------
-isLambdaPDRS :: PDRS -> Bool
-isLambdaPDRS (LambdaPDRS {}) = True
-isLambdaPDRS (AMerge p1 p2)  = isLambdaPDRS p1 && isLambdaPDRS p2
-isLambdaPDRS (PMerge p1 p2)  = isLambdaPDRS p1 && isLambdaPDRS p2
-isLambdaPDRS (PDRS {})       = False
 
 ---------------------------------------------------------------------------
 -- | Returns whether a 'PDRS' is /presuppositional/, where:

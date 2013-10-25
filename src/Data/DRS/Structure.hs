@@ -17,8 +17,11 @@ module Data.DRS.Structure
 , DRSRel
 , DRSRef (..)
 , DRSCon (..)
+, drsUniverse
 , isSubDRS
 ) where
+
+import Data.List (union)
 
 ---------------------------------------------------------------------------
 -- * Exported
@@ -71,6 +74,14 @@ data DRSCon =
 ---------------------------------------------------------------------------
 -- ** Basic functions on DRSs
 ---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Returns the universe of a DRS
+---------------------------------------------------------------------------
+drsUniverse :: DRS -> [DRSRef]
+drsUniverse (LambdaDRS _) = []
+drsUniverse (Merge d1 d2) = drsUniverse d1 `union` drsUniverse d2
+drsUniverse (DRS u _)     = u
 
 ---------------------------------------------------------------------------
 -- | Returns whether DRS @d1@ is a direct or indirect sub-DRS of DRS @d2@

@@ -20,28 +20,19 @@ module Data.FOL.Show
 import Data.FOL.Formula
 import Data.List (intercalate)
 
--- | Existential quantifier symbol
-opExists = "\x2203"
--- | Universal quantifier symbol
-opForAll = "\x2200"
--- | Conjunction symbol
-opAnd    = "\x2227"
--- | Disjunction symbol
-opOr     = "\x2228"
--- | Implication symbol
-opImp    = "\x2192"
--- | Negation symbol
-opNeg    = "\x00AC"
--- | Top/true constant symbol
-opTop    = "\x22A4"
--- | Bottom/false constant symbol
-opBottom = "\x22A5"
+---------------------------------------------------------------------------
+-- * Exported
+---------------------------------------------------------------------------
 
--- | Derive an instance of the Show type class for FOLForm
+---------------------------------------------------------------------------
+-- | Derive an instance of the Show typeclass for 'FOLForm'.
+---------------------------------------------------------------------------
 instance Show FOLForm where
   show = showFOLForm
 
--- | Shows a FOL formula
+---------------------------------------------------------------------------
+-- | Shows a 'FOLForm'.
+---------------------------------------------------------------------------
 showFOLForm :: FOLForm -> String
 showFOLForm f = '\n' : showFormula f ++ "\n"
   where showFormula :: FOLForm -> String
@@ -55,6 +46,45 @@ showFOLForm f = '\n' : showFormula f ++ "\n"
         showFormula (Top)        = opTop
         showFormula (Bottom)     = opBottom
 
--- | Prints a FOL formula
+---------------------------------------------------------------------------
+-- | Prints a 'FOLForm'.
+---------------------------------------------------------------------------
 printFOLForm :: FOLForm -> IO ()
 printFOLForm f = putStrLn $ '\n' : showFOLForm f
+
+---------------------------------------------------------------------------
+-- * Private
+---------------------------------------------------------------------------
+
+-- | Existential quantifier symbol
+opExists :: [Char]
+opExists = "\x2203" 
+
+-- | Universal quantifier symbol
+opForAll :: [Char]
+opForAll = "\x2200"
+
+-- | Conjunction symbol
+opAnd :: [Char]
+opAnd    = "\x2227" 
+
+-- | Disjunction symbol
+opOr :: [Char]
+opOr     = "\x2228" 
+
+-- | Implication symbol
+opImp :: [Char]
+opImp    = "\x2192" 
+
+-- | Negation symbol
+opNeg :: [Char]
+opNeg    = "\x00AC" 
+
+-- | Top/true constant symbol
+opTop:: [Char]
+opTop    = "\x22A4" 
+
+-- | Bottom/false constant symbol
+opBottom :: [Char]
+opBottom = "\x22A5" 
+
