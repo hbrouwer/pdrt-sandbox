@@ -21,7 +21,7 @@ module Data.PDRS.LambdaCalculus
 , pdrsPurify
 ) where
 
-import Data.DRS.LambdaCalculus (alphaConvertVar)
+import Data.DRS.LambdaCalculus (renameVar)
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 
@@ -77,7 +77,7 @@ a1 <<.>> a2 = a1 `pdrsFunctionCompose` a2
 
 ---------------------------------------------------------------------------
 -- | Converts a 'PDRS' into a /pure/ 'PDRS' by first purifying its
--- projection variables, and then pyrifying its projected referents, where:
+-- projection variables, and then purifying its projected referents, where:
 --
 -- [A 'PDRS' is pure /iff/:]
 --
@@ -131,7 +131,7 @@ renameSubPDRS (PMerge p1 p2) gp ps rs    = PMerge p1' p2'
   where p1' = renameSubPDRS p1 gp ps rs
         p2' = renameSubPDRS p2 gp ps rs
 renameSubPDRS lp@(PDRS l m u c) gp ps rs = PDRS l' m' u' c'
-  where l' = alphaConvertVar l ps
+  where l' = renameVar l ps
         m' = renameMAPs m lp gp ps
         u' = renameUniverse u lp gp ps rs
         c' = renamePCons c lp gp ps rs
@@ -148,7 +148,7 @@ renameMAPs m lp gp ps = map (\(l1,l2) -> (renamePVar l1 lp gp ps, renamePVar l2 
 -- a conversion list for 'PVar's @ps@ and 'PDRSRef's @rs@.
 ---------------------------------------------------------------------------
 renameUniverse :: [PRef] -> PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> [PRef]
-renameUniverse u lp gp ps rs = map (\(PRef p r) -> PRef (renamePVar p lp gp ps) (alphaConvertVar r rs)) u
+renameUniverse u lp gp ps rs = map (\(PRef p r) -> PRef (renamePVar p lp gp ps) (renameVar r rs)) u
 
 ---------------------------------------------------------------------------
 -- | Applies alpha conversion to a list of 'PCon's @c@ in
@@ -180,7 +180,7 @@ renamePCons c lp gp ps rs = map rename c
 ---------------------------------------------------------------------------
 renamePDRSRef :: PVar -> PDRSRef -> PDRS -> PDRS -> [(PDRSRef,PDRSRef)] -> PDRSRef
 renamePDRSRef pv r lp gp rs
-  | pdrsBoundPRef (PRef pv r) lp gp = alphaConvertVar r rs
+  | pdrsBoundPRef (PRef pv r) lp gp = renameVar r rs
   | otherwise                       = r
 
 ---------------------------------------------------------------------------
@@ -189,11 +189,11 @@ renamePDRSRef pv r lp gp rs
 ---------------------------------------------------------------------------
 renamePVar :: PVar -> PDRS -> PDRS -> [(PVar,PVar)] -> PVar
 renamePVar pv lp gp ps
-  | pdrsBoundPVar pv lp gp = alphaConvertVar pv ps
+  | pdrsBoundPVar pv lp gp = renameVar pv ps
   | otherwise              = pv
 
 ---------------------------------------------------------------------------
--- ** PVar purification
+-- ** Purifying PVars
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
@@ -201,16 +201,16 @@ renamePVar pv lp gp ps
 --
 -- [This function implements the following algorithm:]
 --
--- (1) start with the global 'PDRS' and an empty list of seen projection
---    variables @pvs@ (in 'pdrsPurifyPDRS');
+-- (1) start with the global 'PDRS' @gp@ and add all free 'PVar's in @gp@ to
+-- the list of seen projection variables @pvs@ (see 'pdrsPurify');
 -- 
--- 2. check the label @l@ of the first atomic 'PDRS' @pdrs@ against @pvs@
---    and, if necessary, alpha-convert @pdrs@ replacing @l@ for a new 'PVar';
+-- 2. check the label @l@ of the first atomic 'PDRS' @lp@ against @pvs@
+--    and, if necessary, alpha-convert @lp@ replacing @l@ for a new 'PVar';
 -- 
 -- 3. add the label and all 'PVar's from the universe and set of 'MAP's
 --    of @pdrs@ to the list of seen projection variables @pvs@;
 -- 
--- 4. go through all conditions of @pdrs@, while continually updating @pvs@ 
+-- 4. go through all conditions of @pdrs@, while continually updating @pvs@.
 ---------------------------------------------------------------------------
 purifyPVars :: (PDRS,[PVar]) -> PDRS -> (PDRS,[PVar])
 purifyPVars (lp@(LambdaPDRS _),pvs) _  = (lp,pvs)
@@ -266,7 +266,7 @@ purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs2)
                 (ccs,pvs2) = purify (pcs,pvs1)
 
 ---------------------------------------------------------------------------
--- ** PRef purification
+-- ** Purifying PRefs
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------

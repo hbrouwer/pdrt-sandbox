@@ -20,26 +20,44 @@ module Data.DRS.Structure
 , isSubDRS
 ) where
 
+---------------------------------------------------------------------------
+-- * Exported
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- ** DRS data type
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
 -- | Discourse Representation Structure (DRS)
+---------------------------------------------------------------------------
 data DRS =
   LambdaDRS (DRSVar,Int)  -- ^ A lambda DRS (with its argument position)
   | Merge DRS DRS         -- ^ A merge between two DRSs
   | DRS [DRSRef] [DRSCon] -- ^ A DRS (a set of referents and a set of conditions)
   deriving (Eq)
 
+---------------------------------------------------------------------------
 -- | DRS variable
+---------------------------------------------------------------------------
 type DRSVar = String
 
+---------------------------------------------------------------------------
 -- | DRS relation
+---------------------------------------------------------------------------
 type DRSRel = String
 
+---------------------------------------------------------------------------
 -- | DRS referent
+---------------------------------------------------------------------------
 data DRSRef =
   LambdaDRSRef (DRSVar, Int) -- ^ A lambda DRS referent (with its argument position)
   | DRSRef DRSVar            -- ^ A DRS referent
   deriving (Eq)
 
+---------------------------------------------------------------------------
 -- | DRS condition
+---------------------------------------------------------------------------
 data DRSCon = 
   Rel DRSRel [DRSRef] -- ^ A relation defined on a set of referents
   | Neg DRS           -- ^ A negated DRS
@@ -50,7 +68,13 @@ data DRSCon =
   | Box DRS           -- ^ A necessary DRS
   deriving (Eq)
 
+---------------------------------------------------------------------------
+-- ** Basic functions on DRSs
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
 -- | Returns whether DRS @d1@ is a direct or indirect sub-DRS of DRS @d2@
+---------------------------------------------------------------------------
 isSubDRS :: DRS -> DRS -> Bool
 isSubDRS d1 (LambdaDRS _) = False
 isSubDRS d1 (Merge d2 d3) = isSubDRS d1 d2 || isSubDRS d1 d3

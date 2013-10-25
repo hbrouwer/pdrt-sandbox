@@ -15,8 +15,7 @@ and function composition
 module Data.DRS.LambdaCalculus
 (
   drsAlphaConvert
-, alphaConvertSubDRS
-, alphaConvertVar
+, renameVar
 , drsBetaReduce
 , (<<@>>)
 , drsFunctionCompose
@@ -29,65 +28,39 @@ import Data.DRS.Variables
 
 import Data.List ((\\), intersect, union)
 
--- | Applies alpha conversion to a DRS on the basis of a conversion list
--- for DRS referents @rs@
+---------------------------------------------------------------------------
+-- * Exported
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- ** Alpha Conversion
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Applies alpha conversion to a 'DRS' on the basis of a conversion list
+-- for 'DRSRef's @rs@.
+---------------------------------------------------------------------------
 drsAlphaConvert :: DRS -> [(DRSRef,DRSRef)] -> DRS
-drsAlphaConvert d = alphaConvertSubDRS d d
+drsAlphaConvert d = renameSubDRS d d
 
--- | Applies alpha conversion to a DRS @sd@, which is a sub-DRS of the global
--- DRS @gd@, on the basis of a conversion list for DRS referents @rs@
-alphaConvertSubDRS :: DRS -> DRS -> [(DRSRef,DRSRef)] -> DRS
-alphaConvertSubDRS ld@(LambdaDRS _) _ _ = ld
-alphaConvertSubDRS (Merge d1 d2) gd rs  = Merge d1' d2'
-  where d1' = alphaConvertSubDRS d1 gd rs
-        d2' = alphaConvertSubDRS d2 gd rs
-alphaConvertSubDRS sd@(DRS u _) gd rs    = DRS u' c'
-  where u' = alphaConvertRefs u rs
-        c' = alphaConvertCons sd gd rs
-
--- | Applies alpha conversion to a list of DRS referents @u@, on the basis
--- of a conversion list @rs@
-alphaConvertRefs :: [DRSRef] -> [(DRSRef,DRSRef)] -> [DRSRef]
-alphaConvertRefs u rs = map (`alphaConvertVar` rs) u
-
--- | Applies alpha conversion to a variable @v@, iff @v@ occurs in
--- a variable conversion list. Otherwise, @v@ is returned unmodified
-alphaConvertVar :: (Eq a) => a -> [(a,a)] -> a
-alphaConvertVar v [] = v
-alphaConvertVar v ((cv,cv'):cvs)
+---------------------------------------------------------------------------
+-- | Renames a variable @v@, iff @v@ occurs in a variable conversion list.
+-- Otherwise, @v@ is returned unmodified
+---------------------------------------------------------------------------
+renameVar :: (Eq a) => a -> [(a,a)] -> a
+renameVar v [] = v
+renameVar v ((cv,cv'):cvs)
   | v == cv   = cv'
-  | otherwise = alphaConvertVar v cvs
+  | otherwise = renameVar v cvs
 
--- | Applies alpha conversion to the conditions in a DRS @sd@, which
--- is a sub-DRS of @gd@, on the basis of a conversion list for DRS
--- referents @rs@
-alphaConvertCons :: DRS -> DRS -> [(DRSRef,DRSRef)] -> [DRSCon]
-alphaConvertCons ld@(DRS _ c) gd rs = map convertCon c
-  where convertCon :: DRSCon -> DRSCon
-        convertCon (Rel r d)    = Rel r   (map convertRef d)
-        convertCon (Neg d1)     = Neg     (alphaConvertSubDRS d1 gd rs)
-        convertCon (Imp d1 d2)  = Imp     (alphaConvertSubDRS d1 gd rs) (alphaConvertSubDRS d2 gd rs)
-        convertCon (Or d1 d2)   = Or      (alphaConvertSubDRS d1 gd rs) (alphaConvertSubDRS d2 gd rs)
-        convertCon (Prop r d1)  = Prop    (convertRef r)                (alphaConvertSubDRS d1 gd rs)
-        convertCon (Diamond d1) = Diamond (alphaConvertSubDRS d1 gd rs)
-        convertCon (Box d1)     = Box     (alphaConvertSubDRS d1 gd rs)
-        convertRef :: DRSRef -> DRSRef
-        convertRef r
-          | drsBoundRef r ld gd = alphaConvertVar r rs
-          | otherwise           = r
 
--- | Type class for a DRSAtom, which is either a DRS or a DRSRef
-class DRSAtom a
-instance DRSAtom DRS
-instance DRSAtom DRSRef
+---------------------------------------------------------------------------
+-- ** Beta Reduction
+---------------------------------------------------------------------------
 
--- | Type class for an AbstractDRS, which is either a resolved DRS, or 
--- an unresolved DRS that takes a DRSAtom and yields an AbstractDRS
-class AbstractDRS a
-instance AbstractDRS DRS
-instance (DRSAtom a, AbstractDRS b) => AbstractDRS (a -> b)
-
--- | Apply beta reduction on an AbstractDRS with a DRSAtom
+---------------------------------------------------------------------------
+-- | Apply beta reduction on an 'AbstractDRS' with a 'DRSAtom'.
+---------------------------------------------------------------------------
 drsBetaReduce :: (AbstractDRS a, DRSAtom b) => (b -> a) -> b -> a
 drsBetaReduce a = a
 
@@ -95,8 +68,14 @@ drsBetaReduce a = a
 (<<@>>) :: (AbstractDRS a, DRSAtom b) => (b -> a) -> b -> a
 ud <<@>> ad = ud `drsBetaReduce` ad
 
--- | Apply function composition to two unresolved DRSs, yielding
--- a new unresolved DRS
+---------------------------------------------------------------------------
+-- ** Function Composition
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Apply function composition to two 'unresolved DRS's, yielding
+-- a new 'unresolved DRS'
+---------------------------------------------------------------------------
 drsFunctionCompose :: (b -> c) -> (a -> b) -> a -> c
 drsFunctionCompose = (.)
 
@@ -104,10 +83,109 @@ drsFunctionCompose = (.)
 (<<.>>) :: (b -> c) -> (a -> b) -> a -> c
 a1 <<.>> a2 = a1 `drsFunctionCompose` a2
 
+---------------------------------------------------------------------------
+-- ** DRS Purification
+---------------------------------------------------------------------------
 
+---------------------------------------------------------------------------
+-- | Converts a 'DRS' into a /pure/ 'DRS' by purifying its 'DRSRef's, 
+-- where:
+--
+-- [A 'DRS' is pure /iff/:]
+--
+-- * There are no occurrences of duplicate, unbound uses of the same
+--   'DRSRef'.
+---------------------------------------------------------------------------
 drsPurify :: DRS -> DRS
 drsPurify gdrs = fst $ purifyRefs (gdrs,drsFreeRefs gdrs gdrs) gdrs
 
+---------------------------------------------------------------------------
+-- * Private
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- ** Type classes
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Type class for a 'DRSAtom', which is either a 'DRS' or a 'DRSRef'.
+---------------------------------------------------------------------------
+class DRSAtom a
+instance DRSAtom DRS
+instance DRSAtom DRSRef
+
+---------------------------------------------------------------------------
+-- | Type class for an 'AbstractDRS', which is either a resolved 'DRS', or 
+-- an 'unresolved DRS' that takes a 'DRSAtom' and yields an 'AbstractDRS'.
+---------------------------------------------------------------------------
+class AbstractDRS a
+instance AbstractDRS DRS
+instance (DRSAtom a, AbstractDRS b) => AbstractDRS (a -> b)
+
+---------------------------------------------------------------------------
+-- ** DRS renaming
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Applies alpha conversion to a 'DRS' @sd@, which is a sub-'DRS' of the
+-- global 'DRS' @gd@, on the basis of a conversion list for 'DRSRef's @rs@.
+---------------------------------------------------------------------------
+renameSubDRS :: DRS -> DRS -> [(DRSRef,DRSRef)] -> DRS
+renameSubDRS ld@(LambdaDRS _) _ _ = ld
+renameSubDRS (Merge d1 d2) gd rs  = Merge d1' d2'
+  where d1' = renameSubDRS d1 gd rs
+        d2' = renameSubDRS d2 gd rs
+renameSubDRS sd@(DRS u _) gd rs    = DRS u' c'
+  where u' = renameRefs u rs
+        c' = renameCons sd gd rs
+
+---------------------------------------------------------------------------
+-- | Applies alpha conversion to a list of 'DRSRef's @u@, on the basis
+-- of a conversion list @rs@
+---------------------------------------------------------------------------
+renameRefs :: [DRSRef] -> [(DRSRef,DRSRef)] -> [DRSRef]
+renameRefs u rs = map (`renameVar` rs) u
+
+---------------------------------------------------------------------------
+-- | Applies alpha conversion to the conditions in a 'DRS' @sd@, which is
+-- a sub-'DRS' of @gd@, on the basis of a conversion list for 'DRSRef's
+-- @rs@.
+---------------------------------------------------------------------------
+renameCons :: DRS -> DRS -> [(DRSRef,DRSRef)] -> [DRSCon]
+renameCons ld@(DRS _ c) gd rs = map convertCon c
+  where convertCon :: DRSCon -> DRSCon
+        convertCon (Rel r d)    = Rel r   (map convertRef d)
+        convertCon (Neg d1)     = Neg     (renameSubDRS d1 gd rs)
+        convertCon (Imp d1 d2)  = Imp     (renameSubDRS d1 gd rs) (renameSubDRS d2 gd rs)
+        convertCon (Or d1 d2)   = Or      (renameSubDRS d1 gd rs) (renameSubDRS d2 gd rs)
+        convertCon (Prop r d1)  = Prop    (convertRef r)                (renameSubDRS d1 gd rs)
+        convertCon (Diamond d1) = Diamond (renameSubDRS d1 gd rs)
+        convertCon (Box d1)     = Box     (renameSubDRS d1 gd rs)
+        convertRef :: DRSRef -> DRSRef
+        convertRef r
+          | drsBoundRef r ld gd = renameVar r rs
+          | otherwise           = r
+
+---------------------------------------------------------------------------
+-- ** Purifying DRSRefs
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Replaces duplicate uses of 'DRSRef's by new 'DRSRef's.
+--
+-- [This function implements the following algorithm:]
+--
+-- (1) start with the global 'DRS' @gd@ and add all free 'PVar's in @gd@ to
+-- the list of seen referents @rs@ (see 'drsPurify');
+-- 
+-- 2. check the universe @u@ of the first atomic 'DRS' @ld@ against @rs@
+--    and, if necessary, alpha-convert @ld@ replacing duplicates for new
+--    'DRSRef's in @u@;
+-- 
+-- 3. add the universe of @ld@ to the list of seen 'DRSRef's @rs@;
+-- 
+-- 4. go through all conditions of @ld@, while continually updating @rs@.
+---------------------------------------------------------------------------
 purifyRefs :: (DRS,[DRSRef]) -> DRS -> (DRS,[DRSRef])
 purifyRefs (ld@(LambdaDRS _),rs) _  = (ld,rs)
 purifyRefs (Merge d1 d2,rs)      gd = (Merge cd1 cd2,rs2)
@@ -129,16 +207,16 @@ purifyRefs (ld@(DRS u _),rs)      gd = (DRS u1 c2,rs1)
           where (cd1,rs1) = purifyRefs (d1,rs) gd
                 (ccs,rs2) = purify (cs,rs1)
         purify (Imp d1 d2:cs,rs)   = (Imp cd1 cd2:ccs,rs3)
-          where (cd1,rs1) = purifyRefs (alphaConvertSubDRS d1 gd nrs,rs)  gd
-                (cd2,rs2) = purifyRefs (alphaConvertSubDRS d2 gd nrs,rs1) gd
+          where (cd1,rs1) = purifyRefs (renameSubDRS d1 gd nrs,rs)  gd
+                (cd2,rs2) = purifyRefs (renameSubDRS d2 gd nrs,rs1) gd
                 (ccs,rs3) = purify (cs,rs2)
                 nrs = zip ors (newDRSRefs ors (drsVariables gd `union` rs))
                 ors = drsUniverse d1 `intersect` rs
                 -- In case we do not want to rename ambiguous bindings:
                 -- ors = drsUniverses d2 \\ drsUniverse d1 `intersect` rs
         purify (Or d1 d2:cs,rs)    = (Or cd1 cd2:ccs,rs3)
-          where (cd1,rs1) = purifyRefs (alphaConvertSubDRS d1 gd nrs,rs)  gd
-                (cd2,rs2) = purifyRefs (alphaConvertSubDRS d2 gd nrs,rs1) gd
+          where (cd1,rs1) = purifyRefs (renameSubDRS d1 gd nrs,rs)  gd
+                (cd2,rs2) = purifyRefs (renameSubDRS d2 gd nrs,rs1) gd
                 (ccs,rs3) = purify (cs,rs2)
                 nrs = zip ors (newDRSRefs ors (drsVariables gd `union` rs))
                 ors = drsUniverse d1 `intersect` rs
