@@ -32,11 +32,19 @@ import Data.List (delete, intersect, nub, partition, union)
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
+-- ** Alpha Conversion
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
 -- | Applies alpha conversion to a 'PDRS' on the basis of conversion lists
 -- for 'PVar's and 'PDRSRef's.
 ---------------------------------------------------------------------------
 pdrsAlphaConvert :: PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> PDRS
 pdrsAlphaConvert p = renameSubPDRS p p
+
+---------------------------------------------------------------------------
+-- ** Beta Reduction
+---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
 -- | Apply beta reduction on an 'AbstractPDRS' with a 'PDRSAtom'.
@@ -49,6 +57,10 @@ pdrsBetaReduce a = a
 up <<@>> ap = up `pdrsBetaReduce` ap
 
 ---------------------------------------------------------------------------
+-- ** Function Composition
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
 -- | Apply function composition to two 'unresolved PDRS's, yielding
 -- a new 'unresolved PDRS'.
 ---------------------------------------------------------------------------
@@ -58,6 +70,10 @@ pdrsFunctionCompose = (.)
 -- | Infix notation for 'pdrsFunctionCompose'.
 (<<.>>) :: (b -> c) -> (a -> b) -> a -> c
 a1 <<.>> a2 = a1 `pdrsFunctionCompose` a2
+
+---------------------------------------------------------------------------
+-- ** PDRS Purification
+---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
 -- | Converts a 'PDRS' into a /pure/ 'PDRS' by first purifying its
@@ -78,6 +94,10 @@ pdrsPurify gp = purifyPRefs cgp cgp (zip prs (newPRefs prs (pdrsVariables cgp)))
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
+-- ** Type classes
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
 -- | Type class for a 'PDRSAtom', which is either a 'PDRS' or a 'PDRSRef'.
 ---------------------------------------------------------------------------
 class PDRSAtom a
@@ -92,6 +112,10 @@ instance PDRSAtom PDRSRef
 class AbstractPDRS a
 instance AbstractPDRS PDRS
 instance (PDRSAtom a, AbstractPDRS b) => AbstractPDRS (a -> b)
+
+---------------------------------------------------------------------------
+-- ** PDRS renaming
+---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
 -- | Applies alpha conversion to a 'PDRS' @sp@, which is a sub-'PDRS' of
@@ -169,44 +193,8 @@ renamePVar pv lp gp ps
   | otherwise              = pv
 
 ---------------------------------------------------------------------------
--- | Replaces duplicate uses of projection referents by new 'PRef's, where:
---
--- [Given conversion pair @(pr',npr)@, @pr@ is replaced by @npr@ /iff/]
---
--- * @pr@ equals @pr'@, or
---
--- * @pr@ and @pr'@ have the same referent and @pr@ is bound by
---   @pr'@ in global 'PDRS' @gp@, or
---
--- * @pr@ and @pr'@ have the same referent and both occur free
---   in subordinated contexts in @gp@.
+-- ** PVar purification
 ---------------------------------------------------------------------------
-purifyPRefs :: PDRS -> PDRS -> [(PRef,PRef)] -> PDRS
-purifyPRefs lp@(LambdaPDRS _) _  _   = lp
-purifyPRefs (AMerge p1 p2)    gp prs = AMerge (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs)
-purifyPRefs (PMerge p1 p2)    gp prs = PMerge (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs)
-purifyPRefs lp@(PDRS l m u c) gp prs = PDRS l m (map (convert prs) u) (map purify c)
-  where -- | Converts a 'PRef' @pr@ based on a conversion list
-        convert :: [(PRef,PRef)] -> PRef -> PRef
-        convert [] pr                                    = pr
-        convert  ((pr'@(PRef p' r'),npr):prs) pr@(PRef p r)
-          | pr == pr'                                    = npr
-          | r  == r' && pdrsPRefBoundByPRef pr lp pr' gp = npr
-          | r  == r' && not(pdrsBoundPRef pr lp gp) 
-            && (pdrsIsAccessibleContext p p' gp)         = npr
-          | otherwise                                    = convert prs pr
-        -- | A projected condition is /purify/ iff all its subordinated
-        -- referents have been converted based on the conversion list.
-        purify :: PCon -> PCon
-        purify (PCon p (Rel r d))    = PCon p (Rel   r (map (purifyPDRSRef p) d))
-        purify (PCon p (Neg p1))     = PCon p (Neg     (purifyPRefs p1 gp prs))
-        purify (PCon p (Imp p1 p2))  = PCon p (Imp     (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs))
-        purify (PCon p (Or  p1 p2))  = PCon p (Or      (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs))
-        purify (PCon p (Prop r p1))  = PCon p (Prop    (purifyPDRSRef p r)     (purifyPRefs p1 gp prs))
-        purify (PCon p (Diamond p1)) = PCon p (Diamond (purifyPRefs p1 gp prs))
-        purify (PCon p (Box p1))     = PCon p (Box     (purifyPRefs p1 gp prs))
-        purifyPDRSRef :: PVar -> PDRSRef -> PDRSRef
-        purifyPDRSRef p r = prefToPDRSRef (convert prs (pdrsRefToPRef r p))
 
 ---------------------------------------------------------------------------
 -- | Replaces duplicate uses of projection variables by new variables.
@@ -276,6 +264,50 @@ purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs2)
         purify (PCon p (Box p1):pcs,pvs)       = (PCon p (Box cp1):ccs,pvs2)
           where (cp1,pvs1) = purifyPVars (p1,p:pvs) gp
                 (ccs,pvs2) = purify (pcs,pvs1)
+
+---------------------------------------------------------------------------
+-- ** PRef purification
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Replaces duplicate uses of projection referents by new 'PRef's, where:
+--
+-- [Given conversion pair @(pr',npr)@, @pr@ is replaced by @npr@ /iff/]
+--
+-- * @pr@ equals @pr'@, or
+--
+-- * @pr@ and @pr'@ have the same referent and @pr@ is bound by
+--   @pr'@ in global 'PDRS' @gp@, or
+--
+-- * @pr@ and @pr'@ have the same referent and both occur free
+--   in subordinated contexts in @gp@.
+---------------------------------------------------------------------------
+purifyPRefs :: PDRS -> PDRS -> [(PRef,PRef)] -> PDRS
+purifyPRefs lp@(LambdaPDRS _) _  _   = lp
+purifyPRefs (AMerge p1 p2)    gp prs = AMerge (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs)
+purifyPRefs (PMerge p1 p2)    gp prs = PMerge (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs)
+purifyPRefs lp@(PDRS l m u c) gp prs = PDRS l m (map (convert prs) u) (map purify c)
+  where -- | Converts a 'PRef' @pr@ based on a conversion list
+        convert :: [(PRef,PRef)] -> PRef -> PRef
+        convert [] pr                                    = pr
+        convert  ((pr'@(PRef p' r'),npr):prs) pr@(PRef p r)
+          | pr == pr'                                    = npr
+          | r  == r' && pdrsPRefBoundByPRef pr lp pr' gp = npr
+          | r  == r' && not(pdrsBoundPRef pr lp gp) 
+            && (pdrsIsAccessibleContext p p' gp)         = npr
+          | otherwise                                    = convert prs pr
+        -- | A projected condition is /purify/ iff all its subordinated
+        -- referents have been converted based on the conversion list.
+        purify :: PCon -> PCon
+        purify (PCon p (Rel r d))    = PCon p (Rel   r (map (purifyPDRSRef p) d))
+        purify (PCon p (Neg p1))     = PCon p (Neg     (purifyPRefs p1 gp prs))
+        purify (PCon p (Imp p1 p2))  = PCon p (Imp     (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs))
+        purify (PCon p (Or  p1 p2))  = PCon p (Or      (purifyPRefs p1 gp prs) (purifyPRefs p2 gp prs))
+        purify (PCon p (Prop r p1))  = PCon p (Prop    (purifyPDRSRef p r)     (purifyPRefs p1 gp prs))
+        purify (PCon p (Diamond p1)) = PCon p (Diamond (purifyPRefs p1 gp prs))
+        purify (PCon p (Box p1))     = PCon p (Box     (purifyPRefs p1 gp prs))
+        purifyPDRSRef :: PVar -> PDRSRef -> PDRSRef
+        purifyPDRSRef p r = prefToPDRSRef (convert prs (pdrsRefToPRef r p))
 
 ---------------------------------------------------------------------------
 -- | Returns a tuple of existing 'PRef's @eps@ and unbound duplicate 'PRef's
