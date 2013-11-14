@@ -22,6 +22,7 @@ module Data.PDRS.Structure
 , PDRSCon (..)
 , DRSRel
 , pdrsLabel
+, pdrsUniverse
 , isSubPDRS
 ) where
 
@@ -99,6 +100,15 @@ data PDRSCon =
 ---------------------------------------------------------------------------
 pdrsLabel :: PDRS -> PVar
 pdrsLabel (PDRS l _ _ _) = l
+
+---------------------------------------------------------------------------
+-- | Returns the universe of a PDRS
+---------------------------------------------------------------------------
+pdrsUniverse :: PDRS -> [PRef]
+pdrsUniverse (LambdaPDRS _)  = []
+pdrsUniverse (AMerge p1 p2) = pdrsUniverse p1 ++ pdrsUniverse p2
+pdrsUniverse (PMerge p1 p2) = pdrsUniverse p1 ++ pdrsUniverse p2
+pdrsUniverse (PDRS _ _ u _) = u
 
 ---------------------------------------------------------------------------
 -- | Returns whether 'PDRS' @p1@ is a direct or indirect sub-'PDRS' of
