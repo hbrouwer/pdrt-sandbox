@@ -38,8 +38,7 @@ pdrsAMerge p1 p2 = amerge rp1 (disjoin rp2 rp1)
   where -- | Merged 'PDRS's should be pure, with resolved merges.
         rp1 = pdrsPurify $ pdrsResolveMerges p1
         rp2 = pdrsPurify $ pdrsResolveMerges p2
-        -- | Make sure all asserted content in 'PDRS' @p@ remains
-        -- asserted by renaming global label to @l@ before merging.
+        -- | Deal with 'LambdaPDRS's
         amerge :: PDRS -> PDRS -> PDRS
         amerge p lp@(LambdaPDRS _) = AMerge p lp
         amerge lp@(LambdaPDRS _) p = AMerge lp p
@@ -67,6 +66,8 @@ pdrsAMerge p1 p2 = amerge rp1 (disjoin rp2 rp1)
           | isLambdaPDRS k2 = AMerge k2 (pdrsPMerge k1 p)
           -- ^ (k1 * lk2) + p = lk2 + (k1 * p)
           | otherwise       = pdrsAMerge (pdrsResolveMerges pm) p
+        -- | Make sure all asserted content in 'PDRS' @p@ remains
+        -- asserted by renaming global label to @l@ before merging.
         amerge p (PDRS l m u c) 
           = PDRS l (m `union` m') (u `union` u') (c `union` c')
           where (PDRS l' m' u' c') = pdrsAlphaConvert p [(pdrsLabel p,l)] []
@@ -93,9 +94,7 @@ pdrsPMerge p1 p2 = pmerge rp1 (disjoin rp2 rp1)
   where -- | Merged 'PDRS's should be pure, with resolved merges.
         rp1 = pdrsPurify $ pdrsResolveMerges p1
         rp2 = pdrsPurify $ pdrsResolveMerges p2
-        -- | Content of 'PDRS' @p@ is added to 'PDRS' @p'@ without
-        -- replacing pointers, resulting in the content of @p@ becoming
-        -- projected in the resulting 'PDRS'.
+       -- | Deal with 'LambdaPDRS's
         pmerge :: PDRS -> PDRS -> PDRS
         pmerge p lp@(LambdaPDRS _) = PMerge p lp
         pmerge lp@(LambdaPDRS _) p = PMerge lp p
@@ -123,6 +122,9 @@ pdrsPMerge p1 p2 = pmerge rp1 (disjoin rp2 rp1)
           | isLambdaPDRS k2 = PMerge k2 (pdrsPMerge k1 p) 
           -- ^ (k1 * lk2) * p = lk2 * (k1 * p)
           | otherwise       = pdrsPMerge (pdrsResolveMerges pm) p
+        -- | Content of 'PDRS' @p@ is added to 'PDRS' @p'@ without
+        -- replacing pointers, resulting in the content of @p@ becoming
+        -- projected in the resulting 'PDRS'.
         pmerge (PDRS l m u c) (PDRS l' m' u' c')
             = PDRS l' ((l',l):m `union` m') (u `union` u') (c `union` c')
         -- | Replace all (duplicate) occurrences of 'PVar's and 'PDRSRef's
