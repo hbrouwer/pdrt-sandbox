@@ -117,21 +117,6 @@ insertPCon pc@(PCon pv _) pdrs@(PDRS l m u c) gp
           insert (PCon p (Box p1))     = PCon p (Box     (insertPCon pc p1 gp))
 
 ---------------------------------------------------------------------------
--- | Returns an empty 'PDRS', if possible with the same label as 'PDRS' @p@.
----------------------------------------------------------------------------
-emptyPDRS :: PDRS -> PDRS
-emptyPDRS lp@(LambdaPDRS _) = lp
-emptyPDRS (AMerge p1 p2)
-  | isLambdaPDRS p1 = AMerge p1 (emptyPDRS p2)
-  | isLambdaPDRS p2 = AMerge (emptyPDRS p1) p2
-  | otherwise       = emptyPDRS (p1 <<+>> p2)
-emptyPDRS (PMerge p1 p2)
-  | isLambdaPDRS p1 = PMerge p1 (emptyPDRS p2)
-  | isLambdaPDRS p2 = PMerge (emptyPDRS p1) p2
-  | otherwise       = emptyPDRS (p1 <<*>> p2)
-emptyPDRS (PDRS l _ _ _)    = PDRS l [] [] []
-
----------------------------------------------------------------------------
 -- | Strips projection variables from a 'PDRS' @p@, resulting in a 'DRS'.
 ---------------------------------------------------------------------------
 stripPVars :: PDRS -> D.DRS
