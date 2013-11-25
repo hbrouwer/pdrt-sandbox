@@ -107,12 +107,9 @@ instance (ShowablePDRS p) => Show (PDRSNotation p) where
 showPDRS :: PDRSNotation PDRS -> String
 showPDRS n =
   case n of
-    (Boxes p)  -> showModifier (showPDRSLambdas rp) 2 (showPDRSBox rp)
-      where rp = pdrsResolveMerges p
-    (Linear p) -> showPDRSLambdas rp ++ showPDRSLinear rp ++ "\n" 
-      where rp = pdrsResolveMerges p
-    (Set p)    -> showPDRSLambdas rp ++ showPDRSSet rp  ++ "\n" 
-      where rp = pdrsResolveMerges p
+    (Boxes p)  -> showModifier (showPDRSLambdas p) 2 (showPDRSBox p)
+    (Linear p) -> showPDRSLambdas p ++ showPDRSLinear p ++ "\n" 
+    (Set p)    -> showPDRSLambdas p ++ showPDRSSet p  ++ "\n" 
 
 ---------------------------------------------------------------------------
 -- | Prints a 'PDRS'.
@@ -240,15 +237,19 @@ modSubord  = "\x2264";
 showPDRSBox :: PDRS -> String
 showPDRSBox (LambdaPDRS (v,_)) = v ++ "\n"
 showPDRSBox (AMerge p1 p2)
-  | isLambdaPDRS p1 && isLambdaPDRS p2      = showConcat (showPDRSBox p1) (showModifier opAMerge 0 (showPDRSBox p2))
-  | not(isLambdaPDRS p1) && isLambdaPDRS p2 = showConcat (showPDRSBox p1) (showModifier opAMerge 2 (showPadding (showPDRSBox p2)))
-  | isLambdaPDRS p1 && not(isLambdaPDRS p2) = showConcat (showPadding (showPDRSBox p1)) (showModifier opAMerge 2 (showPDRSBox p2))
-  | otherwise                               = showPDRSBox (p1 <<+>> p2)
+  | isLambdaPDRS p1 && isLambdaPDRS p2      = showModifier "(" 0 (showConcat (showConcat (showPDRSBox p1) (showModifier opAMerge 0 (showPDRSBox p2))) ")")
+  | not(isLambdaPDRS p1) && isLambdaPDRS p2 = showBrackets (showConcat (showPDRSBox p1) (showModifier opAMerge 2 (showPadding (showPDRSBox p2))))
+  | isLambdaPDRS p1 && not(isLambdaPDRS p2) = showBrackets (showConcat (showPadding (showPDRSBox p1)) (showModifier opAMerge 2 (showPDRSBox p2)))
+  | otherwise                               = showBrackets (showConcat (showPDRSBox p1) (showModifier opAMerge 2 (showPDRSBox p2)))
+  where showBrackets :: String -> String
+        showBrackets s = showModifier "(" 2 (showConcat s (showPadding $ ")" ++ "\n"))
 showPDRSBox (PMerge p1 p2)
-  | isLambdaPDRS p1 && isLambdaPDRS p2      = showConcat (showPDRSBox p1) (showModifier opPMerge 0 (showPDRSBox p2))
-  | not(isLambdaPDRS p1) && isLambdaPDRS p2 = showConcat (showPDRSBox p1) (showModifier opPMerge 2 (showPadding (showPDRSBox p2)))
-  | isLambdaPDRS p1 && not(isLambdaPDRS p2) = showConcat (showPadding (showPDRSBox p1)) (showModifier opPMerge 2 (showPDRSBox p2))
-  | otherwise                               = showPDRSBox (p1 <<*>> p2)
+  | isLambdaPDRS p1 && isLambdaPDRS p2      = showModifier "(" 0 (showConcat (showConcat (showPDRSBox p1) (showModifier opPMerge 0 (showPDRSBox p2))) ")")
+  | not(isLambdaPDRS p1) && isLambdaPDRS p2 = showBrackets (showConcat (showPDRSBox p1) (showModifier opPMerge 2 (showPadding (showPDRSBox p2))))
+  | isLambdaPDRS p1 && not(isLambdaPDRS p2) = showBrackets (showConcat (showPadding (showPDRSBox p1)) (showModifier opPMerge 2 (showPDRSBox p2)))
+  | otherwise                               = showBrackets (showConcat (showPDRSBox p1) (showModifier opPMerge 2 (showPDRSBox p2)))
+  where showBrackets :: String -> String
+        showBrackets s = showModifier "(" 2 (showConcat s (showPadding $ ")" ++ "\n"))
 showPDRSBox (PDRS pl m u c)    = showHeaderLine l pl
   ++ showContent l ul ++ showHorizontalLine l boxMiddleLeft boxMiddleRight
   ++ showContent l cl ++ showHorizontalLine l boxMiddleLeft boxMiddleRight
@@ -265,12 +266,8 @@ showPDRSBox (PDRS pl m u c)    = showHeaderLine l pl
 ---------------------------------------------------------------------------
 showPDRSLinear :: PDRS -> String
 showPDRSLinear (LambdaPDRS (v,_)) = v
-showPDRSLinear (AMerge p1 p2)
-  | not(isLambdaPDRS p1) && not(isLambdaPDRS p2) = showPDRSLinear (p1 <<+>> p2)
-  | otherwise                                    = showPDRSLinear p1 ++ " " ++ opAMerge ++ " " ++ showPDRSLinear p2
-showPDRSLinear (PMerge p1 p2)
-  | not(isLambdaPDRS p1) && not(isLambdaPDRS p2) = showPDRSLinear (p1 <<*>> p2)
-  | otherwise                                    = showPDRSLinear p1 ++ " " ++ opPMerge ++ " " ++ showPDRSLinear p2
+showPDRSLinear (AMerge p1 p2) = "(" ++ showPDRSLinear p1 ++ " " ++ opAMerge ++ " " ++ showPDRSLinear p2 ++ ")"
+showPDRSLinear (PMerge p1 p2) = "(" ++ showPDRSLinear p1 ++ " " ++ opPMerge ++ " " ++ showPDRSLinear p2 ++ ")"
 showPDRSLinear (PDRS l m u c)     = show l ++ ":[" ++ showUniverseTuples u ++ "|" ++ intercalate "," (map showCon c) ++ "|" ++ showMAPsTuples m ++ "]"
   where showCon :: PCon -> String
         showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ "))"
@@ -286,12 +283,8 @@ showPDRSLinear (PDRS l m u c)     = show l ++ ":[" ++ showUniverseTuples u ++ "|
 ---------------------------------------------------------------------------
 showPDRSSet :: PDRS -> String
 showPDRSSet (LambdaPDRS (v,_)) = v
-showPDRSSet (AMerge p1 p2)
-  | not(isLambdaPDRS p1) && not(isLambdaPDRS p2) = showPDRSSet (p1 <<+>> p2)
-  | otherwise                                    = showPDRSSet p1 ++ " " ++ opAMerge ++ " " ++ showPDRSSet p2
-showPDRSSet (PMerge p1 p2)
-  | not(isLambdaPDRS p1) && not(isLambdaPDRS p2) = showPDRSSet (p1 <<*>> p2)
-  | otherwise                                    = showPDRSSet p1 ++ " " ++ opPMerge ++ " " ++ showPDRSSet p2
+showPDRSSet (AMerge p1 p2) = "(" ++ showPDRSSet p1 ++ " " ++ opAMerge ++ " " ++ showPDRSSet p2 ++ ")"
+showPDRSSet (PMerge p1 p2) = "(" ++ showPDRSSet p1 ++ " " ++ opPMerge ++ " " ++ showPDRSSet p2 ++ ")"
 showPDRSSet (PDRS l m u c)     = "<" ++ show l ++ ",{" ++ showMAPsTuples m ++ "},{" ++ showUniverseTuples u ++ "},{" ++ intercalate "," (map showCon c) ++ "}>"
   where showCon :: PCon -> String
         showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ "))"
