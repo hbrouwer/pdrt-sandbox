@@ -129,13 +129,13 @@ p1 <<*>> p2 = p1 `pdrsPMerge` p2
 pdrsResolveMerges :: PDRS -> PDRS
 pdrsResolveMerges lp@(LambdaPDRS _)    = lp
 pdrsResolveMerges (AMerge p1 p2)
-  | isLambdaPDRS p1 || isLambdaPDRS p2 = AMerge p1 p2
---  | isMergePDRS p1 || isMergePDRS p2   = AMerge p1 p2
-  | otherwise                          = p1 <<+>> p2
+  | isLambdaPDRS p1 = AMerge p1 (pdrsResolveMerges p2)
+  | isLambdaPDRS p2 = AMerge (pdrsResolveMerges p1) p2
+  | otherwise       = pdrsResolveMerges (p1 <<+>> p2)
 pdrsResolveMerges (PMerge p1 p2)
-  | isLambdaPDRS p1 || isLambdaPDRS p2 = PMerge p1 p2
---  | isMergePDRS p1 || isMergePDRS p2   = PMerge p1 p2
-  | otherwise                          = p1 <<*>> p2
+  | isLambdaPDRS p1 = PMerge p1 (pdrsResolveMerges p2)
+  | isLambdaPDRS p2 = PMerge (pdrsResolveMerges p1) p2
+  | otherwise       = pdrsResolveMerges (p1 <<*>> p2)
 pdrsResolveMerges (PDRS l m u c) = PDRS l m u (map resolve c)
   where resolve :: PCon -> PCon
         resolve pc@(PCon _ (Rel _ _)) = pc
