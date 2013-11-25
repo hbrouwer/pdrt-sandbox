@@ -267,7 +267,19 @@ pdrsFreePRefs lp@(PDRS _ _ u c) gp = free c
 -- | Returns the list of all 'PVar's in a 'PDRS'
 ---------------------------------------------------------------------------
 pdrsPVars :: PDRS -> [PVar]
-pdrsPVars p = vertices (projectionGraph p)
+pdrsPVars (LambdaPDRS _) = []
+pdrsPVars (AMerge p1 p2) = pdrsPVars p1               `union` pdrsPVars p2
+pdrsPVars (PMerge p1 p2) = pdrsPVars p1               `union` pdrsPVars p2
+pdrsPVars (PDRS l m u c) = l:(concatMap (\(x,y) -> [x,y]) m) `union` (map prefToPVar u) `union` pvars c
+  where pvars :: [PCon] -> [PVar]
+        pvars []                       = []
+        pvars (PCon p (Rel _ _):cs)    = p:pvars cs
+        pvars (PCon p (Neg p1):cs)     = p:pdrsPVars p1 `union` pvars cs
+        pvars (PCon p (Imp p1 p2):cs)  = p:pdrsPVars p1 `union` pdrsPVars p2 `union` pvars cs
+        pvars (PCon p (Or p1 p2):cs)   = p:pdrsPVars p1 `union` pdrsPVars p2 `union` pvars cs
+        pvars (PCon p (Prop _ p1):cs)  = p:pdrsPVars p1 `union` pvars cs
+        pvars (PCon p (Diamond p1):cs) = p:pdrsPVars p1 `union` pvars cs
+        pvars (PCon p (Box p1):cs)     = p:pdrsPVars p1 `union` pvars cs
 
 ---------------------------------------------------------------------------
 -- | Returns the list of all free 'PVar's in a 'PDRS' @lp@, which is a
