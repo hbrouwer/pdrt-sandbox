@@ -187,18 +187,18 @@ renameCons ld@(DRS _ c) gd rs = map convertCon c
 -- 4. go through all conditions of @ld@, while continually updating @rs@.
 ---------------------------------------------------------------------------
 purifyRefs :: (DRS,[DRSRef]) -> DRS -> (DRS,[DRSRef])
-purifyRefs (ld@(LambdaDRS _),rs) _  = (ld,rs)
-purifyRefs (Merge d1 d2,rs)      gd = (Merge cd1 cd2,rs2)
-  where (cd1,rs1) = purifyRefs (d1,rs)  gd
-        (cd2,rs2) = purifyRefs (d2,rs1) gd
-purifyRefs (ld@(DRS u _),rs)      gd = (DRS u1 c2,rs1)
+purifyRefs (ld@(LambdaDRS _),ers) _  = (ld,ers)
+purifyRefs (Merge d1 d2,ers)      gd = (Merge cd1 cd2,ers2)
+  where (cd1,ers1) = purifyRefs (d1,ers)  gd
+        (cd2,ers2) = purifyRefs (d2,ers1) gd
+purifyRefs (ld@(DRS u _),ers)      gd = (DRS u1 c2,ers1)
 -- In case we do not want to rename ambiguous bindings:
--- purifyRefs (ld@(DRS u _),rs)      gd = (DRS u1 c2,u1 ++ rs1)
-  where (DRS u1 c1) = drsAlphaConvert ld (zip ors (newDRSRefs ors (drsVariables gd `union` rs)))
-        ors         = u `intersect` rs
-        (c2,rs1)    = purify (c1,u1 ++ rs)
+-- purifyRefs (ld@(DRS u _),ers)      gd = (DRS u1 c2,u1 ++ ers1)
+  where (DRS u1 c1) = drsAlphaConvert ld (zip ors (newDRSRefs ors (drsVariables gd `union` ers)))
+        ors         = u `intersect` ers
+        (c2,ers1)    = purify (c1,u1 ++ ers)
         -- In case we do not want to rename ambiguous bindings:
-        --(c2,rs1)    = purify (c1,rs)
+        --(c2,ers1)    = purify (c1,ers)
         purify :: ([DRSCon],[DRSRef]) -> ([DRSCon],[DRSRef])
         purify ([],rs)             = ([],rs)
         purify (c@(Rel _ d):cs,rs) = (c:ccs,rs1)

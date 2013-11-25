@@ -17,6 +17,7 @@ module Data.PDRS.Merge (
 , (<<*>>)
 , pdrsResolveMerges
 , emptyPDRS
+, pdrsDisjoin
 ) where
 
 import Data.PDRS.LambdaCalculus
@@ -61,7 +62,7 @@ pdrsAMerge pm@(PMerge k1 k2) p
   | isLambdaPDRS k2 = AMerge k2 (pdrsPMerge k1 p)
   -- ^ (k1 * lk2) + p = lk2 + (k1 * p)
   | otherwise       = pdrsAMerge (pdrsResolveMerges pm) p
-pdrsAMerge p1@(PDRS _ _ _ _) p2@(PDRS _ _ _ _) = amerge pp1 (disjoin pp2 pp1)
+pdrsAMerge p1@(PDRS _ _ _ _) p2@(PDRS _ _ _ _) = amerge pp1 (pdrsDisjoin pp2 pp1)
   where -- | Merged 'PDRS's should be pure.
         pp1 = pdrsPurify p1
         pp2 = pdrsPurify p2
@@ -69,18 +70,8 @@ pdrsAMerge p1@(PDRS _ _ _ _) p2@(PDRS _ _ _ _) = amerge pp1 (disjoin pp2 pp1)
         -- | Make sure all asserted content in 'PDRS' @p@ remains
         -- asserted by renaming global label to @l@ before merging.
         amerge p (PDRS l m u c) 
-          = PDRS l (m `union` m') (u `union` u') (c `union` c')
+          = PDRS l (m' `union` m) (u' `union` u) (c' `union` c)
           where (PDRS l' m' u' c') = pdrsAlphaConvert p [(pdrsLabel p,l)] []
-        -- | Replace all (duplicate) occurrences of 'PVar's and 'PDRSRef's
-        -- from PDRS @p'@ in 'PDRS' @p@ by new variables. Asserted referents
-        -- in the universe of the antecedent PDRS do not count as duplicates
-        -- because multiple bound declarations are allowed in PDRT.
-        disjoin :: PDRS -> PDRS -> PDRS
-        disjoin p p' = pdrsAlphaConvert p (zip ops nps) (zip ors nrs)
-          where ops = pdrsPVars p `intersect` pdrsPVars p'
-                nps = newPVars ops (pdrsPVars p `union` pdrsPVars p')
-                ors = pdrsVariables p `intersect` filter (\r -> (PRef (pdrsLabel p') r) `notElem` pdrsUniverse p') (pdrsVariables p')
-                nrs = newPDRSRefs ors (pdrsVariables p `union` pdrsVariables p')
 
 -- | Infix notation for 'pdrsAMerge'
 (<<+>>) :: PDRS -> PDRS -> PDRS
@@ -97,7 +88,7 @@ pdrsPMerge p am@(AMerge k1 k2)
   | isLambdaPDRS k1 = AMerge k1 (pdrsPMerge p k2)
   -- ^ p * (lk1 + k2) = lk1 + (p * k2)
   | isLambdaPDRS k2 = AMerge (pdrsPMerge p k1) k2
-  -- ^ p * (k1 + lk2) = p * k1 + lk2
+  -- ^ p * (k1 + lk2) = (p * k1) + lk2
   | otherwise       = pdrsPMerge p (pdrsResolveMerges am)
 pdrsPMerge am@(AMerge k1 k2) p
   | isLambdaPDRS k1 = PMerge (pdrsAMerge k1 (emptyPDRS k2)) (pdrsPMerge k2 p) 
@@ -117,7 +108,7 @@ pdrsPMerge pm@(PMerge k1 k2) p
   | isLambdaPDRS k2 = PMerge k2 (pdrsPMerge k1 p) 
   -- ^ (k1 * lk2) * p = lk2 * (k1 * p)
   | otherwise       = pdrsPMerge (pdrsResolveMerges pm) p
-pdrsPMerge p1@(PDRS _ _ _ _) p2@(PDRS _ _ _ _) = pmerge pp1 (disjoin pp2 pp1)
+pdrsPMerge p1@(PDRS _ _ _ _) p2@(PDRS _ _ _ _) = pmerge pp1 (pdrsDisjoin pp2 pp1)
   where -- | Merged 'PDRS's should be pure.
         pp1 = pdrsPurify p1
         pp2 = pdrsPurify p2
@@ -127,16 +118,6 @@ pdrsPMerge p1@(PDRS _ _ _ _) p2@(PDRS _ _ _ _) = pmerge pp1 (disjoin pp2 pp1)
         -- projected in the resulting 'PDRS'.
         pmerge (PDRS l m u c) (PDRS l' m' u' c')
             = PDRS l' ((l',l):m `union` m') (u `union` u') (c `union` c')
-        -- | Replace all (duplicate) occurrences of 'PVar's and 'PDRSRef's
-        -- from PDRS @p'@ in 'PDRS' @p@ by new variables. Asserted referents
-        -- in the universe of the antecedent PDRS do not count as duplicates
-        -- because multiple bound declarations are allowed in PDRT.
-        disjoin :: PDRS -> PDRS -> PDRS
-        disjoin p p' = pdrsAlphaConvert p (zip ops nps) (zip ors nrs)
-          where ops = pdrsPVars p `intersect` pdrsPVars p'
-                nps = newPVars ops (pdrsPVars p `union` pdrsPVars p')
-                ors = pdrsVariables p `intersect` filter (\r -> (PRef (pdrsLabel p') r) `notElem` pdrsUniverse p') (pdrsVariables p')
-                nrs = newPDRSRefs ors (pdrsVariables p `union` pdrsVariables p')
 
 -- | Infix notation for 'pdrsPMerge'
 (<<*>>) :: PDRS -> PDRS -> PDRS
@@ -179,3 +160,22 @@ emptyPDRS (PMerge p1 p2)
   | isLambdaPDRS p2 = PMerge (emptyPDRS p1) p2
   | otherwise       = emptyPDRS (p1 <<*>> p2)
 emptyPDRS (PDRS l _ _ _)    = PDRS l [] [] []
+
+---------------------------------------------------------------------------
+-- | Disjoins 'PDRS' @p1@ from 'PDRS' @p2@, where
+--
+-- [@p1@ is disjoined from @p2@ /iff/]
+--  
+--  * All duplicate occurrences of 'PVar's and 'PDRSRef's from 'PDRS' @p2@
+--    in 'PDRS' @p1@ are replaced by new variables. Asserted referents in
+--    the  universe of the antecedent 'PDRS' do not count as duplicates
+--    because multiple bound declarations are allowed in PDRT.
+---------------------------------------------------------------------------
+
+pdrsDisjoin :: PDRS -> PDRS -> PDRS
+pdrsDisjoin p p' = pdrsAlphaConvert p (zip ops nps) (zip ors nrs)
+  where ops = pdrsPVars p `intersect` pdrsPVars p'
+        nps = newPVars ops (pdrsPVars p `union` pdrsPVars p')
+        ors = pdrsVariables p `intersect` filter (\r -> (PRef (pdrsLabel p') r) `notElem` pdrsUniverse p') (pdrsVariables p')
+        nrs = newPDRSRefs ors (pdrsVariables p `union` pdrsVariables p')
+
