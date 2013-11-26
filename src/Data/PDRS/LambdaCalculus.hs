@@ -162,20 +162,13 @@ renameUniverse u lp gp ps rs = map (\(PRef p r) -> PRef (renamePVar p lp gp ps) 
 renamePCons :: [PCon] -> PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> [PCon]
 renamePCons c lp gp ps rs = map rename c
   where rename :: PCon -> PCon
-        rename (PCon p (Rel r d))    = PCon p' (Rel   r (map (flip (flip (flip (renamePDRSRef p') lp) gp) rs) d))
-          where p' = renamePVar p lp gp ps
-        rename (PCon p (Neg p1))     = PCon p' (Neg     (renameSubPDRS p1 gp ps rs))
-          where p' = renamePVar p lp gp ps
-        rename (PCon p (Imp p1 p2))  = PCon p' (Imp     (renameSubPDRS p1 gp ps rs)  (renameSubPDRS p2 gp ps rs))
-          where p' = renamePVar p lp gp ps
-        rename (PCon p (Or p1 p2))   = PCon p' (Or      (renameSubPDRS p1 gp ps rs)  (renameSubPDRS p2 gp ps rs))
-          where p' = renamePVar p lp gp ps
-        rename (PCon p (Prop r p1))  = PCon p' (Prop    (renamePDRSRef p' r lp gp rs)(renameSubPDRS p1 gp ps rs))
-          where p' = renamePVar p lp gp ps
-        rename (PCon p (Diamond p1)) = PCon p' (Diamond (renameSubPDRS p1 gp ps rs))
-          where p' = renamePVar p lp gp ps
-        rename (PCon p (Box  p1))    = PCon p' (Box     (renameSubPDRS p1 gp ps rs))
-          where p' = renamePVar p lp gp ps
+        rename (PCon p (Rel r d))    = PCon (renamePVar p lp gp ps) (Rel r   (map (flip (flip (flip (renamePDRSRef p) lp) gp) rs) d))
+        rename (PCon p (Neg p1))     = PCon (renamePVar p lp gp ps) (Neg     (renameSubPDRS p1 gp ps rs))
+        rename (PCon p (Imp p1 p2))  = PCon (renamePVar p lp gp ps) (Imp     (renameSubPDRS p1 gp ps rs)  (renameSubPDRS p2 gp ps rs))
+        rename (PCon p (Or p1 p2))   = PCon (renamePVar p lp gp ps) (Or      (renameSubPDRS p1 gp ps rs)  (renameSubPDRS p2 gp ps rs))
+        rename (PCon p (Prop r p1))  = PCon (renamePVar p lp gp ps) (Prop    (renamePDRSRef p r lp gp rs) (renameSubPDRS p1 gp ps rs))
+        rename (PCon p (Diamond p1)) = PCon (renamePVar p lp gp ps) (Diamond (renameSubPDRS p1 gp ps rs))
+        rename (PCon p (Box  p1))    = PCon (renamePVar p lp gp ps) (Box     (renameSubPDRS p1 gp ps rs))
 
 ---------------------------------------------------------------------------
 -- |  Applies alpha conversion to a list of projected referents @u@, in
