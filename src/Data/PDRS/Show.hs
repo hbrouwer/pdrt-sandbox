@@ -61,30 +61,25 @@ instance Show PDRS where
 class ShowablePDRS p where 
   resolve :: p -> Int -> Int -> PDRS
 
--- | Derive an instance of 'ShowablePDRS' for a resolved 'PDRS'.
+-- | Derive appropriate instances of 'ShowablePDRS'.
 instance ShowablePDRS PDRS where
   resolve p _ _ = p
-
--- | Derive an instance of 'ShowablePDRS' for a 'PDRS' that requires
--- at least one 'PDRS' referent to resolve.
 instance (ShowablePDRS p) => ShowablePDRS (PDRSRef -> p) where
   resolve up nr np = resolve (up rv) (nr + 1) np
-    where rv = LambdaPDRSRef ('r' : show nr, nr + np)
-
--- | Derive an instance of 'ShowablePDRS' for a 'PDRS' that requires
--- at least one 'PDRS' to resolve.
+    where rv = LambdaPDRSRef (('r' : show nr,[]), nr + np)
 instance (ShowablePDRS p) => ShowablePDRS (PDRS -> p) where
   resolve up nr np = resolve (up lv) nr (np + 1)
-    where lv = LambdaPDRS ('k' : show np, nr + np)
+    where lv = LambdaPDRS (('k' : show np,[]), nr + np)
+instance (ShowablePDRS p) => ShowablePDRS ((PDRSRef -> PDRS) -> p) where
+  resolve up nr np = resolve (up lv) nr (np + 1)
+    where lv = \x -> LambdaPDRS (('k' : show np,[drsRefToDRSVar (pdrsRefToDRSRef x)]), nr + np)
 
--- | Derive an instance of 'Show' for a 'PDRS' that requires
--- at least one 'PDRS' referent to resolve.
+-- | Derive appropriate instances of 'Show' for 'ShowablePDRS's.
 instance (ShowablePDRS p) => Show (PDRSRef -> p) where
   show p = show (resolve p 0 0)
-
--- | Derive an instance of 'Show' for a 'PDRS' that requires
--- at least one 'PDRS' to resolve.
 instance (ShowablePDRS p) => Show (PDRS -> p) where
+  show p = show (resolve p 0 0)
+instance (ShowablePDRS p) => Show ((PDRSRef -> PDRS) -> p) where
   show p = show (resolve p 0 0)
 
 ---------------------------------------------------------------------------
@@ -235,7 +230,9 @@ modSubord  = "\x2264";
 -- | Show a 'PDRS' in 'Box' notation.
 ---------------------------------------------------------------------------
 showPDRSBox :: PDRS -> String
-showPDRSBox (LambdaPDRS (v,_)) = v ++ "\n"
+showPDRSBox (LambdaPDRS ((v,d),_))
+  | not (null d) = v ++ "(" ++ intercalate "," d ++ ")" ++ "\n"
+  | otherwise    = v ++ "\n"
 showPDRSBox (AMerge p1 p2)
   | isLambdaPDRS p1 && isLambdaPDRS p2      = showModifier "(" 0 (showConcat (showConcat (showPDRSBox p1) (showModifier opAMerge 0 (showPDRSBox p2))) ")")
   | not(isLambdaPDRS p1) && isLambdaPDRS p2 = showBrackets (showConcat (showPDRSBox p1) (showModifier opAMerge 2 (showPadding (showPDRSBox p2))))
@@ -265,7 +262,9 @@ showPDRSBox (PDRS pl m u c)    = showHeaderLine l pl
 -- | Show a 'PDRS' in 'Linear' notation.
 ---------------------------------------------------------------------------
 showPDRSLinear :: PDRS -> String
-showPDRSLinear (LambdaPDRS (v,_)) = v
+showPDRSLinear (LambdaPDRS ((v,d),_))
+  | not (null d) = v ++ "(" ++ intercalate "," d ++ ")"
+  | otherwise    = v
 showPDRSLinear (AMerge p1 p2) = "(" ++ showPDRSLinear p1 ++ " " ++ opAMerge ++ " " ++ showPDRSLinear p2 ++ ")"
 showPDRSLinear (PMerge p1 p2) = "(" ++ showPDRSLinear p1 ++ " " ++ opPMerge ++ " " ++ showPDRSLinear p2 ++ ")"
 showPDRSLinear (PDRS l m u c)     = show l ++ ":[" ++ showUniverseTuples u ++ "|" ++ intercalate "," (map showCon c) ++ "|" ++ showMAPsTuples m ++ "]"
@@ -282,7 +281,9 @@ showPDRSLinear (PDRS l m u c)     = show l ++ ":[" ++ showUniverseTuples u ++ "|
 -- | Show a 'PDRS' in 'Set' notation.
 ---------------------------------------------------------------------------
 showPDRSSet :: PDRS -> String
-showPDRSSet (LambdaPDRS (v,_)) = v
+showPDRSSet (LambdaPDRS ((v,d),_))
+  | not (null d) = v ++ "(" ++ intercalate "," d ++ ")"
+  | otherwise    = v
 showPDRSSet (AMerge p1 p2) = "(" ++ showPDRSSet p1 ++ " " ++ opAMerge ++ " " ++ showPDRSSet p2 ++ ")"
 showPDRSSet (PMerge p1 p2) = "(" ++ showPDRSSet p1 ++ " " ++ opPMerge ++ " " ++ showPDRSSet p2 ++ ")"
 showPDRSSet (PDRS l m u c)     = "<" ++ show l ++ ",{" ++ showMAPsTuples m ++ "},{" ++ showUniverseTuples u ++ "},{" ++ intercalate "," (map showCon c) ++ "}>"
@@ -396,7 +397,7 @@ showMAPsTuples m = intercalate "," (map show (unique m []))
 ---------------------------------------------------------------------------
 showPDRSLambdas :: PDRS -> String
 showPDRSLambdas p = show (pdrsLambdas p)
-  where show :: [DRSVar] -> String
+  where show :: [(DRSVar,[DRSVar])] -> String
         show []     = []
-        show (l:ls) = opLambda ++ l ++ "." ++ show ls
+        show ((l,_):ls) = opLambda ++ l ++ "." ++ show ls
 

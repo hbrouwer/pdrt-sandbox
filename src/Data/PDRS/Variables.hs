@@ -305,7 +305,7 @@ pdrsFreePVars lp@(PDRS _ m u c) gp = freePVars (concatMap (\(x,y) -> [x,y]) m) `
 ---------------------------------------------------------------------------
 -- | Returns the list of all lambda variables in a 'PDRS'
 ---------------------------------------------------------------------------
-pdrsLambdas :: PDRS -> [DRSVar]
+pdrsLambdas :: PDRS -> [(DRSVar,[DRSVar])]
 pdrsLambdas p = map fst (sortBy (comparing snd) (lambdas p))
 
 ---------------------------------------------------------------------------
@@ -349,36 +349,22 @@ newPRefs prs ers = packPRefs ps (newPDRSRefs rs ers)
 ---------------------------------------------------------------------------
 -- | Returns the list of all lambda tuples in a 'PDRS'
 ---------------------------------------------------------------------------
-lambdas :: PDRS -> [(DRSVar,Int)]
+lambdas :: PDRS -> [((DRSVar,[DRSVar]),Int)]
 lambdas (LambdaPDRS lt) = [lt]
 lambdas (AMerge p1 p2)  = lambdas p1     `union` lambdas p2
 lambdas (PMerge p1 p2)  = lambdas p1     `union` lambdas p2
-lambdas (PDRS _ _ u c)  = lambdasPRefs u `union` lambdasPCons c
-
----------------------------------------------------------------------------
--- | Returns the list of all lamba tuples in a 'PDRS' universe
----------------------------------------------------------------------------
-lambdasPRefs :: [PRef] -> [(DRSVar,Int)]
-lambdasPRefs ps = lambdasRefs (map (\(PRef _ r) -> r) ps)
-
----------------------------------------------------------------------------
--- | Returns the list of all lambda tuples in a list of 'PDRSRef's
----------------------------------------------------------------------------
-lambdasRefs :: [PDRSRef] -> [(DRSVar,Int)]
-lambdasRefs []                    = []
-lambdasRefs (LambdaPDRSRef lt:ps) = lt : lambdasRefs ps
-lambdasRefs (PDRSRef{}:ps)        = lambdasRefs ps
-
----------------------------------------------------------------------------
--- | Returns the list of all lambda tuples in a list of 'PDRSCon's
----------------------------------------------------------------------------
-lambdasPCons :: [PCon] -> [(DRSVar,Int)]
-lambdasPCons []                       = []
-lambdasPCons (PCon _ (Rel _ d):cs)    = lambdasRefs d   `union` lambdasPCons cs
-lambdasPCons (PCon _ (Neg p1):cs)     = lambdas p1      `union` lambdasPCons cs
-lambdasPCons (PCon _ (Imp p1 p2):cs)  = lambdas p1      `union` lambdas p2 `union` lambdasPCons cs
-lambdasPCons (PCon _ (Or p1 p2):cs)   = lambdas p1      `union` lambdas p2 `union` lambdasPCons cs
-lambdasPCons (PCon p (Prop r p1):cs)  = lambdasRefs [r] `union` lambdas p1 `union` lambdasPCons cs
-lambdasPCons (PCon _ (Diamond p1):cs) = lambdas p1      `union` lambdasPCons cs
-lambdasPCons (PCon _ (Box p1):cs)     = lambdas p1      `union` lambdasPCons cs
+lambdas (PDRS _ _ u c)  = lamRefs (map prefToPDRSRef u) `union` lamPCons c
+  where lamRefs :: [PDRSRef] -> [((DRSVar,[DRSVar]),Int)]
+        lamRefs []                    = []
+        lamRefs (LambdaPDRSRef lt:ps) = lt : lamRefs ps
+        lamRefs (PDRSRef{}:ps)        = lamRefs ps
+        lamPCons :: [PCon] -> [((DRSVar,[DRSVar]),Int)]
+        lamPCons []                       = []
+        lamPCons (PCon _ (Rel _ d):cs)    = lamRefs d   `union` lamPCons cs
+        lamPCons (PCon _ (Neg p1):cs)     = lambdas p1  `union` lamPCons cs
+        lamPCons (PCon _ (Imp p1 p2):cs)  = lambdas p1  `union` lambdas p2 `union` lamPCons cs
+        lamPCons (PCon _ (Or p1 p2):cs)   = lambdas p1  `union` lambdas p2 `union` lamPCons cs
+        lamPCons (PCon p (Prop r p1):cs)  = lamRefs [r] `union` lambdas p1 `union` lamPCons cs
+        lamPCons (PCon _ (Diamond p1):cs) = lambdas p1  `union` lamPCons cs
+        lamPCons (PCon _ (Box p1):cs)     = lambdas p1  `union` lamPCons cs
 

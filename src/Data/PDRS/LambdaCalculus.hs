@@ -19,10 +19,6 @@ module Data.PDRS.LambdaCalculus
 , pdrsFunctionCompose
 , (<<.>>)
 , pdrsPurify
-
--- for testing
-, unboundDupPRefs
-, purifyPVars
 ) where
 
 import Data.DRS.LambdaCalculus (renameVar)

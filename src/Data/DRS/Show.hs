@@ -74,30 +74,25 @@ instance Show DRS where
 class ShowableDRS d where 
   resolve :: d -> Int -> Int -> DRS
 
--- | Derive an instance of 'ShowableDRS' for a resolved 'DRS'.
+-- | Derive appropriate instances of 'ShowableDRS'.
 instance ShowableDRS DRS where
   resolve d _ _ = d
-
--- | Derive an instance of 'ShowableDRS' for an 'unresolved DRS' that
--- requires at least one 'DRSRef' to become resolved.
 instance (ShowableDRS d) => ShowableDRS (DRSRef -> d) where
   resolve ud nr nd = resolve (ud rv) (nr + 1) nd
-    where rv = LambdaDRSRef ('r' : show nr, nr + nd)
-
--- | Derive an instance of 'ShowableDRS' for an 'unresolved DRS' that
--- requires at least one 'DRS' to become resolved.
+    where rv = LambdaDRSRef (('r' : show nr,[]), nr + nd)
 instance (ShowableDRS d) => ShowableDRS (DRS -> d) where
   resolve ud nr nd = resolve (ud lv) nr (nd + 1)
-    where lv = LambdaDRS ('k' : show nd, nr + nd)
+    where lv = LambdaDRS (('k' : show nd,[]), nr + nd)
+instance (ShowableDRS p) => ShowableDRS ((DRSRef -> DRS) -> p) where
+  resolve ud nr nd = resolve (ud lv) nr (nd + 1)
+    where lv = \x -> LambdaDRS (('k' : show nd,[drsRefToDRSVar x]), nr + nd)
 
--- | Derive an instance of 'Show' for an 'unresolved DRS' that
--- requires at least one 'DRSRef' to become resolved.
+-- | Derive appropriate instances of 'Show' for 'ShowableDRS's.
 instance (ShowableDRS d) => Show (DRSRef -> d) where
   show d = show (resolve d 0 0)
-
--- | Derive an instance of 'Show' for an 'unresolved DRS' that
--- requires at least one 'DRS' to become resolved.
 instance (ShowableDRS d) => Show (DRS -> d) where
+  show d = show (resolve d 0 0)
+instance (ShowableDRS p) => Show ((DRSRef -> DRS) -> p) where
   show d = show (resolve d 0 0)
 
 ---------------------------------------------------------------------------
@@ -303,7 +298,9 @@ showPadding s = showWhitespace l ++ "\n" ++ showWhitespace l ++ "\n" ++ s
 -- | Shows a 'DRS' in 'Boxes' notation.
 ---------------------------------------------------------------------------
 showDRSBox :: DRS -> String
-showDRSBox (LambdaDRS (v,_)) = v ++ "\n"
+showDRSBox (LambdaDRS ((v,d),_)) 
+  | not (null d) = v ++ "(" ++ intercalate "," d ++ ")" ++ "\n"
+  | otherwise    = v ++ "\n"
 showDRSBox (Merge d1 d2)
   | isLambdaDRS d1 && isLambdaDRS d2      = showConcat (showDRSBox d1) (showModifier opMerge 0 (showDRSBox d2))
   | not(isLambdaDRS d1) && isLambdaDRS d2 = showConcat (showDRSBox d1) (showModifier opMerge 2 (showPadding (showDRSBox d2)))
@@ -322,7 +319,9 @@ showDRSBox (DRS u c)         = showHorizontalLine l boxTopLeft boxTopRight
 -- | Shows a DRS in 'Linear' notation.
 ---------------------------------------------------------------------------
 showDRSLinear :: DRS -> String
-showDRSLinear (LambdaDRS (v,_)) = v
+showDRSLinear (LambdaDRS ((v,d),_)) 
+  | not (null d) = v ++ "(" ++ intercalate "," d ++ ")"
+  | otherwise    = v
 showDRSLinear (Merge d1 d2)
   | not(isLambdaDRS d1) && not(isLambdaDRS d2) = showDRSLinear (d1 <<+>> d2)
   | otherwise                                  = showDRSLinear d1 ++ " " ++ opMerge ++ " " ++ showDRSLinear d2
@@ -340,7 +339,9 @@ showDRSLinear (DRS u c)         = "[" ++ showUniverse u "," ++ ": " ++  intercal
 -- | Shows a 'DRS' in 'Set' notation.
 ---------------------------------------------------------------------------
 showDRSSet :: DRS -> String
-showDRSSet (LambdaDRS (v,_)) = v
+showDRSSet (LambdaDRS ((v,d),_)) 
+  | not (null d) = v ++ "(" ++ intercalate "," d ++ ")"
+  | otherwise    = v
 showDRSSet (Merge d1 d2)
   | not(isLambdaDRS d1) && not(isLambdaDRS d2) = showDRSSet (d1 <<+>> d2)
   | otherwise                                  = showDRSSet d1 ++ " " ++ opMerge ++ " " ++ showDRSSet d2
@@ -415,7 +416,7 @@ showConditions c  = foldr ((++) . showCon) "" c
 ---------------------------------------------------------------------------
 showDRSLambdas :: DRS -> String
 showDRSLambdas d = show (drsLambdas d)
-  where show :: [DRSVar] -> String
+  where show :: [(DRSVar,[DRSVar])] -> String
         show []     = []
-        show (l:ls) = opLambda ++ l ++ "." ++ show ls
+        show ((l,_):ls) = opLambda ++ l ++ "." ++ show ls
 

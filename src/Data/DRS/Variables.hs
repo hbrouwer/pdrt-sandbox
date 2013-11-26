@@ -41,8 +41,8 @@ import Data.Ord (comparing)
 -- | Converts a 'DRSRef' @r@ into a 'DRSVar'.
 ---------------------------------------------------------------------------
 drsRefToDRSVar :: DRSRef -> DRSVar
-drsRefToDRSVar (LambdaDRSRef (r,_)) = r
-drsRefToDRSVar (DRSRef r)           = r
+drsRefToDRSVar (LambdaDRSRef ((r,_),_)) = r
+drsRefToDRSVar (DRSRef r)               = r
 
 ---------------------------------------------------------------------------
 -- ** Binding
@@ -134,7 +134,7 @@ drsFreeRefs ld@(DRS _ c)  gd = free c
 ---------------------------------------------------------------------------
 -- | Returns the ordered list of all lambda variables in a 'DRS'.
 ---------------------------------------------------------------------------
-drsLambdas :: DRS -> [DRSVar]
+drsLambdas :: DRS -> [(DRSVar,[DRSVar])]
 drsLambdas d = map fst (sortBy (comparing snd) (lambdas d))
 
 ---------------------------------------------------------------------------
@@ -155,8 +155,8 @@ newDRSRefs (r:rs) refs = nr : newDRSRefs rs (nr:refs)
           | otherwise      = r'
           where r' =
                   case r of
-                   (LambdaDRSRef (dv,lp)) -> LambdaDRSRef (dv ++ show n, lp)
-                   (DRSRef dv)            -> DRSRef       (dv ++ show n)
+                   (LambdaDRSRef ((dv,dvs),lp)) -> LambdaDRSRef ((dv ++ show n,dvs),lp)
+                   (DRSRef dv)                  -> DRSRef       (dv ++ show n)
 
 ---------------------------------------------------------------------------
 -- * Private
@@ -165,29 +165,21 @@ newDRSRefs (r:rs) refs = nr : newDRSRefs rs (nr:refs)
 ---------------------------------------------------------------------------
 -- | Returns the list of all lambda tuples in a 'DRS'.
 ---------------------------------------------------------------------------
-lambdas :: DRS -> [(DRSVar,Int)]
+lambdas :: DRS -> [((DRSVar,[DRSVar]),Int)]
 lambdas (LambdaDRS lt) = [lt]
-lambdas (Merge d1 d2)  = lambdas d1    `union` lambdas d2
-lambdas (DRS u c)      = lambdasRefs u `union` lambdasCons c
-
----------------------------------------------------------------------------
--- | Returns the list of all lambda tuples in a 'DRS' universe.
----------------------------------------------------------------------------
-lambdasRefs :: [DRSRef] -> [(DRSVar,Int)] 
-lambdasRefs []                   = []
-lambdasRefs (DRSRef _:ds)        = lambdasRefs ds
-lambdasRefs (LambdaDRSRef lt:ds) = lt : lambdasRefs ds
-
----------------------------------------------------------------------------
--- | Returns the list of all lambda tuples in a list of 'DRS' conditions
----------------------------------------------------------------------------
-lambdasCons :: [DRSCon] -> [(DRSVar,Int)]
-lambdasCons []              = []
-lambdasCons (Rel _ d:cs)    = lambdasRefs d   `union` lambdasCons cs
-lambdasCons (Neg d1:cs)     = lambdas d1      `union` lambdasCons cs
-lambdasCons (Imp d1 d2:cs)  = lambdas d1      `union` lambdas d2 `union` lambdasCons cs
-lambdasCons (Or d1 d2:cs)   = lambdas d1      `union` lambdas d2 `union` lambdasCons cs
-lambdasCons (Prop r d1:cs)  = lambdasRefs [r] `union` lambdas d1 `union` lambdasCons cs
-lambdasCons (Diamond d1:cs) = lambdas d1      `union` lambdasCons cs
-lambdasCons (Box d1:cs)     = lambdas d1      `union` lambdasCons cs
+lambdas (Merge d1 d2)  = lambdas d1 `union` lambdas d2
+lambdas (DRS u c)      = lamRefs u  `union` lamCons c
+  where lamRefs :: [DRSRef] -> [((DRSVar,[DRSVar]),Int)] 
+        lamRefs []                   = []
+        lamRefs (DRSRef _:ds)        = lamRefs ds
+        lamRefs (LambdaDRSRef lt:ds) = lt : lamRefs ds
+        lamCons :: [DRSCon] -> [((DRSVar,[DRSVar]),Int)]
+        lamCons []              = []
+        lamCons (Rel _ d:cs)    = lamRefs d   `union` lamCons cs
+        lamCons (Neg d1:cs)     = lambdas d1  `union` lamCons cs
+        lamCons (Imp d1 d2:cs)  = lambdas d1  `union` lambdas d2 `union` lamCons cs
+        lamCons (Or d1 d2:cs)   = lambdas d1  `union` lambdas d2 `union` lamCons cs
+        lamCons (Prop r d1:cs)  = lamRefs [r] `union` lambdas d1 `union` lamCons cs
+        lamCons (Diamond d1:cs) = lambdas d1  `union` lamCons cs
+        lamCons (Box d1:cs)     = lambdas d1  `union` lamCons cs
 

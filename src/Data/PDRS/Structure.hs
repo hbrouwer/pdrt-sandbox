@@ -40,7 +40,7 @@ import Data.DRS.Structure (DRSRel, DRSVar)
 -- | Projective Discourse Representation Structure.
 ---------------------------------------------------------------------------
 data PDRS =
-  LambdaPDRS (DRSVar,Int)         -- ^ A lambda 'PDRS' (and its argument position)
+  LambdaPDRS ((DRSVar,[DRSVar]),Int)         -- ^ A lambda 'PDRS' (and its argument position)
   | AMerge PDRS PDRS              -- ^ An assertive merge between two 'PDRS's
   | PMerge PDRS PDRS              -- ^ A projective merge between two 'PDRS's
   | PDRS PVar [MAP] [PRef] [PCon] -- ^ A 'PDRS', consisting of a 'PVar' (a label), 
@@ -68,7 +68,7 @@ data PRef = PRef PVar PDRSRef
 -- | A 'PDRS' referent.
 ---------------------------------------------------------------------------
 data PDRSRef =
-  LambdaPDRSRef (DRSVar, Int) -- ^ A lambda PDRS referent (with its argument position)
+  LambdaPDRSRef ((DRSVar,[DRSVar]),Int) -- ^ A lambda PDRS referent (with its argument position)
   | PDRSRef DRSVar            -- ^ A PDRS referent
   deriving (Eq,Show)
 
