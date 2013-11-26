@@ -64,13 +64,12 @@ pdrsAMerge pm@(PMerge k1 k2) p
   | otherwise       = pdrsAMerge (pdrsResolveMerges pm) p
 pdrsAMerge p1@(PDRS _ _ _ _) p2@(PDRS _ _ _ _) = amerge pp1 (pdrsDisjoin pp2 pp1)
   where -- | Merged 'PDRS's should be pure.
-        pp1 = pdrsPurify p1
-        pp2 = pdrsPurify p2
+        pp1 = pdrsPurify $ pdrsResolveMerges p1
+        pp2 = pdrsPurify $ pdrsResolveMerges p2
         amerge :: PDRS -> PDRS -> PDRS
         -- | Make sure all asserted content in 'PDRS' @p@ remains
         -- asserted by renaming global label to @l@ before merging.
-        amerge p (PDRS l m u c) 
-          = PDRS l (m' `union` m) (u' `union` u) (c' `union` c)
+        amerge p (PDRS l m u c) = PDRS l (m' `union` m) (u' `union` u) (c' `union` c)
           where (PDRS l' m' u' c') = pdrsAlphaConvert p [(pdrsLabel p,l)] []
 
 -- | Infix notation for 'pdrsAMerge'
@@ -105,19 +104,18 @@ pdrsPMerge p pm@(PMerge k1 k2)
 pdrsPMerge pm@(PMerge k1 k2) p
   | isLambdaPDRS k1 = PMerge k1 (pdrsPMerge k2 p)
   -- ^ (lk1 * k2) * p = lk1 * (k2 * p)
-  | isLambdaPDRS k2 = PMerge k2 (pdrsPMerge k1 p) 
+  | isLambdaPDRS k2 = PMerge k2 (pdrsPMerge k1 p)
   -- ^ (k1 * lk2) * p = lk2 * (k1 * p)
   | otherwise       = pdrsPMerge (pdrsResolveMerges pm) p
 pdrsPMerge p1@(PDRS _ _ _ _) p2@(PDRS _ _ _ _) = pmerge pp1 (pdrsDisjoin pp2 pp1)
   where -- | Merged 'PDRS's should be pure.
-        pp1 = pdrsPurify p1
-        pp2 = pdrsPurify p2
+        pp1 = pdrsPurify $ pdrsResolveMerges p1
+        pp2 = pdrsPurify $ pdrsResolveMerges p2
         pmerge :: PDRS -> PDRS -> PDRS
         -- | Content of 'PDRS' @p@ is added to 'PDRS' @p'@ without
         -- replacing pointers, resulting in the content of @p@ becoming
         -- projected in the resulting 'PDRS'.
-        pmerge (PDRS l m u c) (PDRS l' m' u' c')
-            = PDRS l' ((l',l):m `union` m') (u `union` u') (c `union` c')
+        pmerge (PDRS l m u c) (PDRS l' m' u' c') = PDRS l' ((l',l):m `union` m') (u `union` u') (c `union` c')
 
 -- | Infix notation for 'pdrsPMerge'
 (<<*>>) :: PDRS -> PDRS -> PDRS
@@ -127,16 +125,10 @@ p1 <<*>> p2 = p1 `pdrsPMerge` p2
 -- | Resolves all unresolved merges in a 'PDRS'.
 ---------------------------------------------------------------------------
 pdrsResolveMerges :: PDRS -> PDRS
-pdrsResolveMerges lp@(LambdaPDRS _)    = lp
-pdrsResolveMerges (AMerge p1 p2)
-  | isLambdaPDRS p1 = AMerge p1 (pdrsResolveMerges p2)
-  | isLambdaPDRS p2 = AMerge (pdrsResolveMerges p1) p2
-  | otherwise       = pdrsResolveMerges (p1 <<+>> p2)
-pdrsResolveMerges (PMerge p1 p2)
-  | isLambdaPDRS p1 = PMerge p1 (pdrsResolveMerges p2)
-  | isLambdaPDRS p2 = PMerge (pdrsResolveMerges p1) p2
-  | otherwise       = pdrsResolveMerges (p1 <<*>> p2)
-pdrsResolveMerges (PDRS l m u c) = PDRS l m u (map resolve c)
+pdrsResolveMerges lp@(LambdaPDRS _) = lp
+pdrsResolveMerges (AMerge p1 p2)    = (pdrsResolveMerges p1) <<+>> (pdrsResolveMerges p2)
+pdrsResolveMerges (PMerge p1 p2)    = (pdrsResolveMerges p1) <<*>> (pdrsResolveMerges p2)
+pdrsResolveMerges (PDRS l m u c)    = PDRS l m u (map resolve c)
   where resolve :: PCon -> PCon
         resolve pc@(PCon _ (Rel _ _)) = pc
         resolve (PCon p (Neg p1))     = PCon p (Neg     (pdrsResolveMerges p1))
