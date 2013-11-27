@@ -15,6 +15,7 @@ module Data.DRS.Merge
   drsMerge
 , (<<+>>)
 , drsResolveMerges
+, (<<&>>)
 , drsRename
 ) where
 
@@ -61,7 +62,7 @@ d1 <<+>> d2 = d1 `drsMerge` d2
 ---------------------------------------------------------------------------
 drsResolveMerges :: DRS -> DRS
 drsResolveMerges ld@(LambdaDRS _) = ld
-drsResolveMerges (Merge d1 d2)    = (drsResolveMerges d1) <<+>> (drsResolveMerges d2)
+drsResolveMerges (Merge d1 d2)    = drsResolveMerges d1 <<+>> drsResolveMerges d2
 drsResolveMerges (DRS u c)        = DRS u (map resolve c)
   where resolve :: DRSCon -> DRSCon
         resolve r@(Rel _ _)  = r
@@ -71,6 +72,14 @@ drsResolveMerges (DRS u c)        = DRS u (map resolve c)
         resolve (Prop r d1)  = Prop r  (drsResolveMerges d1)
         resolve (Diamond d1) = Diamond (drsResolveMerges d1)
         resolve (Box d1)     = Box     (drsResolveMerges d1)
+
+---------------------------------------------------------------------------
+-- | Infix notation for combining an unresolved DRS with a 'DRS' into a
+-- resolved 'DRS'.
+---------------------------------------------------------------------------
+
+(<<&>>) :: ((DRSRef -> DRS) -> DRS) -> DRS -> DRS
+s <<&>> c = drsResolveMerges (s (\x -> c))
 
 ---------------------------------------------------------------------------
 -- | Renames in 'DRS' @d@ the 'DRSRef's that occur in @rs@.

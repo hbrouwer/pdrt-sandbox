@@ -16,6 +16,7 @@ module Data.PDRS.Merge (
 , pdrsPMerge
 , (<<*>>)
 , pdrsResolveMerges
+, (<<&>>)
 , emptyPDRS
 , pdrsDisjoin
 ) where
@@ -137,6 +138,14 @@ pdrsResolveMerges (PDRS l m u c)    = PDRS l m u (map resolve c)
         resolve (PCon p (Prop r p1))  = PCon p (Prop r  (pdrsResolveMerges p1))
         resolve (PCon p (Diamond p1)) = PCon p (Diamond (pdrsResolveMerges p1))
         resolve (PCon p (Box p1))     = PCon p (Box     (pdrsResolveMerges p1))
+
+---------------------------------------------------------------------------
+-- | Infix notation for combining an unresolved PDRS with a 'PDRS' into a
+-- resolved 'PDRS'.
+---------------------------------------------------------------------------
+
+(<<&>>) :: ((PDRSRef -> PDRS) -> PDRS) -> PDRS -> PDRS
+s <<&>> c = pdrsResolveMerges (s (\x -> c))
 
 ---------------------------------------------------------------------------
 -- | Returns an empty 'PDRS', if possible with the same label as 'PDRS' @p@.
