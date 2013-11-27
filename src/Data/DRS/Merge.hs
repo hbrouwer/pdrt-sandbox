@@ -15,6 +15,7 @@ module Data.DRS.Merge
   drsMerge
 , (<<+>>)
 , drsResolveMerges
+, drsRename
 ) where
 
 import Data.DRS.LambdaCalculus
@@ -32,17 +33,24 @@ import Data.List (intersect, union)
 -- | Applies merge to 'DRS' @d1@ and 'DRS' @d2@.
 ---------------------------------------------------------------------------
 drsMerge :: DRS -> DRS -> DRS
-drsMerge d1 d2 = merge rd1 (rename rd1 (drsVariables rd2))
-  where rd1 = drsPurify $ drsResolveMerges d1
-        rd2 = drsPurify $ drsResolveMerges d2
-        merge :: DRS -> DRS -> DRS
-        merge (DRS u1 c1) (DRS u2 c2) = DRS (u1 `union` u2) (c1 `union` c2)
-        -- | Replace all occurrences of 'DRSRef's from @rs@ 
-        -- in 'DRS' @d@ by new 'DRSRef's.
-        rename :: DRS -> [DRSRef] -> DRS
-        rename d rs = drsAlphaConvert d2 (zip ors nrs)
-          where ors = drsVariables d `intersect` rs
-                nrs = newDRSRefs ors (drsVariables d `union` rs)
+-- | Deal with 'LambdaDRS's
+drsMerge d ld@(LambdaDRS _) = Merge d ld
+drsMerge ld@(LambdaDRS _) d = Merge ld d
+drsMerge d md@(Merge d1 d2)
+  | isLambdaDRS d1 = Merge d1 (drsMerge d d2)
+  -- ^ d + (ld1 + d2) = ld1 + (d + d2)
+  | isLambdaDRS d2 = Merge (drsMerge d d1) d2
+  -- ^ d + (d1 + ld2) = (d + d1) + ld2
+  | otherwise      = drsMerge d (drsResolveMerges md)
+drsMerge md@(Merge d1 d2) d
+  | isLambdaDRS d1 = Merge d1 (drsMerge d2 d)
+  -- ^ (ld1 + d2) + d = ld1 + (d2 + d)
+  | isLambdaDRS d2 = Merge d2 (drsMerge d1 d)
+  -- ^ (d1 + ld2) + d = ld2 + (d1 + d)
+  | otherwise      = drsMerge d (drsResolveMerges md)
+drsMerge d1@(DRS _ _) d2@(DRS _ _) = DRS (u1' `union` u2') (c1' `union` c2')
+  where d1'@(DRS u1' c1') = drsPurify $ drsResolveMerges d1
+        (DRS u2' c2')     = drsRename (drsPurify $ drsResolveMerges d2) (drsVariables d1')
 
 -- | Infix notation for 'drsMerge'.
 (<<+>>) :: DRS -> DRS ->DRS
@@ -53,9 +61,7 @@ d1 <<+>> d2 = d1 `drsMerge` d2
 ---------------------------------------------------------------------------
 drsResolveMerges :: DRS -> DRS
 drsResolveMerges ld@(LambdaDRS _) = ld
-drsResolveMerges (Merge d1 d2)
-  | isLambdaDRS d1 || isLambdaDRS d2 = Merge d1 d2
-  | otherwise                        = d1 <<+>> d2
+drsResolveMerges (Merge d1 d2)    = (drsResolveMerges d1) <<+>> (drsResolveMerges d2)
 drsResolveMerges (DRS u c)        = DRS u (map resolve c)
   where resolve :: DRSCon -> DRSCon
         resolve r@(Rel _ _)  = r
@@ -66,5 +72,10 @@ drsResolveMerges (DRS u c)        = DRS u (map resolve c)
         resolve (Diamond d1) = Diamond (drsResolveMerges d1)
         resolve (Box d1)     = Box     (drsResolveMerges d1)
 
-
-
+---------------------------------------------------------------------------
+-- | Renames in 'DRS' @d@ the 'DRSRef's that occur in @rs@.
+---------------------------------------------------------------------------
+drsRename :: DRS -> [DRSRef] -> DRS
+drsRename d rs = drsAlphaConvert d (zip ors nrs)
+  where ors = drsVariables d `intersect` rs
+        nrs = newDRSRefs ors (drsVariables d `union` rs)
