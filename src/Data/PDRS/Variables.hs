@@ -270,7 +270,7 @@ pdrsPVars :: PDRS -> [PVar]
 pdrsPVars (LambdaPDRS _) = []
 pdrsPVars (AMerge p1 p2) = pdrsPVars p1               `union` pdrsPVars p2
 pdrsPVars (PMerge p1 p2) = pdrsPVars p1               `union` pdrsPVars p2
-pdrsPVars (PDRS l m u c) = l:(concatMap (\(x,y) -> [x,y]) m) `union` (map prefToPVar u) `union` pvars c
+pdrsPVars (PDRS l m u c) = l : concatMap (\(x,y) -> [x,y]) m `union` map prefToPVar u `union` pvars c
   where pvars :: [PCon] -> [PVar]
         pvars []                       = []
         pvars (PCon p (Rel _ _):cs)    = p:pvars cs

@@ -85,7 +85,7 @@ instance (ShowableDRS d) => ShowableDRS (DRS -> d) where
     where lv = LambdaDRS (('k' : show nd,[]), nr + nd)
 instance (ShowableDRS p) => ShowableDRS ((DRSRef -> DRS) -> p) where
   resolve ud nr nd = resolve (ud lv) nr (nd + 1)
-    where lv = \x -> LambdaDRS (('k' : show nd,[drsRefToDRSVar x]), nr + nd)
+    where lv x = LambdaDRS (('k' : show nd,[drsRefToDRSVar x]), nr + nd)
 
 -- | Derive appropriate instances of 'Show' for 'ShowableDRS's.
 instance (ShowableDRS d) => Show (DRSRef -> d) where
@@ -192,32 +192,32 @@ printDRSRefBetaReduct d r = putStrLn $ '\n' : showDRSRefBetaReduct d r
 ---------------------------------------------------------------------------
 
 -- | Negation symbol
-opNeg :: [Char]
-opNeg = "\x00AC";
+opNeg :: String
+opNeg = "\x00AC"
 
 -- | Implication symbol
-opImp :: [Char]
-opImp = "\x21D2";
+opImp :: String
+opImp = "\x21D2"
 
 -- | Disjunction symbol
-opOr :: [Char]
-opOr = "\x2228";
+opOr :: String
+opOr = "\x2228"
 
 -- | Diamond symbol
-opDiamond :: [Char]
-opDiamond = "\x25C7";
+opDiamond :: String
+opDiamond = "\x25C7"
 
 -- | Box symbol
-opBox :: [Char]
-opBox = "\x25FB";
+opBox :: String
+opBox = "\x25FB"
 
 -- | Lambda symbol
-opLambda :: [Char]
-opLambda = "\x03BB";
+opLambda :: String
+opLambda = "\x03BB"
 
 -- | Merge symbol
-opMerge :: [Char]
-opMerge = "\x002B";
+opMerge :: String
+opMerge = "\x002B"
 
 ---------------------------------------------------------------------------
 -- ** Box Construction

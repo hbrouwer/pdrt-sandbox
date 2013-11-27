@@ -41,11 +41,11 @@ drsToFOL d = drsToMFOL d worldVar
 ---------------------------------------------------------------------------
 
 -- | Symbol for world variable
-worldVar :: [Char]
+worldVar :: String
 worldVar = "w"
 
 -- | Symbol for accessibility relation between worlds
-worldRel :: [Char]
+worldRel :: String
 worldRel = "Acc"
 
 ---------------------------------------------------------------------------

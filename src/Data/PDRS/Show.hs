@@ -72,7 +72,7 @@ instance (ShowablePDRS p) => ShowablePDRS (PDRS -> p) where
     where lv = LambdaPDRS (('k' : show np,[]), nr + np)
 instance (ShowablePDRS p) => ShowablePDRS ((PDRSRef -> PDRS) -> p) where
   resolve up nr np = resolve (up lv) nr (np + 1)
-    where lv = \x -> LambdaPDRS (('k' : show np,[drsRefToDRSVar (pdrsRefToDRSRef x)]), nr + np)
+    where lv x = LambdaPDRS (('k' : show np,[drsRefToDRSVar (pdrsRefToDRSRef x)]), nr + np)
 
 -- | Derive appropriate instances of 'Show' for 'ShowablePDRS's.
 instance (ShowablePDRS p) => Show (PDRSRef -> p) where
@@ -195,31 +195,31 @@ printPDRSRefBetaReduct p r = putStrLn $ '\n' : showPDRSRefBetaReduct p r
 ---------------------------------------------------------------------------
 -- | Assertive merge symbol.
 ---------------------------------------------------------------------------
-opAMerge :: [Char]
+opAMerge :: String
 opAMerge = "\x002B" 
 
 ---------------------------------------------------------------------------
 -- | Projective merge symbol.
 ---------------------------------------------------------------------------
-opPMerge :: [Char]
+opPMerge :: String
 opPMerge = "\x002A"; 
 
 ---------------------------------------------------------------------------
 -- | Pointer symbol.
 ---------------------------------------------------------------------------
-modPointer :: [Char]
+modPointer :: String
 modPointer = "\x2190";
 
 ---------------------------------------------------------------------------
 -- | Equals symbol.
 ---------------------------------------------------------------------------
-modEquals :: [Char]
+modEquals :: String
 modEquals  = "\x003D"; 
 
 ---------------------------------------------------------------------------
 -- | Subordination symbol.
 ---------------------------------------------------------------------------
-modSubord :: [Char]
+modSubord :: String
 modSubord  = "\x2264"; 
 
 ---------------------------------------------------------------------------

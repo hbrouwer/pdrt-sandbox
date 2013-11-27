@@ -57,34 +57,34 @@ printFOLForm f = putStrLn $ '\n' : showFOLForm f
 ---------------------------------------------------------------------------
 
 -- | Existential quantifier symbol
-opExists :: [Char]
+opExists :: String 
 opExists = "\x2203" 
 
 -- | Universal quantifier symbol
-opForAll :: [Char]
+opForAll :: String
 opForAll = "\x2200"
 
 -- | Conjunction symbol
-opAnd :: [Char]
+opAnd :: String
 opAnd    = "\x2227" 
 
 -- | Disjunction symbol
-opOr :: [Char]
+opOr :: String
 opOr     = "\x2228" 
 
 -- | Implication symbol
-opImp :: [Char]
+opImp :: String
 opImp    = "\x2192" 
 
 -- | Negation symbol
-opNeg :: [Char]
+opNeg :: String
 opNeg    = "\x00AC" 
 
 -- | Top/true constant symbol
-opTop:: [Char]
+opTop:: String
 opTop    = "\x22A4" 
 
 -- | Bottom/false constant symbol
-opBottom :: [Char]
+opBottom :: String
 opBottom = "\x22A5" 
 

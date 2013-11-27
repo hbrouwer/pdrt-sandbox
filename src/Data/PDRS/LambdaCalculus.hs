@@ -223,7 +223,7 @@ purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs2)
         -- ^ In case we do not want to rename ambiguous bindings:
         -- (c2,pvs2) = purify (c1,pvs)
         -- | Step 3.
-        pvs1      = l1:(concatMap (\(x,y) -> [x,y]) m1) `union` (map prefToPVar u1)
+        pvs1      = l1 : concatMap (\(x,y) -> [x,y]) m1 `union` map prefToPVar u1
         -- | Step 4.
         purify :: ([PCon],[PVar]) -> ([PCon],[PVar])
         purify ([],ps)                        = ([],ps)
@@ -282,13 +282,12 @@ purifyPRefs (PMerge p1 p2)    gp prs = PMerge (purifyPRefs p1 gp prs) (purifyPRe
 purifyPRefs lp@(PDRS l m u c) gp prs = PDRS l m (map (convert prs) u) (map purify c)
   where -- | Converts a 'PRef' @pr@ based on a conversion list
         convert :: [(PRef,PRef)] -> PRef -> PRef
-        convert [] pr                                    = pr
+        convert [] pr                                                                  = pr
         convert  ((pr'@(PRef p' r'),npr):prs) pr@(PRef p r)
-          | pr == pr'                                    = npr
-          | r  == r' && pdrsPRefBoundByPRef pr lp pr' gp = npr
-          | r  == r' && not(pdrsBoundPRef pr lp gp) 
-            && (pdrsIsAccessibleContext p p' gp)         = npr
-          | otherwise                                    = convert prs pr
+          | pr == pr'                                                                  = npr
+          | r  == r' && pdrsPRefBoundByPRef pr lp pr' gp                               = npr
+          | r  == r' && not(pdrsBoundPRef pr lp gp) && pdrsIsAccessibleContext p p' gp = npr
+          | otherwise                                                                  = convert prs pr
         -- | A projected condition is /purify/ iff all its subordinated
         -- referents have been converted based on the conversion list.
         purify :: PCon -> PCon
@@ -319,7 +318,7 @@ unboundDupPRefs (AMerge p1 p2)    gp eps = (eps2,dps1 ++ dps2)
 unboundDupPRefs (PMerge p1 p2)    gp eps = (eps2,dps1 ++ dps2)
   where (eps1,dps1) = unboundDupPRefs p1 gp eps
         (eps2,dps2) = unboundDupPRefs p2 gp eps1
-unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,(filter (`dup` eps) uu) ++ dps1)
+unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
   where (eps1,dps1) = dups c (eps ++ uu)
         uu = unboundPRefs u
         -- | Returns whether 'PRef' @pr@ is /duplicate/ wrt a list of 'PRef's.
@@ -336,7 +335,7 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,(filter (`dup` eps) uu) ++ dps1
         dups (PCon p (Rel _ d):pcs)    eps = (eps2,dps1 ++ dps2)
           where (eps2,dps2) = dups pcs (eps ++ upd)
                 upd  = unboundPRefs $ map (`pdrsRefToPRef` p) d
-                dps1 = filter (\pd -> dup pd eps) upd
+                dps1 = filter (`dup` eps) upd
         dups (PCon p (Neg p1):pcs)     eps = (eps2,dps1 ++ dps2)
           where (eps1,dps1) = unboundDupPRefs p1 gp eps
                 (eps2,dps2) = dups pcs eps1
