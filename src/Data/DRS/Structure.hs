@@ -14,7 +14,7 @@ module Data.DRS.Structure
 (
   DRS (..)
 , DRSVar
-, DRSRel
+, DRSRel (..)
 , DRSRef (..)
 , DRSCon (..)
 , drsUniverse
@@ -46,16 +46,19 @@ data DRS =
 type DRSVar = String
 
 ---------------------------------------------------------------------------
--- | DRS relation
----------------------------------------------------------------------------
-type DRSRel = String
-
----------------------------------------------------------------------------
 -- | DRS referent
 ---------------------------------------------------------------------------
 data DRSRef =
   LambdaDRSRef ((DRSVar,[DRSVar]),Int) -- ^ A lambda DRS referent (with its argument position)
   | DRSRef DRSVar            -- ^ A DRS referent
+  deriving (Eq)
+
+---------------------------------------------------------------------------
+-- | DRS relation
+---------------------------------------------------------------------------
+data DRSRel =
+  LambdaDRSRel ((DRSVar,[DRSVar]),Int)
+  | DRSRel String
   deriving (Eq)
 
 ---------------------------------------------------------------------------

@@ -30,7 +30,7 @@ import Data.DRS.Properties (isFOLDRS)
 import Data.DRS.Show hiding (DRSNotation (..))
 import Data.DRS.Structure (DRS)
 import Data.DRS.Translate (drsToFOL)
-import Data.DRS.Variables (drsRefToDRSVar)
+import Data.DRS.Variables (drsRefToDRSVar,drsRelToString)
 
 import Data.PDRS.Merge
 import Data.PDRS.Properties
@@ -73,6 +73,9 @@ instance (ShowablePDRS p) => ShowablePDRS (PDRS -> p) where
 instance (ShowablePDRS p) => ShowablePDRS ((PDRSRef -> PDRS) -> p) where
   resolve up nr np = resolve (up lv) nr (np + 1)
     where lv x = LambdaPDRS (('k' : show np,[drsRefToDRSVar (pdrsRefToDRSRef x)]), nr + np)
+instance (ShowablePDRS p) => ShowablePDRS (PDRSRel -> p) where
+  resolve up nr np = resolve (up lv) nr (np + 1)
+    where lv = LambdaPDRSRel (('P' : show np,[]), nr + np)
 
 -- | Derive appropriate instances of 'Show' for 'ShowablePDRS's.
 instance (ShowablePDRS p) => Show (PDRSRef -> p) where
@@ -80,6 +83,8 @@ instance (ShowablePDRS p) => Show (PDRSRef -> p) where
 instance (ShowablePDRS p) => Show (PDRS -> p) where
   show p = show (resolve p 0 0)
 instance (ShowablePDRS p) => Show ((PDRSRef -> PDRS) -> p) where
+  show p = show (resolve p 0 0)
+instance (ShowablePDRS p) => Show (PDRSRel -> p) where
   show p = show (resolve p 0 0)
 
 ---------------------------------------------------------------------------
@@ -269,7 +274,7 @@ showPDRSLinear (AMerge p1 p2) = "(" ++ showPDRSLinear p1 ++ " " ++ opAMerge ++ "
 showPDRSLinear (PMerge p1 p2) = "(" ++ showPDRSLinear p1 ++ " " ++ opPMerge ++ " " ++ showPDRSLinear p2 ++ ")"
 showPDRSLinear (PDRS l m u c)     = show l ++ ":[" ++ showUniverseTuples u ++ "|" ++ intercalate "," (map showCon c) ++ "|" ++ showMAPsTuples m ++ "]"
   where showCon :: PCon -> String
-        showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ "))"
+        showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ (drsRelToString . pdrsRelToDRSRel) r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ "))"
         showCon (PCon p (Neg p1))     = "(" ++ show p ++ "," ++ opNeg ++ showPDRSLinear p1 ++ ")"
         showCon (PCon p (Imp p1 p2))  = "(" ++ show p ++ "," ++ showPDRSLinear p1 ++ " " ++ opImp ++ " " ++ showPDRSLinear p2 ++ ")"
         showCon (PCon p (Or p1 p2))   = "(" ++ show p ++ "," ++ showPDRSLinear p1 ++ " " ++ opOr  ++ " " ++ showPDRSLinear p2 ++ ")"
@@ -288,7 +293,7 @@ showPDRSSet (AMerge p1 p2) = "(" ++ showPDRSSet p1 ++ " " ++ opAMerge ++ " " ++ 
 showPDRSSet (PMerge p1 p2) = "(" ++ showPDRSSet p1 ++ " " ++ opPMerge ++ " " ++ showPDRSSet p2 ++ ")"
 showPDRSSet (PDRS l m u c)     = "<" ++ show l ++ ",{" ++ showMAPsTuples m ++ "},{" ++ showUniverseTuples u ++ "},{" ++ intercalate "," (map showCon c) ++ "}>"
   where showCon :: PCon -> String
-        showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ "))"
+        showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ (drsRelToString . pdrsRelToDRSRel) r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ "))"
         showCon (PCon p (Neg p1))     = "(" ++ show p ++ "," ++ opNeg ++ showPDRSSet p1 ++ ")"
         showCon (PCon p (Imp p1 p2))  = "(" ++ show p ++ "," ++ showPDRSSet p1 ++ " " ++ opImp ++ " " ++ showPDRSSet p2 ++ ")"
         showCon (PCon p (Or p1 p2))   = "(" ++ show p ++ "," ++ showPDRSSet p1 ++ " " ++ opOr  ++ " " ++ showPDRSSet p2 ++ ")"
@@ -334,7 +339,7 @@ showConditions :: [PCon] -> String
 showConditions [] = " "
 showConditions c  = foldr ((++) . showPCon) "" c
   where showPCon :: PCon -> String
-        showPCon (PCon p (Rel r d)) = projection p ++ " " ++ r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ ")\n"
+        showPCon (PCon p (Rel r d)) = projection p ++ " " ++ (drsRelToString . pdrsRelToDRSRel) r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ ")\n"
         showPCon (PCon p (Neg p1))
           | isLambdaPDRS p1 = showModifier (projection p) 0 (showModifier opNeg 0 b1)
           | otherwise       = showModifier (projection p) 2 (showModifier opNeg 2 b1)

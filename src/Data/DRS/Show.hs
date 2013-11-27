@@ -83,16 +83,21 @@ instance (ShowableDRS d) => ShowableDRS (DRSRef -> d) where
 instance (ShowableDRS d) => ShowableDRS (DRS -> d) where
   resolve ud nr nd = resolve (ud lv) nr (nd + 1)
     where lv = LambdaDRS (('k' : show nd,[]), nr + nd)
-instance (ShowableDRS p) => ShowableDRS ((DRSRef -> DRS) -> p) where
+instance (ShowableDRS d) => ShowableDRS ((DRSRef -> DRS) -> d) where
   resolve ud nr nd = resolve (ud lv) nr (nd + 1)
     where lv x = LambdaDRS (('k' : show nd,[drsRefToDRSVar x]), nr + nd)
+instance (ShowableDRS d) => ShowableDRS (DRSRel -> d) where
+  resolve ud nr nd = resolve (ud lv) nr (nd + 1)
+    where lv = LambdaDRSRel (('P' : show nd,[]), nr + nd)
 
 -- | Derive appropriate instances of 'Show' for 'ShowableDRS's.
 instance (ShowableDRS d) => Show (DRSRef -> d) where
   show d = show (resolve d 0 0)
 instance (ShowableDRS d) => Show (DRS -> d) where
   show d = show (resolve d 0 0)
-instance (ShowableDRS p) => Show ((DRSRef -> DRS) -> p) where
+instance (ShowableDRS d) => Show ((DRSRef -> DRS) -> d) where
+  show d = show (resolve d 0 0)
+instance (ShowableDRS d) => Show (DRSRel -> d) where
   show d = show (resolve d 0 0)
 
 ---------------------------------------------------------------------------
@@ -327,7 +332,7 @@ showDRSLinear (Merge d1 d2)
   | otherwise                                  = showDRSLinear d1 ++ " " ++ opMerge ++ " " ++ showDRSLinear d2
 showDRSLinear (DRS u c)         = "[" ++ showUniverse u "," ++ ": " ++  intercalate "," (map showCon c) ++ "]"
   where showCon :: DRSCon -> String
-        showCon (Rel r d)    = r ++ "(" ++ intercalate "," (map drsRefToDRSVar d) ++ ")"
+        showCon (Rel r d)    = drsRelToString r ++ "(" ++ intercalate "," (map drsRefToDRSVar d) ++ ")"
         showCon (Neg d1)     = opNeg ++ showDRSLinear d1
         showCon (Imp d1 d2)  = showDRSLinear d1 ++ " " ++ opImp ++ " " ++ showDRSLinear d2
         showCon (Or d1 d2)   = showDRSLinear d1 ++ " " ++ opOr  ++ " " ++ showDRSLinear d2
@@ -347,7 +352,7 @@ showDRSSet (Merge d1 d2)
   | otherwise                                  = showDRSSet d1 ++ " " ++ opMerge ++ " " ++ showDRSSet d2
 showDRSSet (DRS u c)         = "<{" ++ showUniverse u "," ++ "},{" ++ intercalate "," (map showCon c) ++ "}>"
   where showCon :: DRSCon -> String
-        showCon (Rel r d)    = r ++ "(" ++ intercalate "," (map drsRefToDRSVar d) ++ ")"
+        showCon (Rel r d)    = drsRelToString r ++ "(" ++ intercalate "," (map drsRefToDRSVar d) ++ ")"
         showCon (Neg d1)     = opNeg ++ showDRSSet d1
         showCon (Imp d1 d2)  = showDRSSet d1 ++ " " ++ opImp ++ " " ++ showDRSSet d2
         showCon (Or d1 d2)   = showDRSSet d1 ++ " " ++ opOr  ++ " " ++ showDRSSet d2
@@ -379,7 +384,7 @@ showConditions :: [DRSCon] -> String
 showConditions [] = " "
 showConditions c  = foldr ((++) . showCon) "" c
   where showCon :: DRSCon -> String
-        showCon (Rel r d) = r ++ "(" ++ intercalate "," (map drsRefToDRSVar d) ++ ")\n"
+        showCon (Rel r d) = drsRelToString r ++ "(" ++ intercalate "," (map drsRefToDRSVar d) ++ ")\n"
         showCon (Neg d1)
           | isLambdaDRS d1 = showModifier opNeg 0 b1
           | otherwise      = showModifier opNeg 2 b1

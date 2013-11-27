@@ -125,7 +125,7 @@ stripPVars (AMerge p1 p2)  = D.Merge (stripPVars p1) (stripPVars p2)
 stripPVars (PMerge p1 p2)  = D.Merge (stripPVars p1) (stripPVars p2)
 stripPVars (PDRS _ _ u c)  = D.DRS (map (pdrsRefToDRSRef . (\(PRef _ r) -> r)) u) (map stripPCon c)
   where stripPCon :: PCon -> D.DRSCon
-        stripPCon (PCon _ (Rel r d))    = D.Rel     r (map pdrsRefToDRSRef d)
+        stripPCon (PCon _ (Rel r d))    = D.Rel     (pdrsRelToDRSRel r) (map pdrsRefToDRSRef d)
         stripPCon (PCon _ (Neg p1))     = D.Neg     (stripPVars p1)
         stripPCon (PCon _ (Imp p1 p2))  = D.Imp     (stripPVars p1)     (stripPVars p2)
         stripPCon (PCon _ (Or p1 p2))   = D.Or      (stripPVars p1)     (stripPVars p2)

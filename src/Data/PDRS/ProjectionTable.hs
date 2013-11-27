@@ -19,10 +19,10 @@ module Data.PDRS.ProjectionTable
 ) where
 
 import Data.DRS.Show
-import Data.DRS.Structure (DRSRel, DRSVar)
-import Data.DRS.Variables (drsRefToDRSVar)
+import Data.DRS.Structure (DRSVar)
+import Data.DRS.Variables (drsRefToDRSVar,drsRelToString)
 
-import Data.PDRS.Structure (PCon (..), PDRS (..), pdrsLabel, PDRSRef (..), PRef (..), PVar)
+import Data.PDRS.Structure (PCon (..), PDRS (..), pdrsLabel, PDRSRef (..), PDRSRel (..), PRef (..), PVar)
 import qualified Data.PDRS.Structure as PDRS
 import Data.PDRS.Variables
 
@@ -74,7 +74,7 @@ showItem :: Item -> String
 showItem (c,is,ps) =
   case c of
     (Ref r)       -> "Ref" ++ "\t" ++ showRef r ++ tail
-    (Rel r d)     -> "Con" ++ "\t" ++ r ++ "("  ++ intercalate "," (map showRef d) ++ ")" ++ tail
+    (Rel r d)     -> "Con" ++ "\t" ++ drsRelToString (pdrsRelToDRSRel r) ++ "("  ++ intercalate "," (map showRef d) ++ ")" ++ tail
     (Neg pv)      -> "Con" ++ "\t" ++ opNeg     ++ " " ++ show pv ++ tail
     (Imp pv1 pv2) -> "Con" ++ "\t" ++ show pv1  ++ " " ++ opImp ++ " " ++ show pv2 ++ tail
     (Or pv1 pv2)  -> "Con" ++ "\t" ++ show pv1  ++ " " ++ opOr  ++ " " ++ show pv2 ++ tail
@@ -90,7 +90,7 @@ showItem (c,is,ps) =
 ---------------------------------------------------------------------------
 data Content =
   Ref PDRSRef
-  | Rel DRSRel [PDRSRef]
+  | Rel PDRSRel [PDRSRef]
   | Neg PVar
   | Imp PVar PVar
   | Or PVar PVar

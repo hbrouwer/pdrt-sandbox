@@ -62,7 +62,7 @@ drsToMFOL (DRS (r:rs) c) w = F.Exists (drsRefToDRSVar r) (drsToMFOL (DRS rs c) w
 -- | Converts a list of DRS conditions to a modal FOL formula with world @w@
 drsConsToMFOL :: [DRSCon] -> F.FOLVar -> F.FOLForm
 drsConsToMFOL [] _              = F.Top
-drsConsToMFOL (Rel r d:[]) w    = F.Rel r (w : map drsRefToDRSVar d)
+drsConsToMFOL (Rel r d:[]) w    = F.Rel (drsRelToString r) (w : map drsRefToDRSVar d)
 drsConsToMFOL (Neg d1:[]) w     = F.Neg (drsToMFOL d1 w)
 drsConsToMFOL (Imp d1 d2:[]) w  = quantifyForAll d1
   where quantifyForAll :: DRS -> F.FOLForm

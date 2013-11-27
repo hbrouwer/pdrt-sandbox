@@ -18,6 +18,7 @@ module Data.PDRS.Variables
 , pdrsRefToPRef
 , prefToPDRSRef
 , prefToPVar
+, pdrsRelToDRSRel
 -- * Binding
 , pdrsBoundPRef
 , pdrsBoundPVar
@@ -37,7 +38,7 @@ module Data.PDRS.Variables
 , newPRefs
 ) where
 
-import Data.DRS.Structure (DRSRef (..))
+import Data.DRS.Structure (DRSRef (..), DRSRel (..))
 import Data.DRS.Variables (newDRSRefs)
 import Data.PDRS.ProjectionGraph
 import Data.PDRS.Structure
@@ -84,6 +85,13 @@ prefToPDRSRef (PRef _ pr) = pr
 ---------------------------------------------------------------------------
 prefToPVar :: PRef -> PVar
 prefToPVar (PRef pv _) = pv
+
+---------------------------------------------------------------------------
+-- | Converts a 'PDRSRel' into a 'DRSRel'
+---------------------------------------------------------------------------
+pdrsRelToDRSRel :: PDRSRel -> DRSRel
+pdrsRelToDRSRel (LambdaPDRSRel lr) = LambdaDRSRel lr
+pdrsRelToDRSRel (PDRSRel r)        = DRSRel r
 
 ---------------------------------------------------------------------------
 -- ** Binding
@@ -360,11 +368,14 @@ lambdas (PDRS _ _ u c)  = lamRefs (map prefToPDRSRef u) `union` lamPCons c
         lamRefs (PDRSRef{}:ps)        = lamRefs ps
         lamPCons :: [PCon] -> [((DRSVar,[DRSVar]),Int)]
         lamPCons []                       = []
-        lamPCons (PCon _ (Rel _ d):cs)    = lamRefs d   `union` lamPCons cs
+        lamPCons (PCon _ (Rel r d):cs)    = lamRel r    `union` lamRefs d  `union` lamPCons cs
         lamPCons (PCon _ (Neg p1):cs)     = lambdas p1  `union` lamPCons cs
         lamPCons (PCon _ (Imp p1 p2):cs)  = lambdas p1  `union` lambdas p2 `union` lamPCons cs
         lamPCons (PCon _ (Or p1 p2):cs)   = lambdas p1  `union` lambdas p2 `union` lamPCons cs
         lamPCons (PCon p (Prop r p1):cs)  = lamRefs [r] `union` lambdas p1 `union` lamPCons cs
         lamPCons (PCon _ (Diamond p1):cs) = lambdas p1  `union` lamPCons cs
         lamPCons (PCon _ (Box p1):cs)     = lambdas p1  `union` lamPCons cs
+        lamRel :: PDRSRel -> [((DRSVar,[DRSVar]),Int)]
+        lamRel (LambdaPDRSRel lt) = [lt]
+        lamRel (PDRSRel _)        = []
 

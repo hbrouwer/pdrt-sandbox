@@ -18,6 +18,7 @@ module Data.PDRS.Structure
 , MAP
 , PRef (..)
 , PDRSRef (..)
+, PDRSRel (..)
 , PCon (..)
 , PDRSCon (..)
 , DRSRel
@@ -73,6 +74,14 @@ data PDRSRef =
   deriving (Eq,Show)
 
 ---------------------------------------------------------------------------
+-- | PDRS relation
+---------------------------------------------------------------------------
+data PDRSRel =
+  LambdaPDRSRel ((DRSVar,[DRSVar]),Int)
+  | PDRSRel String
+  deriving (Eq)
+
+---------------------------------------------------------------------------
 -- | A projected condition, consisting of a 'PVar' and a 'PDRSCon'.
 ---------------------------------------------------------------------------
 data PCon = PCon PVar PDRSCon
@@ -82,7 +91,7 @@ data PCon = PCon PVar PDRSCon
 -- | A 'PDRS' condition.
 ---------------------------------------------------------------------------
 data PDRSCon = 
-  Rel DRSRel [PDRSRef] -- ^ A relation defined on a set of referents
+  Rel PDRSRel [PDRSRef] -- ^ A relation defined on a set of referents
   | Neg PDRS           -- ^ A negated 'PDRS'
   | Imp PDRS PDRS      -- ^ An implication between two 'PDRS's
   | Or PDRS PDRS       -- ^ A disjunction between two 'PDRS's

@@ -14,6 +14,7 @@ module Data.DRS.Variables
 (
 -- * Conversion
   drsRefToDRSVar
+, drsRelToString
 -- * Binding
 , drsBoundRef
 -- * Variable Collections
@@ -43,6 +44,13 @@ import Data.Ord (comparing)
 drsRefToDRSVar :: DRSRef -> DRSVar
 drsRefToDRSVar (LambdaDRSRef ((r,_),_)) = r
 drsRefToDRSVar (DRSRef r)               = r
+
+---------------------------------------------------------------------------
+-- | Converts a 'DRSRef' @r@ into a 'DRSVar'.
+---------------------------------------------------------------------------
+drsRelToString :: DRSRel -> String
+drsRelToString (LambdaDRSRel ((r,_),_)) = r
+drsRelToString (DRSRel r)               = r
 
 ---------------------------------------------------------------------------
 -- ** Binding
@@ -175,11 +183,14 @@ lambdas (DRS u c)      = lamRefs u  `union` lamCons c
         lamRefs (LambdaDRSRef lt:ds) = lt : lamRefs ds
         lamCons :: [DRSCon] -> [((DRSVar,[DRSVar]),Int)]
         lamCons []              = []
-        lamCons (Rel _ d:cs)    = lamRefs d   `union` lamCons cs
+        lamCons (Rel r d:cs)    = lamRel r    `union` lamRefs d  `union` lamCons cs
         lamCons (Neg d1:cs)     = lambdas d1  `union` lamCons cs
         lamCons (Imp d1 d2:cs)  = lambdas d1  `union` lambdas d2 `union` lamCons cs
         lamCons (Or d1 d2:cs)   = lambdas d1  `union` lambdas d2 `union` lamCons cs
         lamCons (Prop r d1:cs)  = lamRefs [r] `union` lambdas d1 `union` lamCons cs
         lamCons (Diamond d1:cs) = lambdas d1  `union` lamCons cs
         lamCons (Box d1:cs)     = lambdas d1  `union` lamCons cs
+        lamRel :: DRSRel -> [((DRSVar,[DRSVar]),Int)]
+        lamRel (LambdaDRSRel lt) = [lt]
+        lamRel (DRSRel _)        = []
 
