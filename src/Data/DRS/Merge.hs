@@ -35,7 +35,6 @@ import Data.List (intersect, union)
 -- | Applies merge to 'DRS' @d1@ and 'DRS' @d2@.
 ---------------------------------------------------------------------------
 drsMerge :: DRS -> DRS -> DRS
--- | Deal with 'LambdaDRS's
 drsMerge d ld@(LambdaDRS _) = Merge d ld
 drsMerge ld@(LambdaDRS _) d = Merge ld d
 drsMerge d md@(Merge d1 d2)

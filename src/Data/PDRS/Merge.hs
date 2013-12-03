@@ -37,7 +37,6 @@ import Data.List ((\\), intersect, union)
 -- | Applies assertive merge to 'PDRS' @p1@ and 'PDRS' @p2@.
 ---------------------------------------------------------------------------
 pdrsAMerge :: PDRS -> PDRS -> PDRS
--- | Deal with 'LambdaPDRS's
 pdrsAMerge p lp@(LambdaPDRS _) = AMerge p lp
 pdrsAMerge lp@(LambdaPDRS _) p = AMerge lp p
 pdrsAMerge p am@(AMerge k1 k2)
@@ -57,8 +56,7 @@ pdrsAMerge pm@(PMerge k1 k2) p
   | isLambdaPDRS k2 = AMerge k2 (pdrsPMerge k1 p) -- (k1 * lk2) + p = lk2 + (k1 * p)
   | otherwise       = pdrsAMerge (pdrsResolveMerges pm) p
 pdrsAMerge p1@(PDRS{}) p2@(PDRS{}) = amerge pp1 (pdrsDisjoin pp2 pp1)
-  where -- | Merged 'PDRS's should be pure.
-        pp1 = pdrsPurify $ pdrsResolveMerges p1
+  where pp1 = pdrsPurify $ pdrsResolveMerges p1
         pp2 = pdrsPurify $ pdrsResolveMerges p2
         amerge :: PDRS -> PDRS -> PDRS
         -- | Make sure all asserted content in 'PDRS' @p@ remains
@@ -74,7 +72,6 @@ p1 <<+>> p2 = p1 `pdrsAMerge` p2
 -- | Applies projective merge to 'PDRS' @p1@ and 'PDRS' @p2@.
 ---------------------------------------------------------------------------
 pdrsPMerge :: PDRS -> PDRS -> PDRS
--- | Deal with 'LambdaPDRS's
 pdrsPMerge p lp@(LambdaPDRS _) = PMerge p lp
 pdrsPMerge lp@(LambdaPDRS _) p = PMerge lp p
 pdrsPMerge p am@(AMerge k1 k2)
@@ -96,8 +93,7 @@ pdrsPMerge pm@(PMerge k1 k2) p
   | isLambdaPDRS k2 = PMerge k2 (pdrsPMerge k1 p) -- (k1 * lk2) * p = lk2 * (k1 * p)
   | otherwise       = pdrsPMerge (pdrsResolveMerges pm) p
 pdrsPMerge p1@(PDRS{}) p2@(PDRS{}) = pmerge pp1 (pdrsDisjoin pp2 pp1)
-  where -- | Merged 'PDRS's should be pure.
-        pp1 = pdrsPurify $ pdrsResolveMerges p1
+  where pp1 = pdrsPurify $ pdrsResolveMerges p1
         pp2 = pdrsPurify $ pdrsResolveMerges p2
         pmerge :: PDRS -> PDRS -> PDRS
         -- | Content of 'PDRS' @p@ is added to 'PDRS' @p'@ without
