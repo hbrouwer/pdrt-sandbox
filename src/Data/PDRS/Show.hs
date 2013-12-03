@@ -309,10 +309,10 @@ showPDRSSet (PDRS l m u c)     = "<" ++ show l ++ ",{" ++ showMAPsTuples m ++ "}
 -- | Shows a horizontal line of width @l@ that label @pl@ in its center.
 ---------------------------------------------------------------------------
 showHeaderLine :: Int -> PVar -> String
-showHeaderLine l pl = [boxTopLeft] ++ dl ++ sl ++ dr ++ [boxTopRight] ++ "\n"
+showHeaderLine l pl = [boxTopLeft] ++ dl ++ "[" ++ sl ++ "]" ++ dr ++ [boxTopRight] ++ "\n"
   where sl = show pl
-        dl = replicate (floor   (fromIntegral (l - 2) / 2) - lf) boxHorLine
-        dr = replicate (ceiling (fromIntegral (l - 2) / 2) - lc) boxHorLine
+        dl = replicate ((floor   (fromIntegral (l - 2) / 2) - lf) - 1) boxHorLine
+        dr = replicate ((ceiling (fromIntegral (l - 2) / 2) - lc) - 1) boxHorLine
         lf = floor   (fromIntegral (length sl) / 2)
         lc = ceiling (fromIntegral (length sl) / 2)
 
