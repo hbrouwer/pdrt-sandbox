@@ -22,15 +22,16 @@ module Data.DRS.Input.String
 
 import Data.DRS.Structure
 
+import Data.Char (isSpace)
 import Data.List (intercalate)
 
 ---------------------------------------------------------------------------
 -- * Exported
 ---------------------------------------------------------------------------
 
-stringNegOps     = ["!", "not"]
+stringNegOps     = ["!", "not", "neg"]
 
-stringImpOps     = ["imp"]
+stringImpOps     = ["imp", "->", "=>"]
 
 stringOrOps      = ["v","V","or"]
 
@@ -42,7 +43,7 @@ stringToDRS :: String -> DRS
 stringToDRS s@('<':_)
   | felicitousBracketing s1 = DRS (parseRefs s2) (parseCons (tail (dropUpToMatchingBracket Curly s2)))
   | otherwise               = error "infelicitous bracketing"
-  where s1 = filter (/= ' ') (replaceArrows s)
+  where s1 = filter (not . isSpace) (replaceArrows s)
         s2 = dropOuterBrackets s1
 
 ---------------------------------------------------------------------------
@@ -102,6 +103,7 @@ replaceArrows s = replace s []
   where replace :: String -> String -> String
         replace [] s'          = s'
         replace ('-':'>':cs) s' = replace cs (s' ++ "imp")
+        replace ('=':'>':cs) s' = replace cs (s' ++ "imp")
         replace (c:cs)       s' = replace cs (s' ++ [c])
 
 parseRefs :: String -> [DRSRef]
