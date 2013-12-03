@@ -18,6 +18,7 @@ module Data.DRS
 , printFOLForm
 ) where
 
+import Data.DRS.Input.String as DRS -- todo: add input.hs
 import Data.DRS.LambdaCalculus as DRS
 import Data.DRS.Merge as DRS
 import Data.DRS.Properties as DRS

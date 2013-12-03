@@ -33,5 +33,6 @@ haddock:
 hlint:
 	hlint src/Data/*.hs
 	hlint src/Data/DRS/*.hs
+	hlint src/Data/DRS/Input/*.hs
 	hlint src/Data/FOL/*.hs
 	hlint src/Data/PDRS/*.hs
