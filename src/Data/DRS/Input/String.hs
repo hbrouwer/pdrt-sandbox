@@ -18,6 +18,14 @@ module Data.DRS.Input.String
 , stringBoxOps
 , stringDiamondOps
 , stringToDRS
+, BracketType (..)
+, brackets
+, felicitousBracketing
+, dropOuterBrackets
+, takeUpToMatchingBracket
+, dropUpToMatchingBracket
+, replaceArrows
+, splitOn
 ) where
 
 import Data.DRS.Structure

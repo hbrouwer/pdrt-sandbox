@@ -16,6 +16,7 @@ module Data.PDRS
 , module PDRS
 ) where
 
+import Data.PDRS.Input as PDRS
 import Data.PDRS.LambdaCalculus as PDRS
 import Data.PDRS.Merge as PDRS
 import Data.PDRS.ProjectionGraph as PDRS
