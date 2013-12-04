@@ -47,7 +47,7 @@ import Data.List (intercalate)
 -- | Transforms a 'String' representation of a DRS into a 'DRS'.
 ---------------------------------------------------------------------------
 stringToDRS :: String -> DRS
-stringToDRS s@('<':_)
+stringToDRS s
   | felicitousBracketing s' = parseDRS (filter (not . isSpace) s')
   | otherwise               = error "infelicitous bracketing"
   where s' = replaceArrows s

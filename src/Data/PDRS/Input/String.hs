@@ -29,7 +29,7 @@ import Data.PDRS.Structure
 ---------------------------------------------------------------------------
 
 stringToPDRS :: String -> PDRS
-stringToPDRS s@('<':_)
+stringToPDRS s
   | felicitousBracketing s' = parsePDRS (filter (not . isSpace) s')
   | otherwise               = error "infelicitous bracketing"
   where s' = replaceArrows s
@@ -42,7 +42,7 @@ stringToPDRS s@('<':_)
 -- | Converts a 'String' into a 'PDRS'.
 ---------------------------------------------------------------------------
 parsePDRS :: String -> PDRS
-parsePDRS s = PDRS l m u c
+parsePDRS s@('<':_) = PDRS l m u c
   where l  = read $ takeWhile (/= ',') (dropOuterBrackets s)
         m  = parseMAPs $ tail (dropUpToMatchingBracket Curly (tail (dropUpToMatchingBracket Curly s')))
         u  = parseRefs s'
