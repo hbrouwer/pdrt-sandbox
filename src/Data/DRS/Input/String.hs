@@ -12,12 +12,15 @@ String to DRS
 
 module Data.DRS.Input.String
 (
-  stringNegOps
+-- * String to DRS conversion
+  stringToDRS
+-- * String representations for operators
+, stringNegOps
 , stringImpOps
 , stringOrOps
 , stringBoxOps
 , stringDiamondOps
-, stringToDRS
+-- * Auxiliary functions for string parsing
 , BracketType (..)
 , brackets
 , felicitousBracketing
@@ -28,14 +31,26 @@ module Data.DRS.Input.String
 , splitOn
 ) where
 
-import Data.DRS.Structure
-
 import Data.Char (isSpace, toLower)
+import Data.DRS.Structure
 import Data.List (intercalate)
 
 ---------------------------------------------------------------------------
 -- * Exported
 ---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- ** String to DRS conversion
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Transforms a 'String' representation of a DRS into a 'DRS'.
+---------------------------------------------------------------------------
+stringToDRS :: String -> DRS
+stringToDRS s@('<':_)
+  | felicitousBracketing s' = parseDRS (filter (not . isSpace) s')
+  | otherwise               = error "infelicitous bracketing"
+  where s' = replaceArrows s
 
 ---------------------------------------------------------------------------
 -- ** String representations for operators
@@ -57,21 +72,7 @@ stringBoxOps     = ["b", "box", "necessary"]
 stringDiamondOps = ["d", "diamond", "maybe"]
 
 ---------------------------------------------------------------------------
--- ** String to DRS Conversion
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- | Transforms a 'String' representation of a DRS into a 'DRS'.
----------------------------------------------------------------------------
-stringToDRS :: String -> DRS
-stringToDRS s@('<':_)
-  | felicitousBracketing s1 = DRS (parseRefs s2) (parseCons (tail (dropUpToMatchingBracket Curly s2)))
-  | otherwise               = error "infelicitous bracketing"
-  where s1 = filter (not . isSpace) (replaceArrows s)
-        s2 = dropOuterBrackets s1
-
----------------------------------------------------------------------------
--- * Private
+-- ** Auxiliary functions for string parsing
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
@@ -156,6 +157,27 @@ replaceArrows s = replace s []
         replace (c:cs)       s' = replace cs (s' ++ [c])
 
 ---------------------------------------------------------------------------
+-- | Modification of 'words', where 'String' @s@ is broken into parts based
+-- on delimiter @c@.
+---------------------------------------------------------------------------
+splitOn :: Char -> String -> [String]
+splitOn c s = case dropWhile (c ==) s of 
+  "" -> []
+  s1 -> w : splitOn c s2
+        where (w, s2) = break (c ==) s1
+
+---------------------------------------------------------------------------
+-- * Private
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Converts a 'String' into a 'DRS'.
+---------------------------------------------------------------------------
+parseDRS :: String -> DRS
+parseDRS s@('<':_) = DRS (parseRefs s') (parseCons (tail (dropUpToMatchingBracket Curly s')))
+  where s' = dropOuterBrackets s
+
+---------------------------------------------------------------------------
 -- | Converts a 'String' into a set of 'DRSRef's.
 ---------------------------------------------------------------------------
 parseRefs :: String -> [DRSRef]
@@ -172,28 +194,18 @@ parseCons s@('{':_) = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly 
         parse []      = []
         parse (',':s) = parse s
         parse s
-          | pfx_op `elem` stringNegOps     = Neg     (stringToDRS d1)                   : parse (drop (length pfx_op + length d1) s)
-          | ifx_op `elem` stringImpOps     = Imp     (stringToDRS d1) (stringToDRS d2)  : parse (drop (length ifx_op + length d1 + length d2) s)
-          | ifx_op `elem` stringOrOps      = Or      (stringToDRS d1) (stringToDRS d2)  : parse (drop (length ifx_op + length d1 + length d2) s)
-          | ':'    `elem` pfx_op           = Prop    (DRSRef prop_r)  (stringToDRS d1)  : parse (drop (length prop_r + 1 + length d1) s)
-          | pfx_op `elem` stringDiamondOps = Diamond (stringToDRS d1)                   : parse (drop (length pfx_op + length d1) s)
-          | pfx_op `elem` stringBoxOps     = Box     (stringToDRS d1)                   : parse (drop (length pfx_op + length d1) s)
-          | otherwise                      = Rel     (DRSRel rel)     (map DRSRef refs) : parse (drop (length rel + 2 + length (intercalate "," refs)) s)
-          where pfx_op = map toLower (takeWhile (/= '<') s)
-                ifx_op = map toLower (takeWhile (/= '<') (dropUpToMatchingBracket Angle s))
-                prop_r = takeWhile (/= ':') s
-                rel    = takeWhile (/= '(') s
-                refs   = splitOn ',' (dropOuterBrackets (takeUpToMatchingBracket Parentheses (dropWhile (/= '(') s)))
-                d1     = takeUpToMatchingBracket Angle is
-                d2     = takeUpToMatchingBracket Angle (drop (length ifx_op) (dropUpToMatchingBracket Angle is))
-                is     = dropWhile (/= '<') s
+          | pfx `elem` stringNegOps     = Neg     (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
+          | ifx `elem` stringImpOps     = Imp     (parseDRS d1) (parseDRS d2)    : parse (drop (length ifx  + length d1 + length d2) s)
+          | ifx `elem` stringOrOps      = Or      (parseDRS d1) (parseDRS d2)    : parse (drop (length ifx  + length d1 + length d2) s)
+          | ':' `elem` pfx              = Prop    (DRSRef prop) (parseDRS d1)    : parse (drop (length prop + 1 + length d1) s)
+          | pfx `elem` stringDiamondOps = Diamond (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
+          | pfx `elem` stringBoxOps     = Box     (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
+          | otherwise                   = Rel     (DRSRel rel) (map DRSRef refs) : parse (drop (length rel  + 2 + length (intercalate "," refs)) s)
+          where pfx  = map toLower (takeWhile (/= '<') s)
+                ifx  = map toLower (takeWhile (/= '<') (dropUpToMatchingBracket Angle s))
+                prop = takeWhile (/= ':') s
+                rel  = takeWhile (/= '(') s
+                d1   = takeUpToMatchingBracket Angle (dropWhile (/= '<') s)
+                d2   = takeUpToMatchingBracket Angle (drop (length ifx) (dropUpToMatchingBracket Angle (dropWhile (/= '<') s)))
+                refs = splitOn ',' (dropOuterBrackets (takeUpToMatchingBracket Parentheses (dropWhile (/= '(') s)))
 
----------------------------------------------------------------------------
--- | Modification of 'words', where 'String' @s@ is broken into parts based
--- on delimiter @c@.
----------------------------------------------------------------------------
-splitOn :: Char -> String -> [String]
-splitOn c s = case dropWhile (c ==) s of 
-  "" -> []
-  s1 -> w : splitOn c s2
-        where (w, s2) = break (c ==) s1
