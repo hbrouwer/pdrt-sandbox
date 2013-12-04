@@ -15,23 +15,13 @@ module Data.PDRS.Input.String
   stringToPDRS
 ) where
 
-import Data.PDRS.Structure
-
 import Data.Char (isSpace, toLower)
-
-import Data.DRS.Input.String (stringNegOps, stringImpOps, stringOrOps, stringBoxOps, stringDiamondOps)
-import Data.DRS.Input.String (BracketType (..), brackets, felicitousBracketing, dropOuterBrackets)
-import Data.DRS.Input.String (takeUpToMatchingBracket, dropUpToMatchingBracket)
-import Data.DRS.Input.String (replaceArrows, splitOn)
-
+import Data.DRS.Input.String
 import Data.List (intercalate)
+import Data.PDRS.Structure
 
 ---------------------------------------------------------------------------
 -- * Exported
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- ** String to PDRS Conversion
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
@@ -40,16 +30,28 @@ import Data.List (intercalate)
 
 stringToPDRS :: String -> PDRS
 stringToPDRS s@('<':_)
-  | felicitousBracketing s1 = PDRS l m u c
-  | otherwise               = error "infelicitous bracketing"
-  where s1 = filter (not . isSpace) (replaceArrows s)
-        s2 = dropOuterBrackets s1
-        s3 = tail $ dropWhile (/= ',') s2
-        l  = read $ takeWhile (/= ',') s2
-        u  = parseRefs s3
-        c  = parseCons $ tail (dropUpToMatchingBracket Curly s3)
-        m  = parseMAPs $ tail (dropUpToMatchingBracket Curly (tail (dropUpToMatchingBracket Curly s3)))
+  | felicitousBracketing s' = parsePDRS (filter (not . isSpace) s')
+  | otherwise              = error "infelicitous bracketing"
+  where s' = replaceArrows s
 
+---------------------------------------------------------------------------
+-- * Private
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Converts a 'String' into a 'PDRS'.
+---------------------------------------------------------------------------
+parsePDRS :: String -> PDRS
+parsePDRS s = PDRS l m u c
+  where l  = read $ takeWhile (/= ',') (dropOuterBrackets s)
+        m  = parseMAPs $ tail (dropUpToMatchingBracket Curly (tail (dropUpToMatchingBracket Curly s')))
+        u  = parseRefs s'
+        c  = parseCons $ tail (dropUpToMatchingBracket Curly s')
+        s' = tail $ dropWhile (/= ',') s
+
+---------------------------------------------------------------------------
+-- | Converts a 'String' into a set of 'PRef's.
+---------------------------------------------------------------------------
 parseRefs :: String -> [PRef]
 parseRefs [] = []
 parseRefs s  = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly s
@@ -61,6 +63,9 @@ parseRefs s  = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly s
                 r = head $ tail t
                 t = splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Parentheses s)
 
+---------------------------------------------------------------------------
+-- | Converts a 'String' into a set of 'PCon's.
+---------------------------------------------------------------------------
 parseCons :: String -> [PCon]
 parseCons []        = []
 parseCons s@('{':_) = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly s
@@ -68,30 +73,32 @@ parseCons s@('{':_) = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly 
         parse []      = []
         parse (',':s) = parse s
         parse s
-          | pfx_op `elem` stringNegOps     = PCon p (Neg     (stringToPDRS d1)                   ) : parse (drop (pl + length pfx_op + length d1) s)
-          | ifx_op `elem` stringImpOps     = PCon p (Imp     (stringToPDRS d1) (stringToPDRS d2) ) : parse (drop (pl + length ifx_op + length d1 + length d2) s)
-          | ifx_op `elem` stringOrOps      = PCon p (Or      (stringToPDRS d1) (stringToPDRS d2) ) : parse (drop (pl + length ifx_op + length d1 + length d2) s)
-          | ':'    `elem` pfx_op           = PCon p (Prop    (PDRSRef prop_r)  (stringToPDRS d1) ) : parse (drop (pl + length prop_r + 1 + length d1) s)
-          | pfx_op `elem` stringDiamondOps = PCon p (Diamond (stringToPDRS d1)                   ) : parse (drop (pl + length pfx_op + length d1) s)
-          | pfx_op `elem` stringBoxOps     = PCon p (Box     (stringToPDRS d1)                   ) : parse (drop (pl + length pfx_op + length d1) s)
-          | otherwise                      = PCon p (Rel     (PDRSRel rel)     (map PDRSRef refs)) : parse (drop (pl + length rel + 2 + length (intercalate "," refs)) s)
-          where p = read $ takeWhile (/= ',') t
-                c = tail $ dropWhile (/= ',') t
-                t = dropOuterBrackets $ takeUpToMatchingBracket Parentheses s
-                pfx_op = map toLower (takeWhile (/= '<') c)
-                ifx_op = map toLower (takeWhile (/= '<') (dropUpToMatchingBracket Angle c))
-                prop_r = takeWhile (/= ':') c
-                rel    = takeWhile (/= '(') c
-                refs   = splitOn ',' (dropOuterBrackets (takeUpToMatchingBracket Parentheses (dropWhile (/= '(') c)))
-                d1     = takeUpToMatchingBracket Angle is
-                d2     = takeUpToMatchingBracket Angle (drop (length ifx_op) (dropUpToMatchingBracket Angle is))
-                is     = dropWhile (/= '<') c
-                pl     = length (show p) + 3
+          | pfx `elem` stringNegOps     = PCon p (Neg     (parsePDRS d1))                   : parse (drop (pl + length pfx  + length d1) s)
+          | ifx `elem` stringImpOps     = PCon p (Imp     (parsePDRS d1) (parsePDRS d2))    : parse (drop (pl + length ifx  + length d1 + length d2) s)
+          | ifx `elem` stringOrOps      = PCon p (Or      (parsePDRS d1) (parsePDRS d2))    : parse (drop (pl + length ifx  + length d1 + length d2) s)
+          | ':'    `elem` pfx           = PCon p (Prop    (PDRSRef prop) (parsePDRS d1))    : parse (drop (pl + length prop + 1 + length d1) s)
+          | pfx `elem` stringDiamondOps = PCon p (Diamond (parsePDRS d1))                   : parse (drop (pl + length pfx  + length d1) s)
+          | pfx `elem` stringBoxOps     = PCon p (Box     (parsePDRS d1))                   : parse (drop (pl + length pfx  + length d1) s)
+          | otherwise                   = PCon p (Rel     (PDRSRel rel) (map PDRSRef refs)) : parse (drop (pl + length rel  + 2 + length (intercalate "," refs)) s)
+          where ifx  = map toLower (takeWhile (/= '<') (dropUpToMatchingBracket Angle c))
+                pfx  = map toLower (takeWhile (/= '<') c)
+                prop = takeWhile (/= ':') c
+                rel  = takeWhile (/= '(') c
+                d1   = takeUpToMatchingBracket Angle (dropWhile (/= '<') c)
+                d2   = takeUpToMatchingBracket Angle (drop (length ifx) (dropUpToMatchingBracket Angle (dropWhile (/= '<') c)))
+                refs = splitOn ',' (dropOuterBrackets (takeUpToMatchingBracket Parentheses (dropWhile (/= '(') c)))
+                c  = tail $ dropWhile (/= ',') t
+                p  = read $ takeWhile (/= ',') t
+                t  = dropOuterBrackets $ takeUpToMatchingBracket Parentheses s
+                pl = length (show p) + 3
 
-parseMAPs :: String -> [(PVar,PVar)]
+---------------------------------------------------------------------------
+-- | Converts a 'String' into a set of 'MAP's.
+---------------------------------------------------------------------------
+parseMAPs :: String -> [MAP]
 parseMAPs [] = []
 parseMAPs s  = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly s
-  where parse :: String -> [(PVar,PVar)]
+  where parse :: String -> [MAP]
         parse [] = []
         parse (',':s) = parse s
         parse s = (p1,p2) : parse (drop (length (show p1) + length (show p2) + 3) s)
