@@ -15,11 +15,11 @@ module Data.DRS.Input.String
 -- * String to DRS conversion
   stringToDRS
 -- * String representations for operators
-, stringNegOps
-, stringImpOps
-, stringOrOps
-, stringBoxOps
-, stringDiamondOps
+, opNegString
+, opImpString
+, opOrString
+, opBoxString
+, opDiamondString
 -- * Auxiliary functions for string parsing
 , BracketType (..)
 , brackets
@@ -57,19 +57,19 @@ stringToDRS s@('<':_)
 ---------------------------------------------------------------------------
 
 -- | Negation operators (case insensitive): @!, not, neg@.
-stringNegOps     = ["!", "not", "neg"]
+opNegString     = ["!", "not", "neg"]
 
 -- | Implication operators (case insensitive): @imp, ->, =>, then@.
-stringImpOps     = ["imp", "->", "=>", "then"]
+opImpString     = ["imp", "->", "=>", "then"]
 
 -- | Disjuction operators (case insensitive): @v, or@.
-stringOrOps      = ["v", "or"]
+opOrString      = ["v", "or"]
 
 -- | Box operators (case insensitive): @b, box, necessary@.
-stringBoxOps     = ["b", "box", "necessary"]
+opBoxString     = ["b", "box", "necessary"]
 
 -- | Diamond operators (case insensitive): @d, diamond, maybe@.
-stringDiamondOps = ["d", "diamond", "maybe"]
+opDiamondString = ["d", "diamond", "maybe"]
 
 ---------------------------------------------------------------------------
 -- ** Auxiliary functions for string parsing
@@ -194,13 +194,13 @@ parseCons s@('{':_) = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly 
         parse []      = []
         parse (',':s) = parse s
         parse s
-          | pfx `elem` stringNegOps     = Neg     (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
-          | ifx `elem` stringImpOps     = Imp     (parseDRS d1) (parseDRS d2)    : parse (drop (length ifx  + length d1 + length d2) s)
-          | ifx `elem` stringOrOps      = Or      (parseDRS d1) (parseDRS d2)    : parse (drop (length ifx  + length d1 + length d2) s)
-          | ':' `elem` pfx              = Prop    (DRSRef prop) (parseDRS d1)    : parse (drop (length prop + 1 + length d1) s)
-          | pfx `elem` stringDiamondOps = Diamond (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
-          | pfx `elem` stringBoxOps     = Box     (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
-          | otherwise                   = Rel     (DRSRel rel) (map DRSRef refs) : parse (drop (length rel  + 2 + length (intercalate "," refs)) s)
+          | pfx `elem` opNegString     = Neg     (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
+          | ifx `elem` opImpString     = Imp     (parseDRS d1) (parseDRS d2)    : parse (drop (length ifx  + length d1 + length d2) s)
+          | ifx `elem` opOrString      = Or      (parseDRS d1) (parseDRS d2)    : parse (drop (length ifx  + length d1 + length d2) s)
+          | ':' `elem` pfx             = Prop    (DRSRef prop) (parseDRS d1)    : parse (drop (length prop + 1 + length d1) s)
+          | pfx `elem` opDiamondString = Diamond (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
+          | pfx `elem` opBoxString     = Box     (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
+          | otherwise                  = Rel     (DRSRel rel) (map DRSRef refs) : parse (drop (length rel  + 2 + length (intercalate "," refs)) s)
           where pfx  = map toLower (takeWhile (/= '<') s)
                 ifx  = map toLower (takeWhile (/= '<') (dropUpToMatchingBracket Angle s))
                 prop = takeWhile (/= ':') s
