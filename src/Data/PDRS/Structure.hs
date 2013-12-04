@@ -41,11 +41,16 @@ import Data.DRS.Structure (DRSRel, DRSVar)
 -- | Projective Discourse Representation Structure.
 ---------------------------------------------------------------------------
 data PDRS =
-  LambdaPDRS ((DRSVar,[DRSVar]),Int)         -- ^ A lambda 'PDRS' (and its argument position)
-  | AMerge PDRS PDRS              -- ^ An assertive merge between two 'PDRS's
-  | PMerge PDRS PDRS              -- ^ A projective merge between two 'PDRS's
-  | PDRS PVar [MAP] [PRef] [PCon] -- ^ A 'PDRS', consisting of a 'PVar' (a label), 
-                                  -- a list of 'MAP's, a set of 'PRef's, and a set of 'PCon's
+  LambdaPDRS ((DRSVar,[DRSVar]),Int)
+  -- ^ A lambda 'PDRS' (a variable, the set of referents
+  -- to be applied to the PDRS, and its argument position)
+  | AMerge PDRS PDRS
+  -- ^ An assertive merge between two 'PDRS's
+  | PMerge PDRS PDRS
+  -- ^ A projective merge between two 'PDRS's
+  | PDRS PVar [MAP] [PRef] [PCon]
+  -- ^ A 'PDRS', consisting of a 'PVar' (a label), 
+  -- a set of 'MAP's, a set of 'PRef's, and a set of 'PCon's
   deriving (Eq)
 
 ---------------------------------------------------------------------------
@@ -69,8 +74,11 @@ data PRef = PRef PVar PDRSRef
 -- | A 'PDRS' referent.
 ---------------------------------------------------------------------------
 data PDRSRef =
-  LambdaPDRSRef ((DRSVar,[DRSVar]),Int) -- ^ A lambda PDRS referent (with its argument position)
-  | PDRSRef DRSVar            -- ^ A PDRS referent
+  LambdaPDRSRef ((DRSVar,[DRSVar]),Int)
+  -- ^ A lambda PDRS referent (a variable, the set of referents
+  -- to be applied to the referent, and its argument position)
+  | PDRSRef DRSVar
+  -- ^ A PDRS referent
   deriving (Eq,Show)
 
 ---------------------------------------------------------------------------
@@ -92,12 +100,12 @@ data PCon = PCon PVar PDRSCon
 ---------------------------------------------------------------------------
 data PDRSCon = 
   Rel PDRSRel [PDRSRef] -- ^ A relation defined on a set of referents
-  | Neg PDRS           -- ^ A negated 'PDRS'
-  | Imp PDRS PDRS      -- ^ An implication between two 'PDRS's
-  | Or PDRS PDRS       -- ^ A disjunction between two 'PDRS's
-  | Prop PDRSRef PDRS  -- ^ A proposition 'PDRS'
-  | Diamond PDRS       -- ^ A possible 'PDRS'
-  | Box PDRS           -- ^ A necessary 'PDRS'
+  | Neg PDRS            -- ^ A negated 'PDRS'
+  | Imp PDRS PDRS       -- ^ An implication between two 'PDRS's
+  | Or PDRS PDRS        -- ^ A disjunction between two 'PDRS's
+  | Prop PDRSRef PDRS   -- ^ A proposition 'PDRS'
+  | Diamond PDRS        -- ^ A possible 'PDRS'
+  | Box PDRS            -- ^ A necessary 'PDRS'
   deriving (Eq)
 
 ---------------------------------------------------------------------------

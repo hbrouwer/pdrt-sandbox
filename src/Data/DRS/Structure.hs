@@ -35,9 +35,13 @@ import Data.List (union)
 -- | Discourse Representation Structure (DRS)
 ---------------------------------------------------------------------------
 data DRS =
-  LambdaDRS ((DRSVar,[DRSVar]),Int)  -- ^ A lambda DRS (with its argument position)
-  | Merge DRS DRS         -- ^ A merge between two DRSs
-  | DRS [DRSRef] [DRSCon] -- ^ A DRS (a set of referents and a set of conditions)
+  LambdaDRS ((DRSVar,[DRSVar]),Int)
+  -- ^ A lambda DRS (a variable, the set of referents
+  -- to be applied to the DRS, and its argument position)
+  | Merge DRS DRS
+  -- ^ A merge between two DRSs
+  | DRS [DRSRef] [DRSCon]
+  -- ^ A DRS (a set of referents and a set of conditions)
   deriving (Eq)
 
 ---------------------------------------------------------------------------
@@ -49,8 +53,11 @@ type DRSVar = String
 -- | DRS referent
 ---------------------------------------------------------------------------
 data DRSRef =
-  LambdaDRSRef ((DRSVar,[DRSVar]),Int) -- ^ A lambda DRS referent (with its argument position)
-  | DRSRef DRSVar            -- ^ A DRS referent
+  LambdaDRSRef ((DRSVar,[DRSVar]),Int)
+  -- ^ A lambda DRS referent (a variable, the set of referents
+  -- to be applied to the referent, and its argument position)
+  | DRSRef DRSVar
+  -- ^ A DRS referent
   deriving (Eq)
 
 ---------------------------------------------------------------------------
