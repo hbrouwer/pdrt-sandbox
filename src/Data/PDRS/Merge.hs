@@ -19,7 +19,6 @@ module Data.PDRS.Merge (
 , (<<&>>)
 , pdrsResolveMerges
 , emptyPDRS
-, pdrsDisjoin
 ) where
 
 import Data.PDRS.LambdaCalculus
@@ -55,9 +54,9 @@ pdrsAMerge pm@(PMerge k1 k2) p
   | isLambdaPDRS k1 = PMerge k1 (pdrsAMerge k2 p) -- (lk1 * k2) + p = lk1 * (k2 + p)
   | isLambdaPDRS k2 = AMerge k2 (pdrsPMerge k1 p) -- (k1 * lk2) + p = lk2 + (k1 * p)
   | otherwise       = pdrsAMerge (pdrsResolveMerges pm) p
-pdrsAMerge p1@(PDRS{}) p2@(PDRS{}) = amerge pp1 (pdrsDisjoin pp2 pp1)
-  where pp1 = pdrsPurify $ pdrsResolveMerges p1
-        pp2 = pdrsPurify $ pdrsResolveMerges p2
+pdrsAMerge p1@(PDRS{}) p2@(PDRS{}) = amerge p1 (pdrsDisjoin p2' p1')
+  where p1' = pdrsPurify $ pdrsResolveMerges p1
+        p2' = pdrsPurify $ pdrsResolveMerges p2
         amerge :: PDRS -> PDRS -> PDRS
         -- | Make sure all asserted content in 'PDRS' @p@ remains
         -- asserted by renaming global label to @l@ before merging.
@@ -92,9 +91,9 @@ pdrsPMerge pm@(PMerge k1 k2) p
   | isLambdaPDRS k1 = PMerge k1 (pdrsPMerge k2 p) -- (lk1 * k2) * p = lk1 * (k2 * p)
   | isLambdaPDRS k2 = PMerge k2 (pdrsPMerge k1 p) -- (k1 * lk2) * p = lk2 * (k1 * p)
   | otherwise       = pdrsPMerge (pdrsResolveMerges pm) p
-pdrsPMerge p1@(PDRS{}) p2@(PDRS{}) = pmerge pp1 (pdrsDisjoin pp2 pp1)
-  where pp1 = pdrsPurify $ pdrsResolveMerges p1
-        pp2 = pdrsPurify $ pdrsResolveMerges p2
+pdrsPMerge p1@(PDRS{}) p2@(PDRS{}) = pmerge p1' (pdrsDisjoin p2' p1')
+  where p1' = pdrsPurify $ pdrsResolveMerges p1
+        p2' = pdrsPurify $ pdrsResolveMerges p2
         pmerge :: PDRS -> PDRS -> PDRS
         -- | Content of 'PDRS' @p@ is added to 'PDRS' @p'@ without
         -- replacing pointers, resulting in the content of @p@ becoming
@@ -108,7 +107,6 @@ p1 <<*>> p2 = p1 `pdrsPMerge` p2
 ---------------------------------------------------------------------------
 -- | Combines an unresolved 'PDRS' and a 'PDRS' into a resolved 'PDRS'.
 ---------------------------------------------------------------------------
-
 pdrsCombine :: ((PDRSRef -> PDRS) -> PDRS) -> PDRS -> PDRS
 pdrsCombine up p = pdrsResolveMerges (up (const p))
 
@@ -149,20 +147,20 @@ emptyPDRS (PMerge p1 p2)
 emptyPDRS (PDRS l _ _ _)    = PDRS l [] [] []
 
 ---------------------------------------------------------------------------
--- | Disjoins 'PDRS' @p1@ from 'PDRS' @p2@, where
+-- * Private
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Disjoins 'PDRS' @p1@ from 'PDRS' @p2@, where:
 --
 -- [@p1@ is disjoined from @p2@ /iff/]
 --  
 --  * All duplicate occurrences of 'PVar's and 'PDRSRef's from 'PDRS' @p2@
---    in 'PDRS' @p1@ are replaced by new variables. Asserted referents in
---    the  universe of the antecedent 'PDRS' do not count as duplicates
---    because multiple bound declarations are allowed in PDRT.
+--    in 'PDRS' @p1@ are replaced by new variables.
 ---------------------------------------------------------------------------
-
 pdrsDisjoin :: PDRS -> PDRS -> PDRS
 pdrsDisjoin p p' = pdrsAlphaConvert p (zip ops nps) (zip ors nrs)
   where ops = pdrsPVars p `intersect` pdrsPVars p'
         nps = newPVars ops (pdrsPVars p `union` pdrsPVars p')
-        ors = pdrsVariables p `intersect` filter (\r -> PRef (pdrsLabel p') r `notElem` pdrsUniverse p') (pdrsVariables p')
+        ors = pdrsVariables p `intersect` pdrsVariables p'
         nrs = newPDRSRefs ors (pdrsVariables p `union` pdrsVariables p')
-
