@@ -148,7 +148,7 @@ renameMAPs m lp gp ps = map (\(l1,l2) -> (renamePVar l1 lp gp ps, renamePVar l2 
 -- a conversion list for 'PVar's @ps@ and 'PDRSRef's @rs@.
 ---------------------------------------------------------------------------
 renameUniverse :: [PRef] -> PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> [PRef]
-renameUniverse u lp gp ps rs = map (\(PRef p r) -> PRef (renamePVar p lp gp ps) (renameVar r rs)) u
+renameUniverse u lp gp ps rs = map (\(PRef p r) -> PRef (renamePVar p lp gp ps) (renamePDRSRef p r lp gp rs)) u
 
 ---------------------------------------------------------------------------
 -- | Applies alpha conversion to a list of 'PCon's @c@ in
@@ -173,8 +173,9 @@ renamePCons c lp gp ps rs = map rename c
 ---------------------------------------------------------------------------
 renamePDRSRef :: PVar -> PDRSRef -> PDRS -> PDRS -> [(PDRSRef,PDRSRef)] -> PDRSRef
 renamePDRSRef pv r lp gp rs
-  | pdrsBoundPRef (PRef pv r) lp gp = renameVar r rs
-  | otherwise                       = r
+  | any (\pr@(PRef pv' r') -> pdrsPRefBoundByPRef (PRef pv r) lp pr gp && pdrsIsFreePVar pv' gp) (pdrsUniverses gp) = r
+  | not (pdrsBoundPRef (PRef pv r) lp gp) = r
+  | otherwise                             = renameVar r rs
 
 ---------------------------------------------------------------------------
 -- | Converts a 'PVar' into a new 'PVar' in case it occurs bound in 
@@ -182,8 +183,8 @@ renamePDRSRef pv r lp gp rs
 ---------------------------------------------------------------------------
 renamePVar :: PVar -> PDRS -> PDRS -> [(PVar,PVar)] -> PVar
 renamePVar pv lp gp ps
-  | pdrsBoundPVar pv lp gp = renameVar pv ps
-  | otherwise              = pv
+  | not (pdrsBoundPVar pv lp gp) = pv
+  | otherwise                    = renameVar pv ps
 
 ---------------------------------------------------------------------------
 -- ** Purifying PVars
