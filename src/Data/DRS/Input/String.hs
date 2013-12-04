@@ -36,8 +36,8 @@ import Data.List (intercalate)
 -- | Negation operators (case insensitive): @!, not, neg@.
 stringNegOps     = ["!", "not", "neg"]
 
--- | Implication operators (case insensitive): @imp, ->, =>@.
-stringImpOps     = ["imp", "->", "=>"]
+-- | Implication operators (case insensitive): @imp, ->, =>, then@.
+stringImpOps     = ["imp", "->", "=>", "then"]
 
 -- | Disjuction operators (case insensitive): @v, or@.
 stringOrOps      = ["v", "or"]
@@ -181,7 +181,8 @@ parseCons s@('{':_) = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly 
                 is     = dropWhile (/= '<') s
 
 ---------------------------------------------------------------------------
--- | Modification of 'words'.
+-- | Modification of 'words', where 'String' @s@ is broken into parts based
+-- on delimiter @c@.
 ---------------------------------------------------------------------------
 splitOn :: Char -> String -> [String]
 splitOn c s = case dropWhile (c ==) s of 
