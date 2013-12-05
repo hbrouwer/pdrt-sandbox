@@ -12,8 +12,7 @@ PDRS properties
 
 module Data.PDRS.Properties 
 (
-  isLambdaPDRS
-, isMergePDRS
+  isMergePDRS
 , isResolvedPDRS
 , isPresupPDRS
 ) where
@@ -24,15 +23,6 @@ import Data.PDRS.Variables
 ---------------------------------------------------------------------------
 -- * Exported
 ---------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- | Returns whether a PDRS is entirely a 'LambdaPDRS' (at its top-level)
----------------------------------------------------------------------------
-isLambdaPDRS :: PDRS -> Bool
-isLambdaPDRS (LambdaPDRS {}) = True
-isLambdaPDRS (AMerge p1 p2)  = isLambdaPDRS p1 && isLambdaPDRS p2
-isLambdaPDRS (PMerge p1 p2)  = isLambdaPDRS p1 && isLambdaPDRS p2
-isLambdaPDRS (PDRS {})       = False
 
 ---------------------------------------------------------------------------
 -- | Returns whether a 'PDRS' is an 'AMerge' or 'PMerge' (at its top-level)

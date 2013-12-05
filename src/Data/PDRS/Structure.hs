@@ -12,6 +12,7 @@ PDRS data structure
 
 module Data.PDRS.Structure
 (
+-- * PDRS data type
   PDRS (..)
 , DRSVar
 , PVar
@@ -22,6 +23,8 @@ module Data.PDRS.Structure
 , PCon (..)
 , PDRSCon (..)
 , DRSRel
+-- * Basic functions on PDRSs
+, isLambdaPDRS
 , pdrsLabel
 , pdrsUniverse
 , isSubPDRS
@@ -113,9 +116,25 @@ data PDRSCon =
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
+-- | Returns whether a PDRS is entirely a 'LambdaPDRS' (at its top-level)
+---------------------------------------------------------------------------
+isLambdaPDRS :: PDRS -> Bool
+isLambdaPDRS (LambdaPDRS {}) = True
+isLambdaPDRS (AMerge p1 p2)  = isLambdaPDRS p1 && isLambdaPDRS p2
+isLambdaPDRS (PMerge p1 p2)  = isLambdaPDRS p1 && isLambdaPDRS p2
+isLambdaPDRS (PDRS {})       = False
+
+---------------------------------------------------------------------------
 -- | Returns the label of a 'PDRS'.
 ---------------------------------------------------------------------------
 pdrsLabel :: PDRS -> PVar
+pdrsLabel (LambdaPDRS _) = 0
+pdrsLabel (AMerge p1 p2)
+  | isLambdaPDRS p2 = pdrsLabel p1
+  | otherwise       = pdrsLabel p2
+pdrsLabel (PMerge p1 p2)
+  | isLambdaPDRS p2 = pdrsLabel p1
+  | otherwise       = pdrsLabel p2
 pdrsLabel (PDRS l _ _ _) = l
 
 ---------------------------------------------------------------------------
