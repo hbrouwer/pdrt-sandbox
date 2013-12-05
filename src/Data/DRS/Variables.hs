@@ -24,8 +24,12 @@ module Data.DRS.Variables
 , drsLambdas
 -- * New Variables
 , newDRSRefs
+
+
+, increase
 ) where
 
+import Data.Char (isDigit)
 import Data.DRS.Structure
 import Data.List (partition, sortBy, union)
 import Data.Ord (comparing)
@@ -154,17 +158,13 @@ drsLambdas d = map fst (sortBy (comparing snd) (lambdas d))
 -- a list of existing 'DRSRef's.
 ---------------------------------------------------------------------------
 newDRSRefs :: [DRSRef] -> [DRSRef] -> [DRSRef]
-newDRSRefs [] _        = []
-newDRSRefs (r:rs) refs = nr : newDRSRefs rs (nr:refs)
-  where nr = newRef 0
-        newRef :: Int -> DRSRef
-        newRef n
-          | r' `elem` refs = newRef (n + 1)
-          | otherwise      = r'
-          where r' =
-                  case r of
-                   (LambdaDRSRef ((dv,dvs),lp)) -> LambdaDRSRef ((dv ++ show n,dvs),lp)
-                   (DRSRef dv)                  -> DRSRef       (dv ++ show n)
+newDRSRefs [] _    = []
+newDRSRefs (r:ors) ers
+  | r' `elem` (ors `union` ers) = newDRSRefs (r':ors) ers
+  | otherwise                   = r':newDRSRefs ors (r':ers)
+  where r' = case r of 
+          (LambdaDRSRef ((dv,dvs),lp)) -> LambdaDRSRef ((increase dv,dvs),lp)
+          (DRSRef dv)                  -> DRSRef       (increase dv)
 
 ---------------------------------------------------------------------------
 -- * Private
@@ -193,4 +193,18 @@ lambdas (DRS u c)      = lamRefs u  `union` lamCons c
         lamRel :: DRSRel -> [((DRSVar,[DRSVar]),Int)]
         lamRel (LambdaDRSRel lt) = [lt]
         lamRel (DRSRel _)        = []
+
+---------------------------------------------------------------------------
+-- | Increases the index of a 'DRSVar' by 1, or adds an index to it.
+---------------------------------------------------------------------------
+increase :: DRSVar -> DRSVar
+increase v = (reverse $ dropWhile (isDigit) (reverse v)) ++ i
+  where i = case (index v) of
+          Nothing -> show 1
+          Just n  -> show (n + 1)
+        index :: DRSVar -> Maybe Int
+        index v 
+          | i == ""   = Nothing
+          | otherwise = Just $ read i
+          where i = reverse $ takeWhile (isDigit) (reverse v)
 
