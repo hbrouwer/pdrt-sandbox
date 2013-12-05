@@ -36,6 +36,8 @@ module Data.PDRS.Variables
 , newPVars
 , newPDRSRefs
 , newPRefs
+
+, lambdas --change name!
 ) where
 
 import Data.DRS.Structure (DRSRef (..), DRSRel (..))

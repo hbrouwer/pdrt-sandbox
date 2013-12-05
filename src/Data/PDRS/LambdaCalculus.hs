@@ -22,6 +22,7 @@ module Data.PDRS.LambdaCalculus
 ) where
 
 import Data.DRS.LambdaCalculus (renameVar)
+import Data.DRS.Variables (drsRefToDRSVar)
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 
@@ -123,7 +124,8 @@ instance (PDRSAtom a, AbstractPDRS b) => AbstractPDRS (a -> b)
 -- @ps@ and 'PDRSRef's @rs@.
 ---------------------------------------------------------------------------
 renameSubPDRS :: PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> PDRS
-renameSubPDRS lp@(LambdaPDRS _) _ _ _    = lp
+renameSubPDRS lp@(LambdaPDRS ((v,ds),i)) _ _ rs    = LambdaPDRS ((v,ds'),i)
+  where ds' = map (drsRefToDRSVar . pdrsRefToDRSRef . ((flip renameVar) rs) . (\v -> PDRSRef v)) ds
 renameSubPDRS (AMerge p1 p2) gp ps rs    = AMerge p1' p2'
   where p1' = renameSubPDRS p1 gp ps rs
         p2' = renameSubPDRS p2 gp ps rs
