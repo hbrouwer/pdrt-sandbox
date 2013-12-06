@@ -246,14 +246,14 @@ showPDRSBox (AMerge p1 p2)
   | isLambdaPDRS p1 && not(isLambdaPDRS p2) = showBrackets (showConcat (showPadding (showPDRSBox p1)) (showModifier opAMerge 2 (showPDRSBox p2)))
   | otherwise                               = showBrackets (showConcat (showPDRSBox p1) (showModifier opAMerge 2 (showPDRSBox p2)))
   where showBrackets :: String -> String
-        showBrackets s = showModifier "(" 2 (showConcat s (showPadding $ ")" ++ "\n"))
+        showBrackets s = showModifier "(" 2 (showConcat s (showPadding ")\n"))
 showPDRSBox (PMerge p1 p2)
   | isLambdaPDRS p1 && isLambdaPDRS p2      = showModifier "(" 0 (showConcat (showConcat (showPDRSBox p1) (showModifier opPMerge 0 (showPDRSBox p2))) ")")
   | not(isLambdaPDRS p1) && isLambdaPDRS p2 = showBrackets (showConcat (showPDRSBox p1) (showModifier opPMerge 2 (showPadding (showPDRSBox p2))))
   | isLambdaPDRS p1 && not(isLambdaPDRS p2) = showBrackets (showConcat (showPadding (showPDRSBox p1)) (showModifier opPMerge 2 (showPDRSBox p2)))
   | otherwise                               = showBrackets (showConcat (showPDRSBox p1) (showModifier opPMerge 2 (showPDRSBox p2)))
   where showBrackets :: String -> String
-        showBrackets s = showModifier "(" 2 (showConcat s (showPadding $ ")" ++ "\n"))
+        showBrackets s = showModifier "(" 2 (showConcat s (showPadding ")\n"))
 showPDRSBox (PDRS pl m u c)    = showHeaderLine l pl
   ++ showContent l ul ++ showHorizontalLine l boxMiddleLeft boxMiddleRight
   ++ showContent l cl ++ showHorizontalLine l boxMiddleLeft boxMiddleRight
