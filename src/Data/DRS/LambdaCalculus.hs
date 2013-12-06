@@ -23,6 +23,7 @@ module Data.DRS.LambdaCalculus
 , drsPurify
 ) where
 
+import Data.DRS.Binding
 import Data.DRS.DataType
 import Data.DRS.Structure
 import Data.DRS.Variables

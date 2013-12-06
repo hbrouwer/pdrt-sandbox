@@ -17,6 +17,7 @@ module Data.DRS.Properties
 , isPureDRS
 ) where
 
+import Data.DRS.Binding
 import Data.DRS.DataType
 import Data.DRS.Structure
 import Data.DRS.Variables

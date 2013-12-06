@@ -55,11 +55,9 @@ pdrsUniverse (PDRS _ _ u _) = u
 emptyPDRS :: PDRS -> PDRS
 emptyPDRS lp@(LambdaPDRS _) = lp
 emptyPDRS (AMerge p1 p2)
-  | isLambdaPDRS p1 = AMerge p1 (emptyPDRS p2)
   | isLambdaPDRS p2 = AMerge (emptyPDRS p1) p2
   | otherwise       = emptyPDRS p2
 emptyPDRS (PMerge p1 p2)
-  | isLambdaPDRS p1 = PMerge p1 (emptyPDRS p2)
   | isLambdaPDRS p2 = PMerge (emptyPDRS p1) p2
   | otherwise       = emptyPDRS p2
 emptyPDRS (PDRS l _ _ _)    = PDRS l [] [] []

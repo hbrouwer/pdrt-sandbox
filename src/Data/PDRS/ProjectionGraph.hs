@@ -16,6 +16,7 @@ module Data.PDRS.ProjectionGraph
 , projectionGraph
 , path
 , vertices
+, pdrsIsAccessibleContext
 ) where
 
 import Data.Graph (buildG, Edge, Graph, path, vertices)
@@ -39,6 +40,18 @@ projectionGraph :: PDRS -> PGraph
 projectionGraph p = buildG (minimum ps, maximum ps) es
   where es = edges p
         ps = map fst es `union` map snd es
+
+---------------------------------------------------------------------------
+-- | Returns whether 'PDRS' context @p2@ is accessible from 'PDRS' 
+-- context @p1@ in PDRS @p@
+---------------------------------------------------------------------------
+pdrsIsAccessibleContext :: PVar -> PVar -> PDRS -> Bool
+pdrsIsAccessibleContext p1 p2 p 
+  | p1 `notElem` vs || p2 `notElem` vs = False
+  | path pg p1 p2                      = True
+  | otherwise                          = False
+  where pg = projectionGraph p
+        vs = vertices pg
 
 ---------------------------------------------------------------------------
 -- * Private

@@ -20,13 +20,15 @@ module Data.PDRS.Translate
 import qualified Data.DRS.DataType as D
 import Data.DRS.Translate (drsToFOL)
 import qualified Data.FOL.Formula as F
+
+import Data.List (delete, intersect, union)
+
+import Data.PDRS.Binding
 import Data.PDRS.DataType
 import Data.PDRS.LambdaCalculus
 import Data.PDRS.Merge
 import Data.PDRS.Structure
 import Data.PDRS.Variables
-
-import Data.List (delete, intersect, union)
 
 ---------------------------------------------------------------------------
 -- * Exported
