@@ -50,7 +50,7 @@ data DRSRef =
   -- to be applied to the referent, and its argument position)
   | DRSRef DRSVar
   -- ^ A DRS referent
-  deriving (Eq)
+  deriving (Eq,Show)
 
 ---------------------------------------------------------------------------
 -- | DRS relation
@@ -58,7 +58,7 @@ data DRSRef =
 data DRSRel =
   LambdaDRSRel ((DRSVar,[DRSVar]),Int)
   | DRSRel String
-  deriving (Eq)
+  deriving (Eq,Show)
 
 ---------------------------------------------------------------------------
 -- | DRS condition
@@ -72,5 +72,3 @@ data DRSCon =
   | Diamond DRS       -- ^ A possible DRS
   | Box DRS           -- ^ A necessary DRS
   deriving (Eq)
-
-

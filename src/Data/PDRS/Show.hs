@@ -93,12 +93,14 @@ data PDRSNotation p =
   Set p      -- ^ Set notation
   | Linear p -- ^ Linear notation
   | Boxes p  -- ^ Box notation
+  | Debug p  -- ^ Debug notation
 
 -- | Derive an instance of 'Show' for 'PDRSNotation'.
 instance (ShowablePDRS p) => Show (PDRSNotation p) where
   show (Boxes p)  = '\n' : showPDRS (Boxes  (resolve p 0 0))
   show (Linear p) = '\n' : showPDRS (Linear (resolve p 0 0))
   show (Set p)    = '\n' : showPDRS (Set    (resolve p 0 0))
+  show (Debug p)  = '\n' : showPDRS (Debug  (resolve p 0 0))
 
 ---------------------------------------------------------------------------
 -- | Shows a 'PDRS'.
@@ -109,6 +111,7 @@ showPDRS n =
     (Boxes p)  -> showModifier (showPDRSLambdas p) 2 (showPDRSBox p)
     (Linear p) -> showPDRSLambdas p ++ showPDRSLinear p ++ "\n" 
     (Set p)    -> showPDRSLambdas p ++ showPDRSSet p  ++ "\n" 
+    (Debug p)  -> showPDRSDebug p ++ "\n"
 
 ---------------------------------------------------------------------------
 -- | Prints a 'PDRS'.
@@ -301,6 +304,23 @@ showPDRSSet (PDRS l m u c)     = "<" ++ show l ++ ",{" ++ showMAPsTuples m ++ "}
         showCon (PCon p (Box p1))     = "(" ++ show p ++ "," ++ opBox ++ showPDRSSet p1 ++ ")"
 
 ---------------------------------------------------------------------------
+-- | Show a 'PDRS' in 'Debug' notation.
+---------------------------------------------------------------------------
+showPDRSDebug :: PDRS -> String
+showPDRSDebug (LambdaPDRS l) = "LambdaPDRS" ++ " " ++ show l
+showPDRSDebug (AMerge p1 p2) = "AMerge"     ++ " " ++ showPDRSDebug p1 ++ " " ++ showPDRSDebug p2
+showPDRSDebug (PMerge p1 p2) = "AMerge"     ++ " " ++ showPDRSDebug p1 ++ " " ++ showPDRSDebug p2
+showPDRSDebug (PDRS l m u c) = "PDRS"       ++ " " ++ show l ++ " " ++ show m ++ " " ++ show u ++ " [" ++ intercalate "," (map showCon c) ++ "]"
+  where showCon :: PCon -> String
+        showCon (PCon p (Rel r d))    = "PCon" ++ " " ++ show p ++ " (Rel ("     ++ show r           ++ "))" ++ " " ++ show d
+        showCon (PCon p (Neg p1))     = "PCon" ++ " " ++ show p ++ " (Neg ("     ++ showPDRSDebug p1 ++ "))"
+        showCon (PCon p (Imp p1 p2))  = "PCon" ++ " " ++ show p ++ " (Imp ("     ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ "))"
+        showCon (PCon p (Or p1 p2))   = "PCon" ++ " " ++ show p ++ " (Or ("      ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ "))"
+        showCon (PCon p (Box p1))     = "PCon" ++ " " ++ show p ++ " (Box ("     ++ showPDRSDebug p1 ++ "))"
+        showCon (PCon p (Diamond p1)) = "PCon" ++ " " ++ show p ++ " (Diamond (" ++ showPDRSDebug p1 ++ "))"
+        showCon (PCon p (Prop r p1))  = "PCon" ++ " " ++ show p ++ " (Prop ("    ++ show r ++ " " ++ showPDRSDebug p1 ++ "))"
+
+---------------------------------------------------------------------------
 -- ** Showing the subparts of a PDRS
 ---------------------------------------------------------------------------
 
@@ -404,4 +424,3 @@ showPDRSLambdas p = show (pdrsLambdas p)
   where show :: [(DRSVar,[DRSVar])] -> String
         show []     = []
         show ((l,_):ls) = opLambda ++ l ++ "." ++ show ls
-

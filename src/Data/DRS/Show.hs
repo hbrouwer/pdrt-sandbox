@@ -106,12 +106,14 @@ data DRSNotation d =
   Set d      -- ^ Set notation
   | Linear d -- ^ Linear notation
   | Boxes d  -- ^ Box notation
+  | Debug d  -- ^ Debug notation
 
 -- | Derive an instance of Show for 'DRSNotation'.
 instance (ShowableDRS d) => Show (DRSNotation d) where
   show (Boxes d)  = '\n' : showDRS (Boxes  (resolve d 0 0))
   show (Linear d) = '\n' : showDRS (Linear (resolve d 0 0))
   show (Set d)    = '\n' : showDRS (Set    (resolve d 0 0))
+  show (Debug d)  = '\n' : showDRS (Debug  (resolve d 0 0))
 
 ---------------------------------------------------------------------------
 -- | Shows a 'DRS'.
@@ -125,6 +127,7 @@ showDRS n =
       where rd = drsResolveMerges d
     (Set d)    -> showDRSLambdas rd ++ showDRSSet rd ++ "\n"
       where rd = drsResolveMerges d
+    (Debug d)  -> showDRSDebug d ++ "\n"
 
 ---------------------------------------------------------------------------
 -- | Prints a 'DRS'.
@@ -358,6 +361,22 @@ showDRSSet (DRS u c)         = "<{" ++ showUniverse u "," ++ "},{" ++ intercalat
         showCon (Prop r d1)  = drsRefToDRSVar r ++ ": " ++ showDRSSet d1
         showCon (Diamond d1) = opNeg ++ showDRSSet d1
         showCon (Box d1)     = opNeg ++ showDRSSet d1
+
+---------------------------------------------------------------------------
+-- | Show a 'DRS' in 'Debug' notation.
+---------------------------------------------------------------------------
+showDRSDebug :: DRS -> String
+showDRSDebug (LambdaDRS l) = "LambdaPDRS" ++ " " ++ show l
+showDRSDebug (Merge d1 d2) = "Merge"      ++ " " ++ showDRSDebug d1 ++ " " ++ showDRSDebug d2
+showDRSDebug (DRS u c)     = "DRS"        ++ " " ++ show u ++ " [" ++ intercalate "," (map showCon c) ++ "]"
+  where showCon :: DRSCon -> String
+        showCon (Rel r d)    = "Rel ("     ++ show r           ++ ")" ++ " " ++ show d
+        showCon (Neg d1)     = "Neg ("     ++ showDRSDebug d1 ++ ")"
+        showCon (Imp d1 d2)  = "Imp ("     ++ showDRSDebug d1 ++ ") (" ++ showDRSDebug d2 ++ ")"
+        showCon (Or d1 d2)   = "Or ("      ++ showDRSDebug d1 ++ ") (" ++ showDRSDebug d2 ++ ")"
+        showCon (Box d1)     = "Box ("     ++ showDRSDebug d1 ++ ")"
+        showCon (Diamond d1) = "Diamond (" ++ showDRSDebug d1 ++ ")"
+        showCon (Prop r d1)  = "Prop ("    ++ show r ++ " " ++ showDRSDebug d1 ++ ")"
 
 ---------------------------------------------------------------------------
 -- **  Showing the subparts of a DRS

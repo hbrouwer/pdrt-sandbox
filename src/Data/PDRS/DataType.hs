@@ -80,7 +80,7 @@ data PDRSRef =
 data PDRSRel =
   LambdaPDRSRel ((DRSVar,[DRSVar]),Int)
   | PDRSRel String
-  deriving (Eq)
+  deriving (Eq,Show)
 
 ---------------------------------------------------------------------------
 -- | A projected condition, consisting of a 'PVar' and a 'PDRSCon'.
