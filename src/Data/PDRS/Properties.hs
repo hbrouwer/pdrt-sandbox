@@ -12,47 +12,19 @@ PDRS properties
 
 module Data.PDRS.Properties 
 (
-  isMergePDRS
-, isResolvedPDRS
-, isPresupPDRS
+  isPresupPDRS
+, notthesame
+, pdrsUnresolve
 ) where
 
-import Data.PDRS.Structure
+import Data.DRS.Variables (drsRefToDRSVar)
+import Data.PDRS.DataType
+import Data.PDRS.Merge
 import Data.PDRS.Variables
 
 ---------------------------------------------------------------------------
 -- * Exported
 ---------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- | Returns whether a 'PDRS' is an 'AMerge' or 'PMerge' (at its top-level)
----------------------------------------------------------------------------
-isMergePDRS :: PDRS -> Bool
-isMergePDRS (LambdaPDRS {}) = False
-isMergePDRS (AMerge {})     = True
-isMergePDRS (PMerge {})     = True
-isMergePDRS (PDRS {})       = False
-
----------------------------------------------------------------------------
--- | Returns whether a 'PDRS' is resolved (containing no unresolved merges 
--- or lambdas)
----------------------------------------------------------------------------
-isResolvedPDRS :: PDRS -> Bool
-isResolvedPDRS (LambdaPDRS {}) = False
-isResolvedPDRS (AMerge {})     = False
-isResolvedPDRS (PMerge {})     = False
-isResolvedPDRS (PDRS _ _ u c)  = all isResolvedRef (map (\(PRef _ r) -> r) u) && all isResolvedPCon c
-  where isResolvedRef :: PDRSRef -> Bool
-        isResolvedRef (LambdaPDRSRef _) = False
-        isResolvedRef (PDRSRef _)       = True
-        isResolvedPCon :: PCon -> Bool
-        isResolvedPCon (PCon _ (Rel _ d))    = all isResolvedRef d
-        isResolvedPCon (PCon _ (Neg p1))     = isResolvedPDRS p1
-        isResolvedPCon (PCon _ (Imp p1 p2))  = isResolvedPDRS p1 && isResolvedPDRS p2
-        isResolvedPCon (PCon _ (Or p1 p2))   = isResolvedPDRS p1 && isResolvedPDRS p2
-        isResolvedPCon (PCon _ (Prop r p1))  = isResolvedRef r && isResolvedPDRS p1
-        isResolvedPCon (PCon _ (Diamond p1)) = isResolvedPDRS p1
-        isResolvedPCon (PCon _ (Box p1))     = isResolvedPDRS p1
 
 ---------------------------------------------------------------------------
 -- | Returns whether a 'PDRS' is /presuppositional/, where:
@@ -66,3 +38,33 @@ isPresupPDRS (LambdaPDRS {}) = False
 isPresupPDRS (AMerge p1 p2)  = isPresupPDRS p1 || isPresupPDRS p2
 isPresupPDRS (PMerge {})     = True
 isPresupPDRS p@(PDRS {})     = any (`pdrsIsFreePVar` p) (pdrsPVars p)
+
+---------------------------------------------------------------------------
+-- | Disjoins 'unresolved PDRS' @n1@ from 'unresolved PDRS' @n2@.
+---------------------------------------------------------------------------
+notthesame :: ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS)
+notthesame n1 n2 = \k-> pdrsUnresolve (pdrsDisjoin n1' n2') i k
+  where n1' = n1 (\x -> LambdaPDRS (("t",[(drsRefToDRSVar . pdrsRefToDRSRef) x]),i))
+        n2' = n2 (\x -> LambdaPDRS (("t",[(drsRefToDRSVar . pdrsRefToDRSRef) x]),0))
+        i   = maximum (map snd (lambdas (n1 (\x -> LambdaPDRS (("t",[]),0))))) + 1
+
+---------------------------------------------------------------------------
+-- | Converts a PDRS that contains a 'LambdaPDRS' whose argument position
+-- @li@ equals some 'Int' @i@ into an 'unresolved PDRS'.
+---------------------------------------------------------------------------
+pdrsUnresolve :: PDRS -> Int -> (PDRSRef -> PDRS) -> PDRS
+pdrsUnresolve lp@(LambdaPDRS ((_,r),li)) i k 
+  | li == i   = k (PDRSRef $ head r)
+  | otherwise = lp
+pdrsUnresolve (AMerge p1 p2) i k = AMerge (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)
+pdrsUnresolve (PMerge p1 p2) i k = PMerge (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)
+pdrsUnresolve (PDRS l m u c) i k = (PDRS l m u (replaceLambda c k))
+  where replaceLambda :: [PCon] -> (PDRSRef -> PDRS) -> [PCon]
+        replaceLambda [] k                        = []
+        replaceLambda (pc@(PCon _ (Rel{})):pcs) k = (pc:replaceLambda pcs k)
+        replaceLambda (PCon p (Neg p1):pcs)     k = (PCon p (Neg     (pdrsUnresolve p1 i k)):replaceLambda pcs k)
+        replaceLambda (PCon p (Imp p1 p2):pcs)  k = (PCon p (Imp     (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)):replaceLambda pcs k)
+        replaceLambda (PCon p (Or p1 p2):pcs)   k = (PCon p (Or      (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)):replaceLambda pcs k)
+        replaceLambda (PCon p (Prop r p1):pcs)  k = (PCon p (Prop r  (pdrsUnresolve p1 i k)):replaceLambda pcs k)
+        replaceLambda (PCon p (Diamond p1):pcs) k = (PCon p (Diamond (pdrsUnresolve p1 i k)):replaceLambda pcs k)
+        replaceLambda (PCon p (Box p1):pcs)     k = (PCon p (Box     (pdrsUnresolve p1 i k)):replaceLambda pcs k)

@@ -46,10 +46,9 @@ module Data.DRS.Show
 , showPadding
 ) where
 
+import Data.DRS.DataType
 import Data.DRS.Merge
-import Data.DRS.Properties
 import Data.DRS.Structure
-import Data.DRS.Translate
 import Data.DRS.Variables
 
 import Data.List (intercalate, union)

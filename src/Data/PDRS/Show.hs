@@ -26,16 +26,15 @@ module Data.PDRS.Show
 , printPDRSRefBetaReduct
 ) where
 
+import Data.DRS.DataType (DRS)
 import Data.DRS.Properties (isFOLDRS)
 import Data.DRS.Show hiding (DRSNotation (..))
-import Data.DRS.Structure (DRS)
 import Data.DRS.Translate (drsToFOL)
 import Data.DRS.Variables (drsRefToDRSVar,drsRelToString)
 
+import Data.PDRS.DataType
 import Data.PDRS.Merge
-import Data.PDRS.Properties
 import Data.PDRS.Structure
-import Data.PDRS.Translate
 import Data.PDRS.Variables
 
 import Data.List (intercalate, union)

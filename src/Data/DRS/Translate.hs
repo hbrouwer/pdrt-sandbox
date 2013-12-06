@@ -15,8 +15,8 @@ module Data.DRS.Translate
   drsToFOL
 ) where
 
+import Data.DRS.DataType
 import Data.DRS.LambdaCalculus
-import Data.DRS.Structure
 import Data.DRS.Variables
 import qualified Data.FOL as F
 

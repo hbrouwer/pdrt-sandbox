@@ -19,6 +19,7 @@ module Data.DRS.Merge
 , drsResolveMerges
 ) where
 
+import Data.DRS.DataType
 import Data.DRS.LambdaCalculus
 import Data.DRS.Properties
 import Data.DRS.Structure

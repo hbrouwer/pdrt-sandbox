@@ -18,7 +18,8 @@ module Data.PDRS.Input.String
 import Data.Char (isSpace, toLower)
 import Data.DRS.Input.String
 import Data.List (intercalate)
-import Data.PDRS.Structure
+import Data.PDRS.DataType
+
 
 ---------------------------------------------------------------------------
 -- * Exported

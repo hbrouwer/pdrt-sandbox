@@ -17,13 +17,12 @@ module Data.PDRS.Translate
 , pdrsToDRS
 ) where
 
-import qualified Data.DRS.Structure as D
+import qualified Data.DRS.DataType as D
 import Data.DRS.Translate (drsToFOL)
 import qualified Data.FOL.Formula as F
+import Data.PDRS.DataType
 import Data.PDRS.LambdaCalculus
 import Data.PDRS.Merge
-import Data.PDRS.ProjectionGraph
-import Data.PDRS.Properties
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 

@@ -18,12 +18,13 @@ module Data.PDRS.ProjectionTable
 , printPTable
 ) where
 
+import Data.DRS.DataType (DRSVar)
 import Data.DRS.Show
-import Data.DRS.Structure (DRSVar)
 import Data.DRS.Variables (drsRefToDRSVar,drsRelToString)
 
-import Data.PDRS.Structure (PCon (..), PDRS (..), pdrsLabel, PDRSRef (..), PDRSRel (..), PRef (..), PVar)
-import qualified Data.PDRS.Structure as PDRS
+import Data.PDRS.DataType (PCon (..), PDRS (..), PDRSRef (..), PDRSRel (..), PRef (..), PVar)
+import qualified Data.PDRS.DataType as PDRS
+import Data.PDRS.Structure
 import Data.PDRS.Variables
 
 import Data.List (intercalate)

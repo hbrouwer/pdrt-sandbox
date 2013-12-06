@@ -40,8 +40,9 @@ module Data.PDRS.Variables
 , lambdas --change name!
 ) where
 
-import Data.DRS.Structure (DRSRef (..), DRSRel (..))
+import Data.DRS.DataType (DRSRef (..), DRSRel (..))
 import Data.DRS.Variables (newDRSRefs)
+import Data.PDRS.DataType
 import Data.PDRS.ProjectionGraph
 import Data.PDRS.Structure
 

@@ -32,7 +32,7 @@ module Data.DRS.Input.String
 ) where
 
 import Data.Char (isSpace, toLower)
-import Data.DRS.Structure
+import Data.DRS.DataType
 import Data.List (intercalate)
 
 ---------------------------------------------------------------------------

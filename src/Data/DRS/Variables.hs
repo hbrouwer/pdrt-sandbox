@@ -30,6 +30,7 @@ module Data.DRS.Variables
 ) where
 
 import Data.Char (isDigit)
+import Data.DRS.DataType
 import Data.DRS.Structure
 import Data.List (partition, sortBy, union)
 import Data.Ord (comparing)

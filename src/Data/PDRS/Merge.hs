@@ -18,16 +18,11 @@ module Data.PDRS.Merge (
 , pdrsCombine
 , (<<&>>)
 , pdrsResolveMerges
-, emptyPDRS
 , pdrsDisjoin
-, notthesame
-
-, pdrsUnresolve
 ) where
 
-import Data.DRS.Variables (drsRefToDRSVar)
 import Data.PDRS.LambdaCalculus
-import Data.PDRS.Properties
+import Data.PDRS.DataType
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 
@@ -137,21 +132,6 @@ pdrsResolveMerges (PDRS l m u c)    = PDRS l m u (map resolve c)
         resolve (PCon p (Box p1))     = PCon p (Box     (pdrsResolveMerges p1))
 
 ---------------------------------------------------------------------------
--- | Returns an empty 'PDRS', if possible with the same label as 'PDRS' @p@.
----------------------------------------------------------------------------
-emptyPDRS :: PDRS -> PDRS
-emptyPDRS lp@(LambdaPDRS _) = lp
-emptyPDRS (AMerge p1 p2)
-  | isLambdaPDRS p1 = AMerge p1 (emptyPDRS p2)
-  | isLambdaPDRS p2 = AMerge (emptyPDRS p1) p2
-  | otherwise       = emptyPDRS (p1 <<+>> p2)
-emptyPDRS (PMerge p1 p2)
-  | isLambdaPDRS p1 = PMerge p1 (emptyPDRS p2)
-  | isLambdaPDRS p2 = PMerge (emptyPDRS p1) p2
-  | otherwise       = emptyPDRS (p1 <<*>> p2)
-emptyPDRS (PDRS l _ _ _)    = PDRS l [] [] []
-
----------------------------------------------------------------------------
 -- * Private
 ---------------------------------------------------------------------------
 
@@ -170,32 +150,3 @@ pdrsDisjoin p p' = pdrsAlphaConvert p (zip ops nps) (zip ors nrs)
         ors = pdrsVariables p `intersect` pdrsVariables p'
         nrs = newPDRSRefs ors (pdrsVariables p `union` pdrsVariables p')
 
----------------------------------------------------------------------------
--- | Disjoins 'unresolved PDRS' @n1@ from 'unresolved PDRS' @n2@.
----------------------------------------------------------------------------
-notthesame :: ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS)
-notthesame n1 n2 = \k-> pdrsUnresolve (pdrsDisjoin n1' n2') i k
-  where n1' = n1 (\x -> LambdaPDRS (("t",[(drsRefToDRSVar . pdrsRefToDRSRef) x]),i))
-        n2' = n2 (\x -> LambdaPDRS (("t",[(drsRefToDRSVar . pdrsRefToDRSRef) x]),0))
-        i   = maximum (map snd (lambdas (n1 (\x -> LambdaPDRS (("t",[]),0))))) + 1
-
----------------------------------------------------------------------------
--- | Converts a PDRS that contains a 'LambdaPDRS' whose argument position
--- @li@ equals some 'Int' @i@ into an 'unresolved PDRS'.
----------------------------------------------------------------------------
-pdrsUnresolve :: PDRS -> Int -> (PDRSRef -> PDRS) -> PDRS
-pdrsUnresolve lp@(LambdaPDRS ((_,r),li)) i k 
-  | li == i   = k (PDRSRef $ head r)
-  | otherwise = lp
-pdrsUnresolve (AMerge p1 p2) i k = AMerge (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)
-pdrsUnresolve (PMerge p1 p2) i k = PMerge (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)
-pdrsUnresolve (PDRS l m u c) i k = (PDRS l m u (replaceLambda c k))
-  where replaceLambda :: [PCon] -> (PDRSRef -> PDRS) -> [PCon]
-        replaceLambda [] k                        = []
-        replaceLambda (pc@(PCon _ (Rel{})):pcs) k = (pc:replaceLambda pcs k)
-        replaceLambda (PCon p (Neg p1):pcs)     k = (PCon p (Neg     (pdrsUnresolve p1 i k)):replaceLambda pcs k)
-        replaceLambda (PCon p (Imp p1 p2):pcs)  k = (PCon p (Imp     (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)):replaceLambda pcs k)
-        replaceLambda (PCon p (Or p1 p2):pcs)   k = (PCon p (Or      (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)):replaceLambda pcs k)
-        replaceLambda (PCon p (Prop r p1):pcs)  k = (PCon p (Prop r  (pdrsUnresolve p1 i k)):replaceLambda pcs k)
-        replaceLambda (PCon p (Diamond p1):pcs) k = (PCon p (Diamond (pdrsUnresolve p1 i k)):replaceLambda pcs k)
-        replaceLambda (PCon p (Box p1):pcs)     k = (PCon p (Box     (pdrsUnresolve p1 i k)):replaceLambda pcs k)

@@ -18,9 +18,10 @@ module Data.PDRS.ProjectionGraph
 , vertices
 ) where
 
-import Data.PDRS.Structure
 import Data.Graph (buildG, Edge, Graph, path, vertices)
 import Data.List (union)
+import Data.PDRS.DataType
+import Data.PDRS.Structure
 
 ---------------------------------------------------------------------------
 -- * Exported
