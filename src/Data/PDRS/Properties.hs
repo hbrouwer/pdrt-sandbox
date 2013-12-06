@@ -13,11 +13,11 @@ PDRS properties
 module Data.PDRS.Properties 
 (
   isPresupPDRS
-, notthesame
-, pdrsUnresolve
+, pdrsIsDifferentNP
 ) where
 
 import Data.DRS.Variables (drsRefToDRSVar)
+import Data.PDRS.Binding
 import Data.PDRS.DataType
 import Data.PDRS.Merge
 import Data.PDRS.Variables
@@ -42,11 +42,15 @@ isPresupPDRS p@(PDRS {})     = any (`pdrsIsFreePVar` p) (pdrsPVars p)
 ---------------------------------------------------------------------------
 -- | Disjoins 'unresolved PDRS' @n1@ from 'unresolved PDRS' @n2@.
 ---------------------------------------------------------------------------
-notthesame :: ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS)
-notthesame n1 n2 = \k-> pdrsUnresolve (pdrsDisjoin n1' n2') i k
+pdrsIsDifferentNP :: ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS)
+pdrsIsDifferentNP n1 n2 = \k-> pdrsUnresolve (pdrsDisjoin n1' n2') i k
   where n1' = n1 (\x -> LambdaPDRS (("t",[(drsRefToDRSVar . pdrsRefToDRSRef) x]),i))
         n2' = n2 (\x -> LambdaPDRS (("t",[(drsRefToDRSVar . pdrsRefToDRSRef) x]),0))
         i   = maximum (map snd (lambdas (n1 (\x -> LambdaPDRS (("t",[]),0))))) + 1
+
+---------------------------------------------------------------------------
+-- * Private
+---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
 -- | Converts a PDRS that contains a 'LambdaPDRS' whose argument position

@@ -18,6 +18,7 @@ module Data.DRS
 , printFOLForm
 ) where
 
+import Data.DRS.Binding as DRS
 import Data.DRS.DataType as DRS
 import Data.DRS.Input as DRS
 import Data.DRS.LambdaCalculus as DRS

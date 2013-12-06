@@ -23,7 +23,9 @@ module Data.PDRS.LambdaCalculus
 
 import Data.DRS.LambdaCalculus (renameVar)
 import Data.DRS.Variables (drsRefToDRSVar)
+import Data.PDRS.Binding
 import Data.PDRS.DataType
+import Data.PDRS.ProjectionGraph
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 

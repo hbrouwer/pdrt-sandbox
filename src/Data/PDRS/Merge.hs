@@ -132,10 +132,6 @@ pdrsResolveMerges (PDRS l m u c)    = PDRS l m u (map resolve c)
         resolve (PCon p (Box p1))     = PCon p (Box     (pdrsResolveMerges p1))
 
 ---------------------------------------------------------------------------
--- * Private
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
 -- | Disjoins 'PDRS' @p1@ from 'PDRS' @p2@, where:
 --
 -- [@p1@ is disjoined from @p2@ /iff/]

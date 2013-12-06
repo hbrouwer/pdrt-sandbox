@@ -16,6 +16,7 @@ module Data.PDRS
 , module PDRS
 ) where
 
+import Data.PDRS.Binding as PDRS
 import Data.PDRS.DataType as PDRS
 import Data.PDRS.Input as PDRS
 import Data.PDRS.LambdaCalculus as PDRS
