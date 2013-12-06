@@ -309,7 +309,7 @@ showPDRSSet (PDRS l m u c)     = "<" ++ show l ++ ",{" ++ showMAPsTuples m ++ "}
 showPDRSDebug :: PDRS -> String
 showPDRSDebug (LambdaPDRS l) = "LambdaPDRS" ++ " " ++ show l
 showPDRSDebug (AMerge p1 p2) = "AMerge"     ++ " " ++ showPDRSDebug p1 ++ " " ++ showPDRSDebug p2
-showPDRSDebug (PMerge p1 p2) = "AMerge"     ++ " " ++ showPDRSDebug p1 ++ " " ++ showPDRSDebug p2
+showPDRSDebug (PMerge p1 p2) = "PMerge"     ++ " " ++ showPDRSDebug p1 ++ " " ++ showPDRSDebug p2
 showPDRSDebug (PDRS l m u c) = "PDRS"       ++ " " ++ show l ++ " " ++ show m ++ " " ++ show u ++ " [" ++ intercalate "," (map showCon c) ++ "]"
   where showCon :: PCon -> String
         showCon (PCon p (Rel r d))    = "PCon" ++ " " ++ show p ++ " (Rel ("     ++ show r           ++ "))" ++ " " ++ show d
