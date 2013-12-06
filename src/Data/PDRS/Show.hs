@@ -312,7 +312,7 @@ showPDRSDebug (AMerge p1 p2) = "AMerge"     ++ " " ++ showPDRSDebug p1 ++ " " ++
 showPDRSDebug (PMerge p1 p2) = "PMerge"     ++ " " ++ showPDRSDebug p1 ++ " " ++ showPDRSDebug p2
 showPDRSDebug (PDRS l m u c) = "PDRS"       ++ " " ++ show l ++ " " ++ show m ++ " " ++ show u ++ " [" ++ intercalate "," (map showCon c) ++ "]"
   where showCon :: PCon -> String
-        showCon (PCon p (Rel r d))    = "PCon" ++ " " ++ show p ++ " (Rel ("     ++ show r           ++ "))" ++ " " ++ show d
+        showCon (PCon p (Rel r d))    = "PCon" ++ " " ++ show p ++ " (Rel ("     ++ show r           ++ ")" ++ " " ++ show d ++ ")"
         showCon (PCon p (Neg p1))     = "PCon" ++ " " ++ show p ++ " (Neg ("     ++ showPDRSDebug p1 ++ "))"
         showCon (PCon p (Imp p1 p2))  = "PCon" ++ " " ++ show p ++ " (Imp ("     ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ "))"
         showCon (PCon p (Or p1 p2))   = "PCon" ++ " " ++ show p ++ " (Or ("      ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ "))"
