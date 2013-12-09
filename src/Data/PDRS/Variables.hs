@@ -14,11 +14,13 @@ module Data.PDRS.Variables
 (
 -- * Conversion
   pdrsRefToDRSRef
+, pdrsRefToDRSVar
 , drsRefToPDRSRef
 , pdrsRefToPRef
 , prefToPDRSRef
 , prefToPVar
 , pdrsRelToDRSRel
+, pdrsRelToString
 -- * New Variables
 , newPVars
 , newPDRSRefs
@@ -31,8 +33,8 @@ module Data.PDRS.Variables
 , pdrsLambdaVars
 ) where
 
-import Data.DRS.DataType (DRSRef (..), DRSRel (..))
-import Data.DRS.Variables (newDRSRefs)
+import Data.DRS.DataType (DRSRef (..), DRSRel (..), DRSVar)
+import Data.DRS.Variables (drsRefToDRSVar,drsRelToString,newDRSRefs)
 import Data.PDRS.DataType
 import Data.PDRS.Structure
 
@@ -53,6 +55,10 @@ import Data.Ord (comparing)
 pdrsRefToDRSRef :: PDRSRef -> DRSRef
 pdrsRefToDRSRef (LambdaPDRSRef lt) = LambdaDRSRef lt
 pdrsRefToDRSRef (PDRSRef r)        = DRSRef r
+
+-- | Directly converts a 'PDRSRef' into a 'DRSVar'
+pdrsRefToDRSVar :: PDRSRef -> DRSVar
+pdrsRefToDRSVar = drsRefToDRSVar . pdrsRefToDRSRef
 
 ---------------------------------------------------------------------------
 -- | Converts a 'DRSRef' to a 'PDRSRef'
@@ -85,6 +91,10 @@ prefToPVar (PRef pv _) = pv
 pdrsRelToDRSRel :: PDRSRel -> DRSRel
 pdrsRelToDRSRel (LambdaPDRSRel lr) = LambdaDRSRel lr
 pdrsRelToDRSRel (PDRSRel r)        = DRSRel r
+
+-- | Directly converts a 'PDRSRel' into a 'String'
+pdrsRelToString :: PDRSRel -> String
+pdrsRelToString = drsRelToString . pdrsRelToDRSRel
 
 ---------------------------------------------------------------------------
 -- ** New Variables

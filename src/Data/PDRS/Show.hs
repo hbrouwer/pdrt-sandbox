@@ -30,7 +30,6 @@ import Data.DRS.DataType (DRS)
 import Data.DRS.Properties (isFOLDRS)
 import Data.DRS.Show hiding (DRSNotation (..))
 import Data.DRS.Translate (drsToFOL)
-import Data.DRS.Variables (drsRefToDRSVar,drsRelToString)
 
 import Data.PDRS.DataType
 import Data.PDRS.Merge
@@ -71,7 +70,7 @@ instance (ShowablePDRS p) => ShowablePDRS (PDRS -> p) where
     where lv = LambdaPDRS (('k' : show np,[]), nr + np)
 instance (ShowablePDRS p) => ShowablePDRS ((PDRSRef -> PDRS) -> p) where
   resolve up nr np = resolve (up lv) nr (np + 1)
-    where lv x = LambdaPDRS (('k' : show np,[drsRefToDRSVar (pdrsRefToDRSRef x)]), nr + np)
+    where lv x = LambdaPDRS (('k' : show np,[pdrsRefToDRSVar x]), nr + np)
 instance (ShowablePDRS p) => ShowablePDRS (PDRSRel -> p) where
   resolve up nr np = resolve (up lv) nr (np + 1)
     where lv = LambdaPDRSRel (('P' : show np,[]), nr + np)
@@ -274,15 +273,15 @@ showPDRSLinear (LambdaPDRS ((v,d),_))
   | otherwise    = v
 showPDRSLinear (AMerge p1 p2) = "(" ++ showPDRSLinear p1 ++ " " ++ opAMerge ++ " " ++ showPDRSLinear p2 ++ ")"
 showPDRSLinear (PMerge p1 p2) = "(" ++ showPDRSLinear p1 ++ " " ++ opPMerge ++ " " ++ showPDRSLinear p2 ++ ")"
-showPDRSLinear (PDRS l m u c)     = show l ++ ":[" ++ showUniverseTuples u ++ "|" ++ intercalate "," (map showCon c) ++ "|" ++ showMAPsTuples m ++ "]"
+showPDRSLinear (PDRS l m u c) = show l ++ ":[" ++ showUniverseTuples u ++ "|" ++ intercalate "," (map showCon c) ++ "|" ++ showMAPsTuples m ++ "]"
   where showCon :: PCon -> String
-        showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ (drsRelToString . pdrsRelToDRSRel) r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ "))"
-        showCon (PCon p (Neg p1))     = "(" ++ show p ++ "," ++ opNeg ++ showPDRSLinear p1 ++ ")"
-        showCon (PCon p (Imp p1 p2))  = "(" ++ show p ++ "," ++ showPDRSLinear p1 ++ " " ++ opImp ++ " " ++ showPDRSLinear p2 ++ ")"
-        showCon (PCon p (Or p1 p2))   = "(" ++ show p ++ "," ++ showPDRSLinear p1 ++ " " ++ opOr  ++ " " ++ showPDRSLinear p2 ++ ")"
-        showCon (PCon p (Prop r p1))  = "(" ++ show p ++ "," ++ (drsRefToDRSVar . pdrsRefToDRSRef) r ++ ": " ++ showPDRSLinear p1 ++ ")"
-        showCon (PCon p (Diamond p1)) = "(" ++ show p ++ "," ++ opDiamond ++ showPDRSLinear p1 ++ ")"
-        showCon (PCon p (Box p1))     = "(" ++ show p ++ "," ++ opBox ++ showPDRSLinear p1 ++ ")"
+        showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ pdrsRelToString r ++ "("  ++ intercalate "," (map pdrsRefToDRSVar d) ++ "))"
+        showCon (PCon p (Neg p1))     = "(" ++ show p ++ "," ++ opNeg                     ++ showPDRSLinear p1 ++ ")"
+        showCon (PCon p (Imp p1 p2))  = "(" ++ show p ++ "," ++ showPDRSLinear p1 ++ " "  ++ opImp ++ " "      ++ showPDRSLinear p2 ++ ")"
+        showCon (PCon p (Or p1 p2))   = "(" ++ show p ++ "," ++ showPDRSLinear p1 ++ " "  ++ opOr  ++ " "      ++ showPDRSLinear p2 ++ ")"
+        showCon (PCon p (Prop r p1))  = "(" ++ show p ++ "," ++ pdrsRefToDRSVar r ++ ": " ++ showPDRSLinear p1 ++ ")"
+        showCon (PCon p (Diamond p1)) = "(" ++ show p ++ "," ++ opDiamond                 ++ showPDRSLinear p1 ++ ")"
+        showCon (PCon p (Box p1))     = "(" ++ show p ++ "," ++ opBox                     ++ showPDRSLinear p1 ++ ")"
 
 ---------------------------------------------------------------------------
 -- | Show a 'PDRS' in 'Set' notation.
@@ -293,32 +292,32 @@ showPDRSSet (LambdaPDRS ((v,d),_))
   | otherwise    = v
 showPDRSSet (AMerge p1 p2) = "(" ++ showPDRSSet p1 ++ " " ++ opAMerge ++ " " ++ showPDRSSet p2 ++ ")"
 showPDRSSet (PMerge p1 p2) = "(" ++ showPDRSSet p1 ++ " " ++ opPMerge ++ " " ++ showPDRSSet p2 ++ ")"
-showPDRSSet (PDRS l m u c)     = "<" ++ show l ++ ",{" ++ showMAPsTuples m ++ "},{" ++ showUniverseTuples u ++ "},{" ++ intercalate "," (map showCon c) ++ "}>"
+showPDRSSet (PDRS l m u c) = "<" ++ show l ++ ",{" ++ showMAPsTuples m ++ "},{" ++ showUniverseTuples u ++ "},{" ++ intercalate "," (map showCon c) ++ "}>"
   where showCon :: PCon -> String
-        showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ (drsRelToString . pdrsRelToDRSRel) r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ "))"
-        showCon (PCon p (Neg p1))     = "(" ++ show p ++ "," ++ opNeg ++ showPDRSSet p1 ++ ")"
-        showCon (PCon p (Imp p1 p2))  = "(" ++ show p ++ "," ++ showPDRSSet p1 ++ " " ++ opImp ++ " " ++ showPDRSSet p2 ++ ")"
-        showCon (PCon p (Or p1 p2))   = "(" ++ show p ++ "," ++ showPDRSSet p1 ++ " " ++ opOr  ++ " " ++ showPDRSSet p2 ++ ")"
-        showCon (PCon p (Prop r p1))  = "(" ++ show p ++ "," ++ (drsRefToDRSVar . pdrsRefToDRSRef) r ++ ": " ++ showPDRSSet p1 ++ ")"
-        showCon (PCon p (Diamond p1)) = "(" ++ show p ++ "," ++ opDiamond ++ showPDRSSet p1 ++ ")"
-        showCon (PCon p (Box p1))     = "(" ++ show p ++ "," ++ opBox ++ showPDRSSet p1 ++ ")"
+        showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ pdrsRelToString r ++ "("  ++ intercalate "," (map pdrsRefToDRSVar d) ++ "))"
+        showCon (PCon p (Neg p1))     = "(" ++ show p ++ "," ++ opNeg                     ++ showPDRSSet p1 ++ ")"
+        showCon (PCon p (Imp p1 p2))  = "(" ++ show p ++ "," ++ showPDRSSet p1 ++ " "     ++ opImp ++ " "   ++ showPDRSSet p2 ++ ")"
+        showCon (PCon p (Or p1 p2))   = "(" ++ show p ++ "," ++ showPDRSSet p1 ++ " "     ++ opOr  ++ " "   ++ showPDRSSet p2 ++ ")"
+        showCon (PCon p (Prop r p1))  = "(" ++ show p ++ "," ++ pdrsRefToDRSVar r ++ ": " ++ showPDRSSet p1 ++ ")"
+        showCon (PCon p (Diamond p1)) = "(" ++ show p ++ "," ++ opDiamond                 ++ showPDRSSet p1 ++ ")"
+        showCon (PCon p (Box p1))     = "(" ++ show p ++ "," ++ opBox                     ++ showPDRSSet p1 ++ ")"
 
 ---------------------------------------------------------------------------
 -- | Show a 'PDRS' in 'Debug' notation.
 ---------------------------------------------------------------------------
 showPDRSDebug :: PDRS -> String
-showPDRSDebug (LambdaPDRS l) = "LambdaPDRS" ++ " " ++ show l
-showPDRSDebug (AMerge p1 p2) = "AMerge"     ++ " " ++ showPDRSDebug p1 ++ " " ++ showPDRSDebug p2
-showPDRSDebug (PMerge p1 p2) = "PMerge"     ++ " " ++ showPDRSDebug p1 ++ " " ++ showPDRSDebug p2
-showPDRSDebug (PDRS l m u c) = "PDRS"       ++ " " ++ show l ++ " " ++ show m ++ " " ++ show u ++ " [" ++ intercalate "," (map showCon c) ++ "]"
+showPDRSDebug (LambdaPDRS l) = "LambdaPDRS" ++ " "  ++ show l
+showPDRSDebug (AMerge p1 p2) = "AMerge"     ++ " (" ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ ")"
+showPDRSDebug (PMerge p1 p2) = "PMerge"     ++ " (" ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ ")"
+showPDRSDebug (PDRS l m u c) = "PDRS"       ++ " (" ++ show l ++ ") " ++ show m ++ " " ++ show u ++ " [" ++ intercalate "," (map showCon c) ++ "]"
   where showCon :: PCon -> String
-        showCon (PCon p (Rel r d))    = "PCon" ++ " " ++ show p ++ " (Rel ("     ++ show r           ++ ")" ++ " " ++ show d ++ ")"
-        showCon (PCon p (Neg p1))     = "PCon" ++ " " ++ show p ++ " (Neg ("     ++ showPDRSDebug p1 ++ "))"
-        showCon (PCon p (Imp p1 p2))  = "PCon" ++ " " ++ show p ++ " (Imp ("     ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ "))"
-        showCon (PCon p (Or p1 p2))   = "PCon" ++ " " ++ show p ++ " (Or ("      ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ "))"
-        showCon (PCon p (Box p1))     = "PCon" ++ " " ++ show p ++ " (Box ("     ++ showPDRSDebug p1 ++ "))"
-        showCon (PCon p (Diamond p1)) = "PCon" ++ " " ++ show p ++ " (Diamond (" ++ showPDRSDebug p1 ++ "))"
-        showCon (PCon p (Prop r p1))  = "PCon" ++ " " ++ show p ++ " (Prop ("    ++ show r ++ " " ++ showPDRSDebug p1 ++ "))"
+        showCon (PCon p (Rel r d))    = "PCon" ++ " (" ++ show p ++ ") (Rel ("     ++ show r           ++ ")" ++ " " ++ show d ++ ")"
+        showCon (PCon p (Neg p1))     = "PCon" ++ " (" ++ show p ++ ") (Neg ("     ++ showPDRSDebug p1 ++ "))"
+        showCon (PCon p (Imp p1 p2))  = "PCon" ++ " (" ++ show p ++ ") (Imp ("     ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ "))"
+        showCon (PCon p (Or p1 p2))   = "PCon" ++ " (" ++ show p ++ ") (Or ("      ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ "))"
+        showCon (PCon p (Prop r p1))  = "PCon" ++ " (" ++ show p ++ ") (Prop ("    ++ show r           ++ " "   ++ showPDRSDebug p1 ++ "))"
+        showCon (PCon p (Diamond p1)) = "PCon" ++ " (" ++ show p ++ ") (Diamond (" ++ showPDRSDebug p1 ++ "))"
+        showCon (PCon p (Box p1))     = "PCon" ++ " (" ++ show p ++ ") (Box ("     ++ showPDRSDebug p1 ++ "))"
 
 ---------------------------------------------------------------------------
 -- ** Showing the subparts of a PDRS
@@ -341,7 +340,7 @@ showHeaderLine l pl = [boxTopLeft] ++ dl ++ "[" ++ sl ++ "]" ++ dr ++ [boxTopRig
 showUniverse :: [PRef] -> String
 showUniverse u  = intercalate "  " (map showPRef u)
   where showPRef :: PRef -> String
-        showPRef (PRef p r) = show p ++ " " ++ modPointer ++ " " ++ (drsRefToDRSVar . pdrsRefToDRSRef) r
+        showPRef (PRef p r) = show p ++ " " ++ modPointer ++ " " ++ pdrsRefToDRSVar r
 
 ---------------------------------------------------------------------------
 -- | Shows the universe @u@ of a 'PDRS' as tuples.
@@ -349,7 +348,7 @@ showUniverse u  = intercalate "  " (map showPRef u)
 showUniverseTuples :: [PRef] -> String
 showUniverseTuples u = intercalate "," (map showPRef u)
   where showPRef :: PRef -> String
-        showPRef (PRef p r) = "(" ++ show p ++ "," ++ (drsRefToDRSVar . pdrsRefToDRSRef) r ++ ")"
+        showPRef (PRef p r) = "(" ++ show p ++ "," ++ pdrsRefToDRSVar r ++ ")"
 
 ---------------------------------------------------------------------------
 -- | Shows the projected conditions @c@ of a 'PDRS'.
@@ -358,7 +357,7 @@ showConditions :: [PCon] -> String
 showConditions [] = " "
 showConditions c  = foldr ((++) . showPCon) "" c
   where showPCon :: PCon -> String
-        showPCon (PCon p (Rel r d)) = projection p ++ " " ++ (drsRelToString . pdrsRelToDRSRel) r ++ "(" ++ intercalate "," (map (drsRefToDRSVar . pdrsRefToDRSRef) d) ++ ")\n"
+        showPCon (PCon p (Rel r d)) = projection p ++ " " ++ pdrsRelToString r ++ "(" ++ intercalate "," (map pdrsRefToDRSVar d) ++ ")\n"
         showPCon (PCon p (Neg p1))
           | isLambdaPDRS p1 = showModifier (projection p) 0 (showModifier opNeg 0 b1)
           | otherwise       = showModifier (projection p) 2 (showModifier opNeg 2 b1)
@@ -378,8 +377,8 @@ showConditions c  = foldr ((++) . showPCon) "" c
           where b1 = showPDRSBox p1
                 b2 = showPDRSBox p2
         showPCon (PCon p (Prop r p1))
-          | isLambdaPDRS p1 = showModifier (projection p) 0 (showModifier ((drsRefToDRSVar . pdrsRefToDRSRef) r ++ ":") 0 b1)
-          | otherwise       = showModifier (projection p) 2 (showModifier ((drsRefToDRSVar . pdrsRefToDRSRef) r ++ ":") 2 b1)
+          | isLambdaPDRS p1 = showModifier (projection p) 0 (showModifier (pdrsRefToDRSVar r ++ ":") 0 b1)
+          | otherwise       = showModifier (projection p) 2 (showModifier (pdrsRefToDRSVar r ++ ":") 2 b1)
           where b1 = showPDRSBox p1
         showPCon (PCon p (Diamond p1))
           | isLambdaPDRS p1 = showModifier (projection p) 0 (showModifier opDiamond 0 b1)
