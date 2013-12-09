@@ -128,7 +128,7 @@ instance (PDRSAtom a, AbstractPDRS b) => AbstractPDRS (a -> b)
 ---------------------------------------------------------------------------
 renameSubPDRS :: PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> PDRS
 renameSubPDRS lp@(LambdaPDRS ((v,ds),i)) _ _ rs    = LambdaPDRS ((v,ds'),i)
-  where ds' = map (drsRefToDRSVar . pdrsRefToDRSRef . flip renameVar rs . PDRSRef) ds
+  where ds' = map (pdrsRefToDRSVar . flip renameVar rs . PDRSRef) ds
 renameSubPDRS (AMerge p1 p2) gp ps rs    = AMerge p1' p2'
   where p1' = renameSubPDRS p1 gp ps rs
         p2' = renameSubPDRS p2 gp ps rs
@@ -229,7 +229,7 @@ purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs2)
         -- ^ In case we do not want to rename ambiguous bindings:
         -- (c2,pvs2) = purify (c1,pvs)
         -- | Step 3.
-        pvs1      = l1 : concatMap (\(x,y) -> [x,y]) m1 `union` map prefToPVar u1
+        pvs1      = l1 : concatMap (\(x,y) -> [x,y]) m1 `union` map (\(PRef p _) -> p) u1
         -- | Step 4.
         purify :: ([PCon],[PVar]) -> ([PCon],[PVar])
         purify ([],ps)                        = ([],ps)
@@ -305,7 +305,7 @@ purifyPRefs lp@(PDRS l m u c) gp prs = PDRS l m (map (convert prs) u) (map purif
         purify (PCon p (Diamond p1)) = PCon p (Diamond (purifyPRefs p1 gp prs))
         purify (PCon p (Box p1))     = PCon p (Box     (purifyPRefs p1 gp prs))
         purifyPDRSRef :: PVar -> PDRSRef -> PDRSRef
-        purifyPDRSRef p r = prefToPDRSRef (convert prs (pdrsRefToPRef r p))
+        purifyPDRSRef p r = (\(PRef _ r') -> r') (convert prs (PRef p r))
 
 ---------------------------------------------------------------------------
 -- | Returns a tuple of existing 'PRef's @eps@ and unbound duplicate 'PRef's
@@ -340,7 +340,7 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
         dups [] eps = (eps,[])
         dups (PCon p (Rel _ d):pcs)    eps = (eps2,dps1 ++ dps2)
           where (eps2,dps2) = dups pcs (eps ++ upd)
-                upd  = unboundPRefs $ map (`pdrsRefToPRef` p) d
+                upd  = unboundPRefs $ map (PRef p) d
                 dps1 = filter (`dup` eps) upd
         dups (PCon p (Neg p1):pcs)     eps = (eps2,dps1 ++ dps2)
           where (eps1,dps1) = unboundDupPRefs p1 gp eps
@@ -357,7 +357,7 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
           where (eps1,dps1) = unboundDupPRefs p1 gp eps
                 (eps2,dps2) = dups pcs eps1
                 (eps3,dps3) = (eps2 ++ unboundPRefs [pr],filter (`dup` eps) [pr])
-                pr          = pdrsRefToPRef r p
+                pr          = PRef p r
         dups (PCon p (Diamond p1):pcs) eps = (eps2,dps1 ++ dps2)
           where (eps1,dps1) = unboundDupPRefs p1 gp eps
                 (eps2,dps2) = dups pcs eps1

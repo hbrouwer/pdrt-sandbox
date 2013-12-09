@@ -144,7 +144,7 @@ pdrsFreePRefs lp@(PDRS _ _ u c) gp = free c
         freePRefs prs = snd (partition (flip (`pdrsBoundPRef` lp) gp) prs)
         free :: [PCon] -> [PRef]
         free []                       = []
-        free (PCon p (Rel _ d):cs)    = freePRefs (map (`pdrsRefToPRef` p) d)            `union` free cs
+        free (PCon p (Rel _ d):cs)    = freePRefs (map (PRef p) d)                       `union` free cs
         free (PCon _ (Neg p1):cs)     = pdrsFreePRefs p1 gp                              `union` free cs
         free (PCon _ (Imp p1 p2):cs)  = pdrsFreePRefs p1 gp  `union` pdrsFreePRefs p2 gp `union` free cs
         free (PCon _ (Or p1 p2):cs)   = pdrsFreePRefs p1 gp  `union` pdrsFreePRefs p2 gp `union` free cs
@@ -160,7 +160,7 @@ pdrsFreePVars :: PDRS -> PDRS-> [PVar]
 pdrsFreePVars (LambdaPDRS _) _     = []
 pdrsFreePVars (AMerge p1 p2) gp    = pdrsFreePVars p1 gp `union` pdrsFreePVars p2 gp
 pdrsFreePVars (PMerge p1 p2) gp    = pdrsFreePVars p1 gp `union` pdrsFreePVars p2 gp
-pdrsFreePVars lp@(PDRS _ m u c) gp = freePVars (concatMap (\(x,y) -> [x,y]) m) `union` freePVars (map prefToPVar u) `union` free c
+pdrsFreePVars lp@(PDRS _ m u c) gp = freePVars (concatMap (\(x,y) -> [x,y]) m) `union` freePVars (map (\(PRef p _) -> p) u) `union` free c
   where freePVars :: [PVar] -> [PVar]
         freePVars ps = snd (partition (flip (`pdrsBoundPVar` lp) gp) ps)
         free :: [PCon] -> [PVar]

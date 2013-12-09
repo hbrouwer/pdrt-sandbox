@@ -74,17 +74,15 @@ type Item = (Content,PVar,PVar)
 showItem :: Item -> String
 showItem (c,is,ps) =
   case c of
-    (Ref r)       -> "Ref" ++ "\t" ++ showRef r ++ tail
-    (Rel r d)     -> "Con" ++ "\t" ++ drsRelToString (pdrsRelToDRSRel r) ++ "("  ++ intercalate "," (map showRef d) ++ ")" ++ tail
-    (Neg pv)      -> "Con" ++ "\t" ++ opNeg     ++ " " ++ show pv ++ tail
-    (Imp pv1 pv2) -> "Con" ++ "\t" ++ show pv1  ++ " " ++ opImp ++ " " ++ show pv2 ++ tail
-    (Or pv1 pv2)  -> "Con" ++ "\t" ++ show pv1  ++ " " ++ opOr  ++ " " ++ show pv2 ++ tail
-    (Prop r pv)   -> "Con" ++ "\t" ++ showRef r ++ ":" ++ show pv ++ tail
-    (Diamond pv)  -> "Con" ++ "\t" ++ opDiamond ++ " " ++ show pv ++ tail
-    (Box pv)      -> "Con" ++ "\t" ++ opBox     ++ " " ++ show pv ++ tail
+    (Ref r)       -> "Ref" ++ "\t" ++ pdrsRefToDRSVar r ++ tail
+    (Rel r d)     -> "Con" ++ "\t" ++ pdrsRelToString r ++ "(" ++ intercalate "," (map pdrsRefToDRSVar d) ++ ")" ++ tail
+    (Neg pv)      -> "Con" ++ "\t" ++ opNeg             ++ " " ++ show pv ++ tail
+    (Imp pv1 pv2) -> "Con" ++ "\t" ++ show pv1          ++ " " ++ opImp   ++ " " ++ show pv2 ++ tail
+    (Or pv1 pv2)  -> "Con" ++ "\t" ++ show pv1          ++ " " ++ opOr    ++ " " ++ show pv2 ++ tail
+    (Prop r pv)   -> "Con" ++ "\t" ++ pdrsRefToDRSVar r ++ ":" ++ show pv ++ tail
+    (Diamond pv)  -> "Con" ++ "\t" ++ opDiamond         ++ " " ++ show pv ++ tail
+    (Box pv)      -> "Con" ++ "\t" ++ opBox             ++ " " ++ show pv ++ tail
   where tail = "\t\t" ++ show is ++ "\t\t" ++ show ps ++ "\n"
-        showRef :: PDRSRef -> DRSVar
-        showRef = drsRefToDRSVar . pdrsRefToDRSRef
 
 ---------------------------------------------------------------------------
 -- | First column of a 'PTable'

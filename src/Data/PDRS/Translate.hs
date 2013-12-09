@@ -124,7 +124,7 @@ stripPVars :: PDRS -> D.DRS
 stripPVars (LambdaPDRS lt) = D.LambdaDRS lt
 stripPVars (AMerge p1 p2)  = D.Merge (stripPVars p1) (stripPVars p2)
 stripPVars (PMerge p1 p2)  = D.Merge (stripPVars p1) (stripPVars p2)
-stripPVars (PDRS _ _ u c)  = D.DRS (map (pdrsRefToDRSRef . (\(PRef _ r) -> r)) u) (map stripPCon c)
+stripPVars (PDRS _ _ u c)  = D.DRS (map (\(PRef _ r) -> pdrsRefToDRSRef r) u) (map stripPCon c)
   where stripPCon :: PCon -> D.DRSCon
         stripPCon (PCon _ (Rel r d))    = D.Rel     (pdrsRelToDRSRel r) (map pdrsRefToDRSRef d)
         stripPCon (PCon _ (Neg p1))     = D.Neg     (stripPVars p1)

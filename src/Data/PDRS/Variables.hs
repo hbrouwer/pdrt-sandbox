@@ -16,9 +16,6 @@ module Data.PDRS.Variables
   pdrsRefToDRSRef
 , pdrsRefToDRSVar
 , drsRefToPDRSRef
-, pdrsRefToPRef
-, prefToPDRSRef
-, prefToPVar
 , pdrsRelToDRSRel
 , pdrsRelToString
 -- * New Variables
@@ -66,24 +63,6 @@ pdrsRefToDRSVar = drsRefToDRSVar . pdrsRefToDRSRef
 drsRefToPDRSRef :: DRSRef -> PDRSRef
 drsRefToPDRSRef (LambdaDRSRef lt) = LambdaPDRSRef lt
 drsRefToPDRSRef (DRSRef r)        = PDRSRef r
-
----------------------------------------------------------------------------
--- | Converts a 'PDRSRef' with a 'PVar' into a 'PRef'
----------------------------------------------------------------------------
-pdrsRefToPRef :: PDRSRef -> PVar -> PRef
-pdrsRefToPRef pr pv = PRef pv pr
-
----------------------------------------------------------------------------
--- | Converts a 'PRef' into a 'PDRSRef'
----------------------------------------------------------------------------
-prefToPDRSRef :: PRef -> PDRSRef 
-prefToPDRSRef (PRef _ pr) = pr
-
----------------------------------------------------------------------------
--- | Converts a 'PRef' into a 'PVar'
----------------------------------------------------------------------------
-prefToPVar :: PRef -> PVar
-prefToPVar (PRef pv _) = pv
 
 ---------------------------------------------------------------------------
 -- | Converts a 'PDRSRel' into a 'DRSRel'
@@ -177,7 +156,7 @@ pdrsPVars :: PDRS -> [PVar]
 pdrsPVars (LambdaPDRS _) = []
 pdrsPVars (AMerge p1 p2) = pdrsPVars p1               `union` pdrsPVars p2
 pdrsPVars (PMerge p1 p2) = pdrsPVars p1               `union` pdrsPVars p2
-pdrsPVars (PDRS l m u c) = l : concatMap (\(x,y) -> [x,y]) m `union` map prefToPVar u `union` pvars c
+pdrsPVars (PDRS l m u c) = l : concatMap (\(x,y) -> [x,y]) m `union` map (\(PRef p _) -> p) u `union` pvars c
   where pvars :: [PCon] -> [PVar]
         pvars []                       = []
         pvars (PCon p (Rel _ _):cs)    = p:pvars cs
@@ -195,7 +174,7 @@ pdrsLambdas :: PDRS -> [((DRSVar,[DRSVar]),Int)]
 pdrsLambdas (LambdaPDRS lt) = [lt]
 pdrsLambdas (AMerge p1 p2)  = pdrsLambdas p1 `union` pdrsLambdas p2
 pdrsLambdas (PMerge p1 p2)  = pdrsLambdas p1 `union` pdrsLambdas p2
-pdrsLambdas (PDRS _ _ u c)  = lamRefs (map prefToPDRSRef u) `union` lamPCons c
+pdrsLambdas (PDRS _ _ u c)  = lamRefs (map (\(PRef _ r) -> r) u) `union` lamPCons c
   where lamRefs :: [PDRSRef] -> [((DRSVar,[DRSVar]),Int)]
         lamRefs []                    = []
         lamRefs (LambdaPDRSRef lt:ps) = lt : lamRefs ps
@@ -218,3 +197,4 @@ pdrsLambdas (PDRS _ _ u c)  = lamRefs (map prefToPDRSRef u) `union` lamPCons c
 ---------------------------------------------------------------------------
 pdrsLambdaVars :: PDRS -> [(DRSVar,[DRSVar])]
 pdrsLambdaVars p = map fst (sortBy (comparing snd) (pdrsLambdas p))
+
