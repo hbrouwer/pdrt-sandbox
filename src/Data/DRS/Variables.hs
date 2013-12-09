@@ -145,13 +145,13 @@ lambdas (DRS u c)      = lamRefs u  `union` lamCons c
 -- | Increases the index of a 'DRSVar' by 1, or adds an index to it.
 ---------------------------------------------------------------------------
 increase :: DRSVar -> DRSVar
-increase v = (reverse $ dropWhile (isDigit) (reverse v)) ++ i
-  where i = case (index v) of
+increase v = reverse (dropWhile isDigit (reverse v)) ++ i
+  where i = case index v of
           Nothing -> show 1
           Just n  -> show (n + 1)
         index :: DRSVar -> Maybe Int
         index v 
           | i == ""   = Nothing
           | otherwise = Just $ read i
-          where i = reverse $ takeWhile (isDigit) (reverse v)
+          where i = reverse (takeWhile isDigit (reverse v))
 

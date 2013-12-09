@@ -128,7 +128,7 @@ instance (PDRSAtom a, AbstractPDRS b) => AbstractPDRS (a -> b)
 ---------------------------------------------------------------------------
 renameSubPDRS :: PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> PDRS
 renameSubPDRS lp@(LambdaPDRS ((v,ds),i)) _ _ rs    = LambdaPDRS ((v,ds'),i)
-  where ds' = map (drsRefToDRSVar . pdrsRefToDRSRef . ((flip renameVar) rs) . (\v -> PDRSRef v)) ds
+  where ds' = map (drsRefToDRSVar . pdrsRefToDRSRef . flip renameVar rs . PDRSRef) ds
 renameSubPDRS (AMerge p1 p2) gp ps rs    = AMerge p1' p2'
   where p1' = renameSubPDRS p1 gp ps rs
         p2' = renameSubPDRS p2 gp ps rs

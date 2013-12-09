@@ -42,8 +42,8 @@ isPresupPDRS p@(PDRS {})     = any (`pdrsIsFreePVar` p) (pdrsPVars p)
 ---------------------------------------------------------------------------
 -- | Disjoins 'unresolved PDRS' @n1@ from 'unresolved PDRS' @n2@.
 ---------------------------------------------------------------------------
-pdrsIsDifferentNP :: ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS)
-pdrsIsDifferentNP n1 n2 = \k-> pdrsUnresolve (pdrsDisjoin n1' n2') i k
+pdrsIsDifferentNP :: ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS) -> (PDRSRef -> PDRS) -> PDRS
+pdrsIsDifferentNP n1 n2 = pdrsUnresolve (pdrsDisjoin n1' n2') i
   where n1' = n1 (\x -> LambdaPDRS (("t",[(drsRefToDRSVar . pdrsRefToDRSRef) x]),i))
         n2' = n2 (\x -> LambdaPDRS (("t",[(drsRefToDRSVar . pdrsRefToDRSRef) x]),0))
         i   = maximum (map snd (lambdas (n1 (\x -> LambdaPDRS (("t",[]),0))))) + 1
@@ -62,13 +62,13 @@ pdrsUnresolve lp@(LambdaPDRS ((_,r),li)) i k
   | otherwise = lp
 pdrsUnresolve (AMerge p1 p2) i k = AMerge (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)
 pdrsUnresolve (PMerge p1 p2) i k = PMerge (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)
-pdrsUnresolve (PDRS l m u c) i k = (PDRS l m u (replaceLambda c k))
+pdrsUnresolve (PDRS l m u c) i k = PDRS l m u (replaceLambda c k)
   where replaceLambda :: [PCon] -> (PDRSRef -> PDRS) -> [PCon]
         replaceLambda [] k                        = []
-        replaceLambda (pc@(PCon _ (Rel{})):pcs) k = (pc:replaceLambda pcs k)
-        replaceLambda (PCon p (Neg p1):pcs)     k = (PCon p (Neg     (pdrsUnresolve p1 i k)):replaceLambda pcs k)
-        replaceLambda (PCon p (Imp p1 p2):pcs)  k = (PCon p (Imp     (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)):replaceLambda pcs k)
-        replaceLambda (PCon p (Or p1 p2):pcs)   k = (PCon p (Or      (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)):replaceLambda pcs k)
-        replaceLambda (PCon p (Prop r p1):pcs)  k = (PCon p (Prop r  (pdrsUnresolve p1 i k)):replaceLambda pcs k)
-        replaceLambda (PCon p (Diamond p1):pcs) k = (PCon p (Diamond (pdrsUnresolve p1 i k)):replaceLambda pcs k)
-        replaceLambda (PCon p (Box p1):pcs)     k = (PCon p (Box     (pdrsUnresolve p1 i k)):replaceLambda pcs k)
+        replaceLambda (pc@(PCon _ (Rel{})):pcs) k = pc:replaceLambda pcs k
+        replaceLambda (PCon p (Neg p1):pcs)     k = PCon p (Neg     (pdrsUnresolve p1 i k)):replaceLambda pcs k
+        replaceLambda (PCon p (Imp p1 p2):pcs)  k = PCon p (Imp     (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)):replaceLambda pcs k
+        replaceLambda (PCon p (Or p1 p2):pcs)   k = PCon p (Or      (pdrsUnresolve p1 i k) (pdrsUnresolve p2 i k)):replaceLambda pcs k
+        replaceLambda (PCon p (Prop r p1):pcs)  k = PCon p (Prop r  (pdrsUnresolve p1 i k)):replaceLambda pcs k
+        replaceLambda (PCon p (Diamond p1):pcs) k = PCon p (Diamond (pdrsUnresolve p1 i k)):replaceLambda pcs k
+        replaceLambda (PCon p (Box p1):pcs)     k = PCon p (Box     (pdrsUnresolve p1 i k)):replaceLambda pcs k
