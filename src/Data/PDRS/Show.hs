@@ -420,7 +420,7 @@ showMAPsTuples m = intercalate "," (map show (unique m []))
 -- | Shows lambda abstractions over 'PDRS' @p@.
 ---------------------------------------------------------------------------
 showPDRSLambdas :: PDRS -> String
-showPDRSLambdas p = show (pdrsLambdas p)
+showPDRSLambdas p = show (pdrsLambdaVars p)
   where show :: [(DRSVar,[DRSVar])] -> String
         show []     = []
         show ((l,_):ls) = opLambda ++ l ++ "." ++ show ls

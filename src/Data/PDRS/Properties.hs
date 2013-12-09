@@ -46,7 +46,7 @@ pdrsIsDifferentNP :: ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS) 
 pdrsIsDifferentNP n1 n2 = pdrsUnresolve (pdrsDisjoin n1' n2') i
   where n1' = n1 (\x -> LambdaPDRS (("t",[(drsRefToDRSVar . pdrsRefToDRSRef) x]),i))
         n2' = n2 (\x -> LambdaPDRS (("t",[(drsRefToDRSVar . pdrsRefToDRSRef) x]),0))
-        i   = maximum (map snd (lambdas (n1 (\x -> LambdaPDRS (("t",[]),0))))) + 1
+        i   = maximum (map snd (pdrsLambdas (n1 (\x -> LambdaPDRS (("t",[]),0))))) + 1
 
 ---------------------------------------------------------------------------
 -- * Private
