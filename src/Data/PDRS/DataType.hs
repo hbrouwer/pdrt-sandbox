@@ -44,7 +44,7 @@ data PDRS =
   | PDRS PVar [MAP] [PRef] [PCon]
   -- ^ A 'PDRS', consisting of a 'PVar' (a label), 
   -- a set of 'MAP's, a set of 'PRef's, and a set of 'PCon's
-  deriving (Eq)
+  deriving (Eq,Read)
 
 ---------------------------------------------------------------------------
 -- | Projection variable (a label or pointer).
@@ -61,7 +61,7 @@ type MAP = (PVar,PVar)
 -- | A projected referent, consisting of a 'PVar' and a 'PDRSRef'.
 ---------------------------------------------------------------------------
 data PRef = PRef PVar PDRSRef
-  deriving (Eq,Show)
+  deriving (Eq,Read,Show)
 
 ---------------------------------------------------------------------------
 -- | A 'PDRS' referent.
@@ -72,7 +72,7 @@ data PDRSRef =
   -- to be applied to the referent, and its argument position)
   | PDRSRef DRSVar
   -- ^ A PDRS referent
-  deriving (Eq,Show)
+  deriving (Eq,Read,Show)
 
 ---------------------------------------------------------------------------
 -- | PDRS relation
@@ -80,13 +80,13 @@ data PDRSRef =
 data PDRSRel =
   LambdaPDRSRel ((DRSVar,[DRSVar]),Int)
   | PDRSRel String
-  deriving (Eq,Show)
+  deriving (Eq,Read,Show)
 
 ---------------------------------------------------------------------------
 -- | A projected condition, consisting of a 'PVar' and a 'PDRSCon'.
 ---------------------------------------------------------------------------
 data PCon = PCon PVar PDRSCon
-  deriving (Eq)
+  deriving (Eq,Read)
 
 ---------------------------------------------------------------------------
 -- | A 'PDRS' condition.
@@ -99,4 +99,4 @@ data PDRSCon =
   | Prop PDRSRef PDRS   -- ^ A proposition 'PDRS'
   | Diamond PDRS        -- ^ A possible 'PDRS'
   | Box PDRS            -- ^ A necessary 'PDRS'
-  deriving (Eq)
+  deriving (Eq,Read)

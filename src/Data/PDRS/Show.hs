@@ -16,6 +16,7 @@ module Data.PDRS.Show
   PDRSNotation (..)
 , showPDRS
 , printPDRS
+, pdrsToInternal
 , showAMerge
 , printAMerge
 , showPMerge
@@ -117,6 +118,13 @@ showPDRS n =
 ---------------------------------------------------------------------------
 printPDRS :: PDRS -> IO ()
 printPDRS p = putStrLn $ '\n' : showPDRS (Boxes p)
+
+---------------------------------------------------------------------------
+-- | Shows a (readable) 'String' containing the internal representation of
+-- a 'PDRS'.
+---------------------------------------------------------------------------
+pdrsToInternal :: (ShowablePDRS p) => p -> String
+pdrsToInternal n = (showPDRS (Debug (resolve n 0 0)))
 
 ---------------------------------------------------------------------------
 -- ** Show Merges
