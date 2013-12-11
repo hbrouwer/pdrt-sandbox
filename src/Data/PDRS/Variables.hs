@@ -135,10 +135,10 @@ pdrsUniverses (PDRS _ _ u c) = u `union` universes c
 -- | Returns the list of all variables in a 'PDRS'
 ---------------------------------------------------------------------------
 pdrsVariables :: PDRS -> [PDRSRef]
-pdrsVariables (LambdaPDRS _) = []
-pdrsVariables (AMerge p1 p2) = pdrsVariables p1         `union` pdrsVariables p2
-pdrsVariables (PMerge p1 p2) = pdrsVariables p1         `union` pdrsVariables p2
-pdrsVariables (PDRS _ _ u c) = map (\(PRef _ r) -> r) u `union` variables c
+pdrsVariables (LambdaPDRS ((_,d),_)) = map PDRSRef d
+pdrsVariables (AMerge p1 p2)         = pdrsVariables p1         `union` pdrsVariables p2
+pdrsVariables (PMerge p1 p2)         = pdrsVariables p1         `union` pdrsVariables p2
+pdrsVariables (PDRS _ _ u c)         = map (\(PRef _ r) -> r) u `union` variables c
   where variables :: [PCon] -> [PDRSRef]
         variables []                       = []
         variables (PCon _ (Rel _ d):cs)    = d `union` variables cs
