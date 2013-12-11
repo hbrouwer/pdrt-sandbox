@@ -14,12 +14,16 @@ module Data.PDRS.Properties
 (
   isPresupPDRS
 , pdrsIsDifferentNP
+, pdrsIsSameNP
 ) where
 
-import Data.DRS.Variables (drsRefToDRSVar)
+import Data.List (union)
+
 import Data.PDRS.Binding
 import Data.PDRS.DataType
+import Data.PDRS.LambdaCalculus
 import Data.PDRS.Merge
+import Data.PDRS.Structure
 import Data.PDRS.Variables
 
 ---------------------------------------------------------------------------
@@ -49,6 +53,16 @@ pdrsIsDifferentNP n1 n2 = pdrsUnresolve (pdrsDisjoin n1' n2') i
         i   = maximum (map snd (pdrsLambdas (n1 (\x -> LambdaPDRS (("t",[]),0))))) + 1
 
 ---------------------------------------------------------------------------
+-- | Equates 'unresolved PDRS' @n1@ with 'unresolved PDRS' @n2@ in terms of
+-- its label and NP head.
+---------------------------------------------------------------------------
+pdrsIsSameNP :: ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS) -> (PDRSRef -> PDRS) -> PDRS
+pdrsIsSameNP n1 n2 = pdrsUnresolve (pdrsAlphaConvert n1' [(pdrsLabel n1',pdrsLabel n2')] [(npHead n1,npHead n2)]) i
+  where n1' = n1 (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),i))
+        n2' = n2 (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),0))
+        i   = maximum (map snd (pdrsLambdas (n1 (\x -> LambdaPDRS (("t",[]),0)))) `union` map snd (pdrsLambdas n2')) + 1
+
+---------------------------------------------------------------------------
 -- * Private
 ---------------------------------------------------------------------------
 
@@ -72,3 +86,16 @@ pdrsUnresolve (PDRS l m u c) i k = PDRS l m u (replaceLambda c k)
         replaceLambda (PCon p (Prop r p1):pcs)  k = PCon p (Prop r  (pdrsUnresolve p1 i k)):replaceLambda pcs k
         replaceLambda (PCon p (Diamond p1):pcs) k = PCon p (Diamond (pdrsUnresolve p1 i k)):replaceLambda pcs k
         replaceLambda (PCon p (Box p1):pcs)     k = PCon p (Box     (pdrsUnresolve p1 i k)):replaceLambda pcs k
+
+---------------------------------------------------------------------------
+-- | Returns the head of 'unresolved PDRS' @np@, where the head of an NP is
+-- defined as the main referent that is passed on to its argument.
+---------------------------------------------------------------------------
+npHead :: ((PDRSRef -> PDRS) -> PDRS) -> PDRSRef
+npHead np = retrieveLambda (pdrsLambdas (np (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),i))))
+  where i = maximum (map snd (pdrsLambdas (np (\x -> LambdaPDRS (("t",[]),0))))) + 1
+        retrieveLambda :: [((DRSVar,[DRSVar]),Int)] -> PDRSRef
+        retrieveLambda (((_,r),li):ls)
+          | li == i   = PDRSRef (head r)
+          | otherwise = retrieveLambda ls
+
