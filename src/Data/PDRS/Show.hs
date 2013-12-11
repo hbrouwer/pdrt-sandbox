@@ -124,7 +124,7 @@ printPDRS p = putStrLn $ '\n' : showPDRS (Boxes p)
 -- a 'PDRS'.
 ---------------------------------------------------------------------------
 pdrsToInternal :: (ShowablePDRS p) => p -> String
-pdrsToInternal n = (showPDRS (Debug (resolve n 0 0)))
+pdrsToInternal n = showPDRS (Debug (resolve n 0 0))
 
 ---------------------------------------------------------------------------
 -- ** Show Merges
