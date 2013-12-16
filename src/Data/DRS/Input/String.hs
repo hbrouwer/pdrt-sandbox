@@ -78,7 +78,7 @@ opDiamondString = ["d", "diamond", "maybe"]
 ---------------------------------------------------------------------------
 -- | Data type for brackets.
 ---------------------------------------------------------------------------
-data BracketType = Parentheses | Curly | Angle
+data BracketType = Parentheses | Curly | Angle | Square
 
 ---------------------------------------------------------------------------
 -- | Returns tuple with brackets from given 'BracketType'.
@@ -87,6 +87,7 @@ brackets :: BracketType -> (Char,Char)
 brackets Parentheses = ('(',')')
 brackets Curly       = ('{','}')
 brackets Angle       = ('<','>')
+brackets Square      = ('[',']')
 
 ---------------------------------------------------------------------------
 -- | Checks if 'String @s@' contains the same number of opening and

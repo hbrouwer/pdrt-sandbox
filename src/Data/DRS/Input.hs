@@ -17,3 +17,4 @@ module Data.DRS.Input
 ) where
 
 import Data.DRS.Input.String as Input
+import Data.DRS.Input.Boxer as Input
