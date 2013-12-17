@@ -323,7 +323,7 @@ showPDRSDebug (PDRS l m u c) = "PDRS"       ++ " (" ++ show l ++ ") " ++ show m 
         showCon (PCon p (Neg p1))     = "PCon" ++ " (" ++ show p ++ ") (Neg ("     ++ showPDRSDebug p1 ++ "))"
         showCon (PCon p (Imp p1 p2))  = "PCon" ++ " (" ++ show p ++ ") (Imp ("     ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ "))"
         showCon (PCon p (Or p1 p2))   = "PCon" ++ " (" ++ show p ++ ") (Or ("      ++ showPDRSDebug p1 ++ ") (" ++ showPDRSDebug p2 ++ "))"
-        showCon (PCon p (Prop r p1))  = "PCon" ++ " (" ++ show p ++ ") (Prop ("    ++ show r           ++ " "   ++ showPDRSDebug p1 ++ "))"
+        showCon (PCon p (Prop r p1))  = "PCon" ++ " (" ++ show p ++ ") (Prop ("    ++ show r           ++ ") ("   ++ showPDRSDebug p1 ++ "))"
         showCon (PCon p (Diamond p1)) = "PCon" ++ " (" ++ show p ++ ") (Diamond (" ++ showPDRSDebug p1 ++ "))"
         showCon (PCon p (Box p1))     = "PCon" ++ " (" ++ show p ++ ") (Box ("     ++ showPDRSDebug p1 ++ "))"
 
