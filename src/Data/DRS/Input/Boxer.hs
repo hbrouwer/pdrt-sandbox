@@ -14,13 +14,12 @@ module Data.DRS.Input.Boxer
 (
   PrologDRS
 , boxerToDRS
-, plDRSToDRS
-
-, toDRSRef
 , replaceLambdas
+, convertPrologVars
 ) where
 
-import Data.Char (isPunctuation, toUpper)
+import Data.Char (isNumber, isPunctuation, toUpper)
+import Data.List (partition)
 import Data.DRS.DataType
 import Data.DRS.Input.String
 
@@ -35,7 +34,51 @@ type PrologDRS = String
 -- | Converts Boxer's output into a 'DRS'.
 ---------------------------------------------------------------------------
 boxerToDRS :: String -> DRS
-boxerToDRS s@('s':'e':'m':'(':_) = plDRSToDRS $ tail (dropUpToMatchingBracket Square (dropWhile (/= '[') s))
+boxerToDRS s@('s':'e':'m':'(':_) = plDRSToDRS (replaceLambdas (convertPrologVars pldrs []) 0)
+  where pldrs = tail (dropUpToMatchingBracket Square (dropWhile (/= '[') s))
+
+---------------------------------------------------------------------------
+-- | Replaces all lambda-variables in a 'PrologDRS' by lambda-identifiers.
+---------------------------------------------------------------------------
+replaceLambdas :: PrologDRS -> Int -> PrologDRS
+replaceLambdas [] _  = []
+replaceLambdas s i 
+  | drsType == "lam" = replaceLambdas (replace (tail $ dropWhile (/= ',') drs) (takeWhile  (/= ',') (tail drs)) i) (i + 1)
+  | otherwise        = head s : replaceLambdas (tail s) i
+  where drsType = takeWhile (/= '(') s
+        drs     = dropWhile (/= '(') s
+        replace :: PrologDRS -> String -> Int -> PrologDRS
+        replace [] _ _                                    = []
+        replace d@(h:t) l j
+          | init lv == l && isPunctuation (last lv) = "lambda(" ++ l ++ ":" ++ show i ++ ")" ++ replace (drop (length l) d) l j
+          | otherwise                               = h : replace t l j
+          where lv = take (length l + 1) d
+
+---------------------------------------------------------------------------
+-- | Converts all Prolog Variables into new Variables.
+---------------------------------------------------------------------------
+convertPrologVars :: PrologDRS -> [(String,String)] -> PrologDRS
+convertPrologVars [] _ = []
+convertPrologVars s@(h:t) cl
+  | h == '_'  = newvar ++ convertPrologVars (drop (length var + 1) s) newcl
+  | otherwise = h : convertPrologVars t cl
+  where var            = takeWhile (not . isPunctuation) t
+        (newvar,newcl) = convert (take (length var + 2) s) cl cl
+        convert :: String -> [(String,String)] -> [(String,String)] -> (String,[(String,String)])
+        convert v [] ocl
+          | last v == ':' = (np, (init v,np) : ocl) -- ^ for projection variables
+          | otherwise     = (nr, (init v,nr) : ocl)
+          where np        = show (1 + maximum (0 : map (\i -> read i :: Int) ops))
+                nr        = 'x':show (1 + maximum (0 : map (\i -> read i :: Int) suffixes))
+                suffixes  = filter (not . null) (map (reverse . takeWhile isNumber. reverse) ors)
+                (ops,ors) = partition (all isNumber) (map snd ocl)
+        convert v (n:ns) ocl
+          | init v == fst n = (snd n,ocl)
+          | otherwise       = convert v ns ocl
+
+---------------------------------------------------------------------------
+-- * Private
+---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
 -- | Converts a 'PrologDRS' into a 'DRS'.
@@ -49,25 +92,12 @@ plDRSToDRS s
   | drsType == "lambda" = LambdaDRS ((takeWhile (/= ':') drs,[]), read (dropWhile (/= ':') drs) :: Int)
   | drsType == "app"    = LambdaDRS ((takeWhile (/= ':') l,[last sd]), read (tail (dropWhile (/= ':') (init l))) :: Int)
   | otherwise           = error "not a valid DRS"
-  where s'      = replaceLambdas s 0
-        drsType = takeWhile (/= '(') s'
-        drs     = dropOuterBrackets $ takeUpToMatchingBracket Parentheses (drop (length drsType) s')
+  where drsType = takeWhile (/= '(') s
+        drs     = dropOuterBrackets $ takeUpToMatchingBracket Parentheses (drop (length drsType) s)
         drs'    = tail (dropUpToMatchingBracket Parentheses (dropWhile (/= '(') drs))
         -- | For app:
         l  = tail (dropWhile (/= '(') (head sd))
         sd = splitOn ',' drs
-
----------------------------------------------------------------------------
--- * Private
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- Converts a 'String' to a 'DRSRef', which may be a 'LambdaDRSRef'.
----------------------------------------------------------------------------
-toDRSRef :: String -> DRSRef
-toDRSRef r
-  | (take 7 r) == "lambda(" = LambdaDRSRef ((takeWhile (/= ':') (drop 7 r),[]),read (dropWhile (/= ':') r) :: Int)
-  | otherwise               = DRSRef r
 
 ---------------------------------------------------------------------------
 -- | Converts a 'String' with Prolog referents into a set of 'DRSRef's.
@@ -106,27 +136,18 @@ parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Squar
           | pfx == "eq"    = Rel  (DRSRel "=")                      (map toDRSRef ct)                   : etc
           | otherwise      = error "not a valid condition"
           where pfx = takeWhile (/= '(') cs
-                c   = dropOuterBrackets $ takeUpToMatchingBracket Parentheses (drop (length pfx) cs)
-                ct  = splitOn ',' c
+                c   = dropOuterBrackets $ takeUpToMatchingBracket Parentheses (drop (length pfx) cs) 
                 etc = parse (drop (length pfx + length c + 2) cs)
                 c'  = tail $ dropUpToMatchingBracket Parentheses (dropWhile (/= '(') c)
+                ct  = splitOn ',' c
                 capitalize :: String -> String
                 capitalize (h:t) = toUpper h:t
 
 ---------------------------------------------------------------------------
--- | Replaces all lambda-variables in a 'PrologDRS' by lambda-identifiers.
+-- Converts a 'String' to a 'DRSRef', which may be a 'LambdaDRSRef'.
 ---------------------------------------------------------------------------
-replaceLambdas :: String -> Int -> String
-replaceLambdas [] _  = []
-replaceLambdas s i 
-  | drsType == "lam" = replaceLambdas (replace (tail $ dropWhile (/= ',') drs) (takeWhile  (/= ',') (tail drs)) i) (i + 1)
-  | otherwise        = (head s) : replaceLambdas (tail s) i
-  where drsType = takeWhile (/= '(') s
-        drs     = dropWhile (/= '(') s
-        replace :: String -> String -> Int -> String
-        replace [] _ _                                    = []
-        replace d@(h:t) l j 
-          | init lv == l && isPunctuation (last lv) = "lambda(" ++ l ++ ":" ++ show i ++ ")" ++ replace (drop (length l) d) l j
-          | otherwise                               = h : (replace t l j)
-          where lv = take (length l + 1) d
+toDRSRef :: String -> DRSRef
+toDRSRef r
+  | take 7 r == "lambda(" = LambdaDRSRef ((takeWhile (/= ':') (drop 7 r),[]),read (dropWhile (/= ':') r) :: Int)
+  | otherwise             = DRSRef r
 

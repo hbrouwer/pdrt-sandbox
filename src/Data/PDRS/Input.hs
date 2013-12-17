@@ -16,4 +16,5 @@ module Data.PDRS.Input
 , module Input
 ) where
 
+import Data.PDRS.Input.Boxer as Input
 import Data.PDRS.Input.String as Input
