@@ -66,7 +66,7 @@ convertPrologVars s@(h:t) cl
         (newvar,newcl) = convert (take (length var + 2) s) cl cl
         convert :: String -> [(String,String)] -> [(String,String)] -> (String,[(String,String)])
         convert v [] ocl
-          | last v == ':' = (np, (init v,np) : ocl) -- ^ for projection variables
+          | last v == ':' = (np, (init v,np) : ocl) -- for projection variables
           | otherwise     = (nr, (init v,nr) : ocl)
           where np        = show (1 + maximum (0 : map (\i -> read i :: Int) ops))
                 nr        = 'x':show (1 + maximum (0 : map (\i -> read i :: Int) suffixes))
@@ -144,7 +144,7 @@ parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Squar
                 capitalize (h:t) = toUpper h:t
 
 ---------------------------------------------------------------------------
--- Converts a 'String' to a 'DRSRef', which may be a 'LambdaDRSRef'.
+-- | Converts a 'String' to a 'DRSRef', which may be a 'LambdaDRSRef'.
 ---------------------------------------------------------------------------
 toDRSRef :: String -> DRSRef
 toDRSRef r

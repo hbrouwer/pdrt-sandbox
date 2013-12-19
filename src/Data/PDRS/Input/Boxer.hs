@@ -100,7 +100,7 @@ parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Squar
                 capitalize (h:t) = toUpper h:t
 
 ---------------------------------------------------------------------------
--- Converts a 'String' to a 'PDRSRef', which may be a 'LambdaPDRSRef'.
+-- | Converts a 'String' to a 'PDRSRef', which may be a 'LambdaPDRSRef'.
 ---------------------------------------------------------------------------
 toPDRSRef :: String -> PDRSRef
 toPDRSRef r
