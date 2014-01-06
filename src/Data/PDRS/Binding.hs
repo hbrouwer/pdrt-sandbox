@@ -34,7 +34,7 @@ import Data.List (partition, union)
 -- | Returns whether 'PRef' @pr@ in context $lp$ is bound in the 'PDRS'
 -- @gp@, where:
 --
--- [@pdrsBoundRef2 pr lp gp@ /iff/]
+-- [@pdrsBoundRef pr lp gp@ /iff/]
 --
 -- There exists a context @pv@, such that
 --
@@ -61,7 +61,7 @@ pdrsBoundPRef (PRef p r) lp gp
 -- | Returns whether PRef @pr1@ introduced in local PDRS @lp@ is bound by
 -- projected referent @pr2@ in PDRS @pdrs@, where:
 --
--- [@boundByPRef pr lp pr' pdrs@ /iff/]
+-- [@boundByPRef pr1 lp1 pr2 pdrs@ /iff/]
 --
 --  (1) @pr1@ and @pr2@ share the same referent; and
 --  
@@ -71,11 +71,11 @@ pdrsBoundPRef (PRef p r) lp gp
 --    introduction and interpretation site of @pr1@.
 ---------------------------------------------------------------------------
 pdrsPRefBoundByPRef :: PRef -> PDRS -> PRef -> PDRS -> Bool
-pdrsPRefBoundByPRef (PRef p1 r1) lp1 pr2@(PRef p2 r2) lp2 =
+pdrsPRefBoundByPRef (PRef p1 r1) lp pr2@(PRef p2 r2) pdrs =
   r1 == r2
-  && pr2 `elem` pdrsUniverses lp2
-  && pdrsIsAccessibleContext p1 p2 lp2
-  && pdrsIsAccessibleContext (pdrsLabel lp1) p2 lp2
+  && pr2 `elem` pdrsUniverses pdrs
+  && pdrsIsAccessibleContext p1 p2 pdrs
+  && pdrsIsAccessibleContext (pdrsLabel lp) p2 pdrs
 
 ---------------------------------------------------------------------------
 -- | Returns whether @pv@ is a free projection variable in PDRS @p@, where:
@@ -97,40 +97,34 @@ pdrsIsFreePVar pv p
 
 ---------------------------------------------------------------------------
 -- | Returns whether a pointer @p@ in local PDRS @lp@ is bound by a 
--- label in the global PDRS $gp$, where:
+-- label in the global PDRS @gp@, where:
 -- 
 -- [@pdrsBoundPVar p lp gp@ /iff/]
 --
 -- * @p@ is equal to the label of either @lp@ or @gp@; or
 -- 
 -- * there exists a PDRS @p@ with label @pv@, such that @p@ is a subPDRS
---   of @gp@ and @lp@ is a subPDRS of @p@.
+--   of @gp@ and @p@ is accessible from @lp@.
 --
 --Note the correspondence to drsBoundRef.
 ---------------------------------------------------------------------------
 pdrsBoundPVar :: PVar -> PDRS -> PDRS -> Bool
-pdrsBoundPVar _ _ (LambdaPDRS _) = False
-pdrsBoundPVar pv lp (AMerge p1 p2) = pdrsBoundPVar pv lp p1 || pdrsBoundPVar pv lp p2
-pdrsBoundPVar pv lp (PMerge p1 p2) = pdrsBoundPVar pv lp p1 || pdrsBoundPVar pv lp p2
-pdrsBoundPVar pv lp gp@(PDRS l _ _ c)
-  | pv == pdrsLabel lp     = True
-  | pv == l                = True
-  | isBoundByLabel pv lp c = True
-  | otherwise              = False
-  where isBoundByLabel :: PVar -> PDRS -> [PCon] -> Bool
-        isBoundByLabel pv lp = any bound
-          where bound :: PCon -> Bool
-                bound (PCon _ (Rel _ _))    = False
-                bound (PCon _ (Neg p1))     = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
-                bound (PCon _ (Imp p1 p2))  = pv == pdrsLabel p1 && isSubPDRS lp p2
-                  ||  isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
-                  ||  isSubPDRS lp p2 && pdrsBoundPVar pv lp p2
-                bound (PCon _ (Or p1 p2))   = pv == pdrsLabel p1 && isSubPDRS lp p2
-                  ||  isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
-                  ||  isSubPDRS lp p2 && pdrsBoundPVar pv lp p2
-                bound (PCon _ (Prop _ p1))  = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
-                bound (PCon _ (Diamond p1)) = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
-                bound (PCon _ (Box p1))     = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+pdrsBoundPVar _ _ (LambdaPDRS _)      = False
+pdrsBoundPVar pv lp (AMerge p1 p2)    = pdrsBoundPVar pv lp p1 || pdrsBoundPVar pv lp p2
+pdrsBoundPVar pv lp (PMerge p1 p2)    = pdrsBoundPVar pv lp p1 || pdrsBoundPVar pv lp p2
+pdrsBoundPVar pv lp gp@(PDRS l _ _ c) = pv == pdrsLabel lp || pv == l || any bound c
+  where bound :: PCon -> Bool
+        bound (PCon _ (Rel _ _))    = False
+        bound (PCon _ (Neg p1))     = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+        bound (PCon _ (Imp p1 p2))  = pv == pdrsLabel p1 && isSubPDRS lp p2
+          ||  isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+          ||  isSubPDRS lp p2 && pdrsBoundPVar pv lp p2
+        bound (PCon _ (Or p1 p2))   = pv == pdrsLabel p1 && isSubPDRS lp p2
+          ||  isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+          ||  isSubPDRS lp p2 && pdrsBoundPVar pv lp p2
+        bound (PCon _ (Prop _ p1))  = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+        bound (PCon _ (Diamond p1)) = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+        bound (PCon _ (Box p1))     = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
 
 ---------------------------------------------------------------------------
 -- | Returns the list of all free 'PRef's in a 'PDRS'
