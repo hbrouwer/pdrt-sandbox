@@ -279,7 +279,8 @@ showHorizontalLine l lc rc = [lc] ++ replicate (l - 2) boxHorLine ++ [rc] ++ "\n
 -- | Shows a modifier @m@ at line number @p@ in front of 'String' @s@.
 ---------------------------------------------------------------------------
 showModifier :: String -> Int -> String -> String
-showModifier m p s = unlines (modifier 0 (lines s))
+showModifier [] _ s = s
+showModifier m p s  = unlines (modifier 0 (lines s))
   where modifier :: Int -> [String] -> [String]
         modifier _ [] = []
         modifier n (l:ls)
