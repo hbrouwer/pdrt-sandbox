@@ -47,8 +47,8 @@ import Data.List (partition, union)
 ---------------------------------------------------------------------------
 pdrsBoundPRef :: PRef -> PDRS -> PDRS -> Bool
 pdrsBoundPRef (PRef p r) lp gp
-  | p `elem` vs = bound vs
-  | otherwise   = False
+  | (pdrsLabel lp) `elem` vs && p `elem` vs = bound vs
+  | otherwise                               = False
   where pg = projectionGraph gp
         vs = vertices pg
         bound :: [PVar] -> Bool

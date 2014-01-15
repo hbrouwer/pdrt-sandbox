@@ -289,11 +289,11 @@ purifyPRefs lp@(PDRS l m u c) gp prs = PDRS l m (map (convert prs) u) (map purif
   where -- | Converts a 'PRef' @pr@ based on a conversion list
         convert :: [(PRef,PRef)] -> PRef -> PRef
         convert [] pr                                                                  = pr
-        convert  ((pr'@(PRef p' r'),npr):prs) pr@(PRef p r)
+        convert ((pr'@(PRef p' r'),npr):prs') pr@(PRef p r)
           | pr == pr'                                                                  = npr
           | r  == r' && pdrsPRefBoundByPRef pr lp pr' gp                               = npr
           | r  == r' && not(pdrsBoundPRef pr lp gp) && pdrsIsAccessibleContext p p' gp = npr
-          | otherwise                                                                  = convert prs pr
+          | otherwise                                                                  = convert prs' pr
         -- | A projected condition is /purify/ iff all its subordinated
         -- referents have been converted based on the conversion list.
         purify :: PCon -> PCon
