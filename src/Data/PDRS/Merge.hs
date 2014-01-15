@@ -54,7 +54,7 @@ pdrsAMerge pm@(PMerge k1 k2) p
   | isLambdaPDRS k1 = PMerge k1 (pdrsAMerge k2 p) -- (lk1 * k2) + p = lk1 * (k2 + p)
   | isLambdaPDRS k2 = AMerge k2 (pdrsPMerge k1 p) -- (k1 * lk2) + p = lk2 + (k1 * p)
   | otherwise       = pdrsAMerge (pdrsResolveMerges pm) p
-pdrsAMerge p1@(PDRS{}) p2@(PDRS{}) = amerge p1 (pdrsDisjoin p2' p1')
+pdrsAMerge p1@(PDRS{}) p2@(PDRS{}) = pdrsPurify $ amerge p1 (pdrsDisjoin p2' p1')
   where p1' = pdrsPurify $ pdrsResolveMerges p1
         p2' = pdrsPurify $ pdrsResolveMerges p2
         amerge :: PDRS -> PDRS -> PDRS
@@ -91,7 +91,7 @@ pdrsPMerge pm@(PMerge k1 k2) p
   | isLambdaPDRS k1 = PMerge k1 (pdrsPMerge k2 p) -- (lk1 * k2) * p = lk1 * (k2 * p)
   | isLambdaPDRS k2 = PMerge k2 (pdrsPMerge k1 p) -- (k1 * lk2) * p = lk2 * (k1 * p)
   | otherwise       = pdrsPMerge (pdrsResolveMerges pm) p
-pdrsPMerge p1@(PDRS{}) p2@(PDRS{}) = pmerge p1' (pdrsDisjoin p2' p1')
+pdrsPMerge p1@(PDRS{}) p2@(PDRS{}) = pdrsPurify $ pmerge p1' (pdrsDisjoin p2' p1')
   where p1' = pdrsPurify $ pdrsResolveMerges p1
         p2' = pdrsPurify $ pdrsResolveMerges p2
         pmerge :: PDRS -> PDRS -> PDRS
