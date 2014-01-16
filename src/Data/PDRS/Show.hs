@@ -292,15 +292,15 @@ showPDRSSet (LambdaPDRS ((v,d),_))
   | otherwise    = v
 showPDRSSet (AMerge p1 p2) = "(" ++ showPDRSSet p1 ++ " " ++ opAMerge ++ " " ++ showPDRSSet p2 ++ ")"
 showPDRSSet (PMerge p1 p2) = "(" ++ showPDRSSet p1 ++ " " ++ opPMerge ++ " " ++ showPDRSSet p2 ++ ")"
-showPDRSSet (PDRS l m u c) = "<" ++ show l ++ ",{" ++ showMAPsTuples m ++ "},{" ++ showUniverseTuples u ++ "},{" ++ intercalate "," (map showCon c) ++ "}>"
+showPDRSSet (PDRS l m u c) = "<" ++ show l ++ ",{" ++ showUniverseTuples u ++ "},{" ++ intercalate "," (map showCon c) ++ "},{" ++  showMAPsTuples m ++ "}>"
   where showCon :: PCon -> String
-        showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ pdrsRelToString r ++ "("  ++ intercalate "," (map pdrsRefToDRSVar d) ++ "))"
-        showCon (PCon p (Neg p1))     = "(" ++ show p ++ "," ++ opNeg                     ++ showPDRSSet p1 ++ ")"
-        showCon (PCon p (Imp p1 p2))  = "(" ++ show p ++ "," ++ showPDRSSet p1 ++ " "     ++ opImp ++ " "   ++ showPDRSSet p2 ++ ")"
-        showCon (PCon p (Or p1 p2))   = "(" ++ show p ++ "," ++ showPDRSSet p1 ++ " "     ++ opOr  ++ " "   ++ showPDRSSet p2 ++ ")"
-        showCon (PCon p (Prop r p1))  = "(" ++ show p ++ "," ++ pdrsRefToDRSVar r ++ ": " ++ showPDRSSet p1 ++ ")"
-        showCon (PCon p (Diamond p1)) = "(" ++ show p ++ "," ++ opDiamond                 ++ showPDRSSet p1 ++ ")"
-        showCon (PCon p (Box p1))     = "(" ++ show p ++ "," ++ opBox                     ++ showPDRSSet p1 ++ ")"
+        showCon (PCon p (Rel r d))    = "<" ++ show p ++ "," ++ pdrsRelToString r ++ "("  ++ intercalate "," (map pdrsRefToDRSVar d) ++ ")>"
+        showCon (PCon p (Neg p1))     = "<" ++ show p ++ "," ++ opNeg                     ++ showPDRSSet p1 ++ ">"
+        showCon (PCon p (Imp p1 p2))  = "<" ++ show p ++ "," ++ showPDRSSet p1 ++ " "     ++ opImp ++ " "   ++ showPDRSSet p2 ++ ">"
+        showCon (PCon p (Or p1 p2))   = "<" ++ show p ++ "," ++ showPDRSSet p1 ++ " "     ++ opOr  ++ " "   ++ showPDRSSet p2 ++ ">"
+        showCon (PCon p (Prop r p1))  = "<" ++ show p ++ "," ++ pdrsRefToDRSVar r ++ ": " ++ showPDRSSet p1 ++ ">"
+        showCon (PCon p (Diamond p1)) = "<" ++ show p ++ "," ++ opDiamond                 ++ showPDRSSet p1 ++ ">"
+        showCon (PCon p (Box p1))     = "<" ++ show p ++ "," ++ opBox                     ++ showPDRSSet p1 ++ ">"
 
 ---------------------------------------------------------------------------
 -- | Show a 'PDRS' in 'Debug' notation.
@@ -348,7 +348,7 @@ showUniverse u  = intercalate "  " (map showPRef u)
 showUniverseTuples :: [PRef] -> String
 showUniverseTuples u = intercalate "," (map showPRef u)
   where showPRef :: PRef -> String
-        showPRef (PRef p r) = "(" ++ show p ++ "," ++ pdrsRefToDRSVar r ++ ")"
+        showPRef (PRef p r) = "<" ++ show p ++ "," ++ pdrsRefToDRSVar r ++ ">"
 
 ---------------------------------------------------------------------------
 -- | Shows the projected conditions @c@ of a 'PDRS'.
