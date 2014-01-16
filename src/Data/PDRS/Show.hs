@@ -275,13 +275,13 @@ showPDRSLinear (AMerge p1 p2) = "(" ++ showPDRSLinear p1 ++ " " ++ opAMerge ++ "
 showPDRSLinear (PMerge p1 p2) = "(" ++ showPDRSLinear p1 ++ " " ++ opPMerge ++ " " ++ showPDRSLinear p2 ++ ")"
 showPDRSLinear (PDRS l m u c) = show l ++ ":[" ++ showUniverseTuples u ++ "|" ++ intercalate "," (map showCon c) ++ "|" ++ showMAPsTuples m ++ "]"
   where showCon :: PCon -> String
-        showCon (PCon p (Rel r d))    = "(" ++ show p ++ "," ++ pdrsRelToString r ++ "("  ++ intercalate "," (map pdrsRefToDRSVar d) ++ "))"
-        showCon (PCon p (Neg p1))     = "(" ++ show p ++ "," ++ opNeg                     ++ showPDRSLinear p1 ++ ")"
-        showCon (PCon p (Imp p1 p2))  = "(" ++ show p ++ "," ++ showPDRSLinear p1 ++ " "  ++ opImp ++ " "      ++ showPDRSLinear p2 ++ ")"
-        showCon (PCon p (Or p1 p2))   = "(" ++ show p ++ "," ++ showPDRSLinear p1 ++ " "  ++ opOr  ++ " "      ++ showPDRSLinear p2 ++ ")"
-        showCon (PCon p (Prop r p1))  = "(" ++ show p ++ "," ++ pdrsRefToDRSVar r ++ ": " ++ showPDRSLinear p1 ++ ")"
-        showCon (PCon p (Diamond p1)) = "(" ++ show p ++ "," ++ opDiamond                 ++ showPDRSLinear p1 ++ ")"
-        showCon (PCon p (Box p1))     = "(" ++ show p ++ "," ++ opBox                     ++ showPDRSLinear p1 ++ ")"
+        showCon (PCon p (Rel r d))    = "<" ++ show p ++ "," ++ pdrsRelToString r ++ "("  ++ intercalate "," (map pdrsRefToDRSVar d) ++ ")>"
+        showCon (PCon p (Neg p1))     = "<" ++ show p ++ "," ++ opNeg                     ++ showPDRSLinear p1 ++ ">"
+        showCon (PCon p (Imp p1 p2))  = "<" ++ show p ++ "," ++ showPDRSLinear p1 ++ " "  ++ opImp ++ " "      ++ showPDRSLinear p2 ++ ">"
+        showCon (PCon p (Or p1 p2))   = "<" ++ show p ++ "," ++ showPDRSLinear p1 ++ " "  ++ opOr  ++ " "      ++ showPDRSLinear p2 ++ ">"
+        showCon (PCon p (Prop r p1))  = "<" ++ show p ++ "," ++ pdrsRefToDRSVar r ++ ": " ++ showPDRSLinear p1 ++ ">"
+        showCon (PCon p (Diamond p1)) = "<" ++ show p ++ "," ++ opDiamond                 ++ showPDRSLinear p1 ++ ">"
+        showCon (PCon p (Box p1))     = "<" ++ show p ++ "," ++ opBox                     ++ showPDRSLinear p1 ++ ">"
 
 ---------------------------------------------------------------------------
 -- | Show a 'PDRS' in 'Set' notation.
