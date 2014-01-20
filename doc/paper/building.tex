@@ -1,9 +1,129 @@
 \section{Building Projective Discourse Representation Structures}
 
+% nice introduction
+
 \subsection{Basic Structures}
 
+We define basic DRSs following \citeasnoun{bos2003implementing}, with the
+exception that equality between variables (i.e., $x_1=x_2$) is not
+a separate DRS condition, but is treated as a variant of a 2-place predicate
+(i.e., $R(x_1,x_2)$, where $R$ equals $=$). This definition basically
+follows the definition proposed by \citeasnoun{kamp1993discourse}, without
+their duplex conditions, in order to allow for a direct translation to
+first-order logic.
 
-\subsection{Combining Structures} %Merge
+\begin{definition}[Basic DRS] \label{def:bDRS}
+ A Basic DRS is a tuple $\langle \{x_1 ... x_n\},\{\gamma_1 ... \gamma_m\} 
+ \rangle$, where:
+ \begin{enumerate}[i]
+  \item $\{x_1 ... x_n\}$ is a finite set of variables (called ``DRS
+    referents'');
+  \item $\{\gamma_1 ... \gamma_m\}$ is a finite set of DRS conditions (which
+    may be either basic or complex);
+  \item\label{def:bDRS:Rel} $R(x_1, ..., x_n)$ is a basic DRS condition,
+    with $x_1 ... x_n$ are variables and $R$ is a relation symbol for an
+    $n$-place predicate;
+  \item $\neg K$, $\Box K$ and $\Diamond K$ are complex DRS conditions, with
+    $K$ is a DRS;
+  \item $K_1 \vee K_2$ and $K_1 \Rightarrow K_2$ are complex DRS conditions,
+    with $K_1$ and $K_2$ are DRSs;
+  \item \label{def:bDRS:Prop} $x:K$ is a complex DRS condition, with $x$ is
+    a variable and $K$ is a DRS.
+ \end{enumerate} 
+\end{definition}
 
+%%more explanation?
+
+The main difference between a basic DRS and a basic PDRS is that in PDRT all
+structures introduce a label, which can accordingly bind the pointers
+associated with the PDRS referents and conditions. We will refer to labels
+and pointers together as \textit{projection variables}. This description
+results in the definition of a PDRS as a triple of a projection variable,
+a set of projected referents (i.e., DRS referents associated with a pointer)
+and a set of projected conditions. However, such a definition omits an
+essential part of the information that is required to properly represent
+projection phenomena, namely their \emph{projection path}. In DRT, the
+projection path (or ``projection line'', as
+\citeasnoun{sandt1992presupposition} calls it) of some projected content
+determines which DRSs are accessible from the introduction site to find
+a possible antecedent in or otherwise to accommodate into. Accessibility
+between DRSs is standardly defined based on a subordination relation
+($\leq$) between DRSs, i.e., DRS $K_1$ is accessible from DRS $K_2$
+\textit{iff} $K_2\leq K_1$, where subordination is defined as follows:
+
+\begin{definition}[DRS Subordination]
+DRS $K_1$ subordinates DRS $K_2$ ($K_2 \leq K_1$) iff:
+  \begin{itemize}
+    \item $K_1 = K_2$;
+    \item $K_1$ directly subordinates $K_2$ ($K_2 <!~K_1$);
+    \item There is a $K_{1'}$, such that $K_1$ subordinates $K_{1'}$ and 
+      $K_{1'}$ subordinates $K_2$.
+  \end{itemize}
+  where: A DRS $K_i$ directly subordinates a DRS $K_j$ ($K_j <!~K_i$) iff:
+  \begin{itemize}
+    \item $\neg K_j$, $\Box K_j$ or $\Diamond K_j$ is a DRS condition in
+      $K_i$;
+    \item $x:K_j$ is a DRS condition in $K_i$ for some $x$;
+    \item $K_j \Rightarrow K_k$ or $K_j \vee K_k$ is a condition in $K_i$
+      for some $K_k$;
+    \item There is a $K_k$, such that $K_i \Rightarrow K_j$ or $K_i \vee K_j$
+      is a condition in $K_k$.
+  \end{itemize}
+\end{definition}
+
+In PDRT, projection pointers refer to contexts that may or may not be part
+of the current discourse structure. They are, however, related to the PDRS
+in which they are introduced via a subordination relation, since the
+interpretation site of some linguistic content is necessarily accessible
+from its introduction site. Moreover, projected contexts may subordinate
+other projected contexts, which happens for example in the case of embedded
+presuppositions. So, in order to properly define the projection path of
+projected content in PDRT, the subordination properties of projected
+contexts should be explicitly part of the PDRS. We do this by enhancing each
+PDRS with a set of MAPs: Minimally Accessible Projected contexts, which are
+basically tuples describing subordination pairs of contexts. This results in
+the following definition of basic PDRSs:
+
+\begin{definition}[Basic PDRS] \label{def:bPDRS}
+A Basic PDRS is a quadruple $\langle \rho, \{\delta_1 ... \delta_n\},
+  \{\chi_1 ... \chi_m\}, \{\mu_1 ... \mu_l\}\rangle$, where:
+  \begin{enumerate}[i]
+    \item $\rho$ is a projection variable, called the \textit{label} of the
+      PDRS;
+    \item $\{\delta_1 ... \delta_n\}$ is a finite set of projected
+      referents, with $\delta_i=\langle p_i, x_i\rangle$, such that $p_i$ is
+      a projection variable, and $x_i$ is a DRS referent;
+    \item $\{\chi_1 ... \chi_m\}$ is a finite set of projected conditions,
+      with $\chi_j = \langle p_j,\gamma_j\rangle$, such that $p_j$ is a
+      projection variable, and $\gamma_j$ is a PDRS condition (which may be
+      either basic or complex);
+    \item \label{def:bPDRS:Rel} $R(x_1, ..., x_n)$ is a basic PDRS condition,
+      with $x_1 ... x_n$ are variables and $R$ is a relation symbol for an
+      $n$-place predicate;
+    \item $\neg K$, $\Box K$ and $\Diamond K$ are complex PDRS conditions,
+      with $K$ is a PDRS;
+    \item $K_1 \vee K_2$ and $K_1 \Rightarrow K_2$ are complex PDRS
+      conditions, with $K_1$ and $K_2$ are PDRSs;
+    \item\label{def:bPDRS:Prop} $x:K$ is a complex PDRS condition, with $x$
+      is a variable and $K$ is a PDRS.
+    \item $\{\mu_1 ... \mu_l\}$ is a finite set of MAPs, with $\mu_k=\langle
+      p_1,p_2\rangle$, such that $p_1$ and $p_2$ are projection variables,
+      and $p_2\leq p_1$.
+
+  \end{enumerate}
+\end{definition}
+
+\noindent Note the direct correspondence between Definition
+\ref{def:bPDRS}(\ref{def:bPDRS:Rel}-\ref{def:bPDRS:Prop}) and Definition
+\ref{def:bDRS}(\ref{def:bDRS:Rel}-\ref{def:bDRS:Prop}); the only difference
+between these sets of clauses is that complex PDRS conditions contain
+subordinated PDRSs, and complex DRS conditions contain subordinated DRSs.
+
+
+\subsection{Combining Structures}
+
+\subsubsection{Merges}
+
+\subsubsection{Variable binding}
 
 \subsection{Unresolved Structures}
