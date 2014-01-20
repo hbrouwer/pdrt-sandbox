@@ -1,0 +1,82 @@
+\documentclass[11pt]{article}
+
+\usepackage{clin}        % Stylefile for CLIN Journal
+\usepackage{harvard}
+% Harvard:
+% \cite{Covington}             (Covington 1994)
+% \citeasnoun{Covington}       Covington (1994)
+% \citeyear{Covington}         (1994)
+
+\usepackage{linguex}
+\renewcommand\firstrefdash{}
+\usepackage{amssymb}
+\usepackage{verbatim}%for comment command
+%\usepackage{amsthm}
+%\theoremstyle{definition}
+%\newtheorem{definition}{Definition}
+
+%%%%% Boxes %%%%%
+
+\newcommand{\drs}[2]
+{\begin{tabular}{c}
+  \noalign{\smallskip}
+  \begin{tabular}{|l|}
+    \hline
+    #1\\
+    \hline  
+    #2\\
+    \hline
+  \end{tabular}
+  \smallskip
+\end{tabular}
+}
+
+\newcommand{\pdrs}[3]
+{\begin{tabular}{c}
+  #1\\
+  \begin{tabular}{|l|}
+    \hline
+    #2\\
+    \hline
+    #3\\
+    \hline
+  \end{tabular}
+  \smallskip
+\end{tabular}
+}
+
+\newcommand{\flatpdrs}[3]
+{
+  #1:\begin{tabular}[t]{l}[#2$|$#3]\end{tabular}
+}
+
+\pagestyle{empty}
+
+%%%% Begin Document %%%%
+\begin{document}
+
+\title{Harnessing Projection: A formal implementation of Projective Discourse Representation Theory}
+
+\author{Noortje J. Venhuizen$^*$ \email{n.j.venhuizen@rug.nl}\\
+{\normalsize \bf Johan Bos}$^*$ \email{johan.bos@rug.nl}\\
+{\normalsize \bf Harm Brouwer}$^{*,**}$ \email{harm.brouwer@rug.nl}\\
+\AND \addr{$^*$CLCG, University of Groningen, Groningen, The Netherlands}
+\AND \addr{$^{**}$BCN, University of Groningen, Groningen, The Netherlands}
+}
+
+\maketitle
+\thispagestyle{empty}
+
+%\begin{abstract} 
+%\end{abstract}
+
+%\tableofcontents % comment out in final version
+%\newpage         % comment out in final version
+
+\input{introduction}
+
+\clearpage % comment out in final version
+\bibliographystyle{clin}
+\bibliography{presupposition}
+
+\end{document}

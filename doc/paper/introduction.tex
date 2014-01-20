@@ -1,0 +1,31 @@
+\section{Introduction}
+
+Presuppositions are a fundamental aspect of linguistic
+meaning since they relate the content of an utterance to the unfolding
+discourse. A definite description like ``the man'', for example, introduces
+a male discourse entity that is salient in the current discourse context.
+Yet, in many formal semantic accounts, these phenomena have been treated as
+deviations from standard meaning construction, e.g., by resolving them only
+in a second step of processing \cite{sandt1992presupposition}. This is unsatisfactory
+for a number of reasons, mainly because it precludes an incremental
+compositional treatment of projection phenomena such as presuppositions.
+Therefore, we have recently proposed Projective DRT (PDRT), which builds
+upon the widely used Discourse Representation Theory \cite{kamp1981theory,kamp1993discourse}.
+PDRT deals with projected content during discourse construction, without
+losing any information about where information is introduced or interpreted
+\cite{venhuizen2013iwcs}.
+
+In order to evaluate its properties and applications, we implemented PDRT as
+a Haskell library, called \textsc{pdrt-sandbox}. This library includes machinery
+for representing PDRSs, as well as traditional DRSs, a translation from PDRT
+to DRT and FOL, and the different types of merge operations for (P)DRSs.
+Unresolved structures with lambda-abstractions \cite{muskens1996combining} are
+implemented as pure Haskell functions by exploiting Haskell's
+lambda-theoretic foundations. Several (P)DRS representations can be chosen
+as target output, including the well-known box-representations,
+a set-theoretic notation and flat, non-recursive, table-structures.
+\textsc{pdrt-sandbox} provides a comprehensive toolkit for use in NLP applications,
+and paves way for a more thorough understanding of the behaviour of
+projection phenomena in language.  
+
+In this paper...
