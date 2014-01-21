@@ -13,7 +13,7 @@
 \usepackage{amssymb}
 \usepackage{verbatim}%for comment command
 
-%%%%% Boxes %%%%%
+%%%%% Macro's %%%%%
 
 \newcommand{\drs}[2]
 {\begin{tabular}{c}
@@ -29,7 +29,7 @@
 \end{tabular}
 }
 
-\newcommand{\pdrs}[3]
+\newcommand{\pdrs}[4]
 {\begin{tabular}{c}
   #1\\
   \begin{tabular}{|l|}
@@ -38,15 +38,19 @@
     \hline
     #3\\
     \hline
+    #4\\
+    \hline
   \end{tabular}
   \smallskip
 \end{tabular}
 }
 
-\newcommand{\flatpdrs}[3]
+\newcommand{\flatpdrs}[4]
 {
-  #1:\begin{tabular}[t]{l}[#2$|$#3]\end{tabular}
+  #1:\begin{tabular}[t]{l}[#2$|$#3$|$#4]\end{tabular}
 }
+
+\newcommand{\MAPs}{\textsc{map}s}
 
 \pagestyle{empty}
 

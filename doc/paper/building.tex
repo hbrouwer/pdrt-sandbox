@@ -2,7 +2,7 @@
 
 % nice introduction
 
-\subsection{Basic Structures}
+\subsection{Basic Structures and Subordination}
 
 We define basic DRSs following \citeasnoun{bos2003implementing}, with the
 exception that equality between variables (i.e., $x_1=x_2$) is not
@@ -13,9 +13,9 @@ their duplex conditions, in order to allow for a direct translation to
 first-order logic.
 
 \begin{definition}[Basic DRS] \label{def:bDRS}
- A Basic DRS is a tuple $\langle \{x_1 ... x_n\},\{\gamma_1 ... \gamma_m\} 
- \rangle$, where:
- \begin{enumerate}[i]
+A Basic DRS is a tuple $\langle \{x_1 ... x_n\},\{\gamma_1 ... \gamma_m\} 
+\rangle$, where:
+ \begin{enumerate}[i.]
   \item $\{x_1 ... x_n\}$ is a finite set of variables (called ``DRS
     referents'');
   \item $\{\gamma_1 ... \gamma_m\}$ is a finite set of DRS conditions (which
@@ -32,6 +32,7 @@ first-order logic.
  \end{enumerate} 
 \end{definition}
 
+% set of referents is DRS universe
 %%more explanation?
 
 The main difference between a basic DRS and a basic PDRS is that in PDRT all
@@ -51,23 +52,23 @@ between DRSs is standardly defined based on a subordination relation
 ($\leq$) between DRSs, i.e., DRS $K_1$ is accessible from DRS $K_2$
 \textit{iff} $K_2\leq K_1$, where subordination is defined as follows:
 
-\begin{definition}[DRS Subordination]
+\begin{definition}[DRS Subordination]\label{def:DRSsub}
 DRS $K_1$ subordinates DRS $K_2$ ($K_2 \leq K_1$) iff:
   \begin{itemize}
     \item $K_1 = K_2$;
-    \item $K_1$ directly subordinates $K_2$ ($K_2 <!~K_1$);
-    \item There is a $K_{1'}$, such that $K_1$ subordinates $K_{1'}$ and 
+    \item $K_1$ directly subordinates $K_2$;
+    \item There is a DRS $K_{1'}$, such that $K_1$ subordinates $K_{1'}$ and 
       $K_{1'}$ subordinates $K_2$.
   \end{itemize}
-  where: A DRS $K_i$ directly subordinates a DRS $K_j$ ($K_j <!~K_i$) iff:
+  where: DRS $K_i$ directly subordinates DRS $K_j$ ($K_j <!~K_i$) iff:
   \begin{itemize}
     \item $\neg K_j$, $\Box K_j$ or $\Diamond K_j$ is a DRS condition in
       $K_i$;
     \item $x:K_j$ is a DRS condition in $K_i$ for some $x$;
-    \item $K_j \Rightarrow K_k$ or $K_j \vee K_k$ is a condition in $K_i$
-      for some $K_k$;
-    \item There is a $K_k$, such that $K_i \Rightarrow K_j$ or $K_i \vee K_j$
-      is a condition in $K_k$.
+    \item $K_j \Rightarrow K_k$, $K_k \Rightarrow K_j$, $K_j \vee K_k$, or 
+      $K_k \vee K_j$ is a DRS condition in $K_i$ for some DRS $K_k$;
+    \item There is a DRS $K_k$, such that $K_i \Rightarrow K_j$ or $K_i \vee K_j$
+      is a DRS condition in $K_k$.
   \end{itemize}
 \end{definition}
 
@@ -80,50 +81,155 @@ other projected contexts, which happens for example in the case of embedded
 presuppositions. So, in order to properly define the projection path of
 projected content in PDRT, the subordination properties of projected
 contexts should be explicitly part of the PDRS. We do this by enhancing each
-PDRS with a set of MAPs: Minimally Accessible Projected contexts, which are
+PDRS with a set of \MAPs: Minimally Accessible Projected contexts, which are
 basically tuples describing subordination pairs of contexts. This results in
 the following definition of basic PDRSs:
 
 \begin{definition}[Basic PDRS] \label{def:bPDRS}
-A Basic PDRS is a quadruple $\langle \rho, \{\delta_1 ... \delta_n\},
-  \{\chi_1 ... \chi_m\}, \{\mu_1 ... \mu_l\}\rangle$, where:
-  \begin{enumerate}[i]
-    \item $\rho$ is a projection variable, called the \textit{label} of the
-      PDRS;
+A Basic PDRS is a quadruple $\langle \rho, \{\mu_1 ... \mu_l\}, 
+\{\delta_1 ... \delta_n\}, \{\chi_1 ... \chi_m\}\rangle$, where:
+  \begin{enumerate}[i.]
+    \item $\rho$ is a projection variable;
+    \item $\{\mu_1 ... \mu_l\}$ is a finite set of \MAPs, with $\mu_k=\langle
+      v_1,v_2\rangle$, such that $v_1$ and $v_2$ are projection variables,
+      and $v_2\leq v_1$.
     \item $\{\delta_1 ... \delta_n\}$ is a finite set of projected
-      referents, with $\delta_i=\langle p_i, x_i\rangle$, such that $p_i$ is
+      referents, with $\delta_i=\langle v_i, x_i\rangle$, such that $v_i$ is
       a projection variable, and $x_i$ is a DRS referent;
     \item $\{\chi_1 ... \chi_m\}$ is a finite set of projected conditions,
-      with $\chi_j = \langle p_j,\gamma_j\rangle$, such that $p_j$ is a
+      with $\chi_j = \langle v_j,\gamma_j\rangle$, such that $v_j$ is a
       projection variable, and $\gamma_j$ is a PDRS condition (which may be
       either basic or complex);
     \item \label{def:bPDRS:Rel} $R(x_1, ..., x_n)$ is a basic PDRS condition,
       with $x_1 ... x_n$ are variables and $R$ is a relation symbol for an
       $n$-place predicate;
-    \item $\neg K$, $\Box K$ and $\Diamond K$ are complex PDRS conditions,
-      with $K$ is a PDRS;
-    \item $K_1 \vee K_2$ and $K_1 \Rightarrow K_2$ are complex PDRS
-      conditions, with $K_1$ and $K_2$ are PDRSs;
-    \item\label{def:bPDRS:Prop} $x:K$ is a complex PDRS condition, with $x$
-      is a variable and $K$ is a PDRS.
-    \item $\{\mu_1 ... \mu_l\}$ is a finite set of MAPs, with $\mu_k=\langle
-      p_1,p_2\rangle$, such that $p_1$ and $p_2$ are projection variables,
-      and $p_2\leq p_1$.
-
+    \item $\neg P$, $\Box P$ and $\Diamond P$ are complex PDRS conditions,
+      with $P$ is a PDRS;
+    \item $P_1 \vee P_2$ and $P_1 \Rightarrow P_2$ are complex PDRS
+      conditions, with $P_1$ and $P_2$ are PDRSs;
+    \item\label{def:bPDRS:Prop} $x:P$ is a complex PDRS condition, with $x$
+      is a variable and $P$ is a PDRS;
   \end{enumerate}
 \end{definition}
 
 \noindent Note the direct correspondence between Definition
 \ref{def:bPDRS}(\ref{def:bPDRS:Rel}-\ref{def:bPDRS:Prop}) and Definition
 \ref{def:bDRS}(\ref{def:bDRS:Rel}-\ref{def:bDRS:Prop}); the only difference
-between these sets of clauses is that complex PDRS conditions contain
-subordinated PDRSs, and complex DRS conditions contain subordinated DRSs.
+is that complex PDRS conditions contain subordinated PDRSs, and complex DRS
+conditions contain subordinated DRSs.  The definition of projected referents
+and projected conditions as tuples allows us to talk about the two elements
+of the tuples separately; we refer to the first element of all projected
+referents and projected conditions as the \textit{pointer}, and the second
+elements are called the \textit{PDRS referent} and \textit{PDRS condition},
+respectively. This is useful, since in some cases we are interested in the
+entire projected referent/condition, whereas in other cases we need only to
+refer to one of the elements of the tuple. Similarly, we refer to the first
+element of the quadruple representing a PDRS, as the \textit{label} of the
+PDRS (formally, the label of a PDRS $P_i$ is represented as $\rho(P_i)$).
+
+Now we can define subordination for PDRSs. As described above, we need to
+consider both sub-PDRSs and projected contexts when defining accessibility.
+Therefore, we define accessibility over \textit{PDRS-contexts} instead of
+PDRSs. A PDRS-context may refer to a PDRS (via its label), or to
+a projected context created by a pointer.
+
+\begin{definition}[PDRS-context Subordination]
+PDRS-context $\pi_1$ subordinates PDRS-context $\pi_2$ ($\pi_2 \leq \pi_1$)
+iff:
+\begin{itemize}
+  \item $\pi_1 = \pi_2$;
+  \item $\langle \pi_2,\pi_1\rangle$ is an element of the set of \MAPs~of some PDRS $P_i$;
+  \item $\pi_1$ directly subordinates $\pi_2$;
+  \item There is a PDRS-context $\pi_{1'}$, such that $\pi_1$ subordinates
+    $\pi_{1'}$ and $\pi_{1'}$ subordinates $\pi_2$.
+\end{itemize}
+where: PDRS-context $\pi_i$ directly subordinates PDRS-context $\pi_j$ 
+($\pi_j <!~\pi_i$) iff:
+\begin{itemize}
+  \item $\langle\pi_i,\neg P_j\rangle$,
+    $\langle\pi_i,\Box P_j\rangle$,
+    or $\langle\pi_i,\Diamond P_j\rangle$ is a projected condition in
+    some PDRS $P_k$, and $\rho(P_j) = \pi_j$;
+  \item $\langle\pi_i,x:P_j\rangle$ is a projected condition in some
+    PDRS $P_k$, for some $x$, and $\rho(P_j) = \pi_j$;
+  \item  $\langle\pi_i,P_j \Rightarrow P_{j'}\rangle$ or
+    $\langle\pi_i,P_j \vee P_{j'}\rangle$ is a projected condition in
+    some PDRS $P_k$, and $\rho(P_j) = \pi_j$ or $\rho(P_{j'}) = \pi_j$;
+  \item There is a PDRS $P_k$, such that $P_i \Rightarrow P_j$ or 
+    $P_i \vee P_j$ is a PDRS condition in $P_k$, and $\rho(P_i) = \pi_i$ 
+    and $\rho(P_j) = \pi_j$. 
+    %NB this is about PDRS condition instead of projected condition
+\end{itemize}
+\end{definition}
+
+\noindent Note that direct subordination for PDRS-contexts is not defined on
+the basis of the set of conditions of some PDRS, as is the case for DRS
+subordination in Definition~\ref{def:DRSsub}, but on the basis of the
+pointer associated with the PDRS condition in which the sub-PDRS occurs.
+This is because pointers indicate where some content is interpreted, which
+is relevant for determining accessibility between contexts. This means that
+some sub-PDRS that is part of the conditions of another PDRS, need not be
+subordinated by it. 
+
+The $\leq$-relation creates a partial order over all PDRS-contexts, provided
+that subordination is defined for all projected contexts via the \MAPs. This
+results in a directed graph, called the \textit{Accessibility Graph}, over
+all PDRS-contexts in a given PDRS. We will call a PDRS whose accessibility
+graph is weakly connected,\footnote{A directed graph $G$ is weakly connected
+  iff for all pairs of vertices ($v_1$,$v_2$) in $G$ it holds that if all
+  directed edges in $G$ are replaced by undirected edges, then there is
+a path between $v_1$ and $v_2$.} a \emph{complete} PDRS. We will assume that
+all PDRSs are complete throughout the rest of this paper.
+%XXX Can we/Do we want to allow non-complete PDRSs in this sense? Isn't it
+%the case that a free pointer necessarily subordinates its context of
+%introduction? Should this be part of the definition of subordination? But:
+%it seems like this might result in a circular definition, where
+%accessibility depends on free pointers, and free pointers on accessibility.
+%XXX Define properly in Sandbox 
+
+%resolved PDRS (no projected contexts): accessibility graph becomes tree.
+
+\subsection{Variable binding}
+
+Now we are ready to define free and bound variables.  This is necessary to
+define projection, anaphoric binding, PDRS renaming, etc.
+
+\begin{definition}[DRS bound variables]
+DRS variable $x$, introduced in DRS $K_i$, is bound iff:
+\begin{quote}
+There exists a DRS $K_j$, such that
+\begin{enumerate}[i.]
+  \item $K_i \leq K_j$;
+  \item $x\in U(K_j)$. %, where $U(K_2)$ refers to the universe of $K_2$.
+\end{enumerate}
+\end{quote}
+\end{definition}
+
+\begin{definition}[PDRS bound projection variables]
+Projection variable $v$, introduced in PDRS $P_i$, is bound iff:
+\begin{quote}
+There exists a PDRS $P_j$, such that
+\begin{enumerate}[i.]
+  \item $\rho(P_i) \leq \rho(P_j)$; %remember that subordination for PDRSs was defined over PDRS-contexts
+  \item $v = \rho(P_j)$.
+\end{enumerate}
+\end{quote}
+\end{definition}
+
+\begin{definition}[PDRS bound projected referents]
+Projected referent $\langle p,r\rangle$, introduced in PDRS $P_i$, is bound iff:
+\begin{quote}
+There exists a PDRS $P_j$, such that
+\begin{enumerate}[i.]
+  \item $p \leq \rho(P_j)$; 
+  \item $\rho(P_i) \leq \rho(P_j)$; %XXX is this by definition true, since $P_i \leq p$ (in a complete PDRS)?
+  \item $\langle p,r\rangle \in U(P_j)$.
+\end{enumerate}
+\end{quote}
+\end{definition}
+
 
 
 \subsection{Combining Structures}
-
-\subsubsection{Merges}
-
-\subsubsection{Variable binding}
 
 \subsection{Unresolved Structures}
