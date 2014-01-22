@@ -16,7 +16,7 @@
 %%%%% Macro's %%%%%
 
 \newcommand{\drs}[2]
-{\begin{tabular}{c}
+{\hspace{-3pt}\begin{tabular}{c}
   \noalign{\smallskip}
   \begin{tabular}{|l|}
     \hline
@@ -26,11 +26,16 @@
     \hline
   \end{tabular}
   \smallskip
-\end{tabular}
+\end{tabular}\hspace{-10pt}
+}
+
+\newcommand{\flatdrs}[2]
+{
+  \hspace{-10pt}\begin{tabular}[t]{l}[#1$|$#2]\end{tabular}\hspace{-13pt}
 }
 
 \newcommand{\pdrs}[4]
-{\begin{tabular}{c}
+{\hspace{-3pt}\begin{tabular}{c}
   #1\\
   \begin{tabular}{|l|}
     \hline
@@ -42,12 +47,12 @@
     \hline
   \end{tabular}
   \smallskip
-\end{tabular}
+\end{tabular}\hspace{-10pt}
 }
 
 \newcommand{\flatpdrs}[4]
 {
-  #1:\begin{tabular}[t]{l}[#2$|$#3$|$#4]\end{tabular}
+  \hspace{-3pt}#1:\hspace{-5pt}\begin{tabular}[t]{l}[#2$|$#3$|$#4]\end{tabular}\hspace{-10pt}
 }
 
 \newcommand{\MAPs}{\textsc{map}s}
@@ -75,7 +80,7 @@
 \end{abstract}
 
 \tableofcontents % comment out in final version
-\newpage         % comment out in final version
+%\newpage         % comment out in final version
 
 \input{introduction}
 
