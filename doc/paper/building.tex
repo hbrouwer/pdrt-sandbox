@@ -50,17 +50,27 @@ determines which DRSs are accessible from the introduction site to find
 a possible antecedent in or otherwise to accommodate into. Accessibility
 between DRSs is standardly defined based on a subordination relation
 ($\leq$) between DRSs, i.e., DRS $K_1$ is accessible from DRS $K_2$
-\textit{iff} $K_2\leq K_1$, where subordination is defined as follows:
+\textit{iff} $K_2\leq K_1$, where subordination is recursively defined as
+follows:
 
 \begin{definition}[DRS Subordination]\label{def:DRSsub}~\\
 DRS $K_1$ subordinates DRS $K_2$ ($K_2 \leq K_1$) iff:
   \begin{itemize}
     \item $K_1 = K_2$;
-    \item $K_1$ directly subordinates $K_2$;
-    \item There is a DRS $K_{1'}$, such that $K_1$ subordinates $K_{1'}$ and 
-      $K_{1'}$ subordinates $K_2$.
+    \item $K_1$ directly subordinates $K_2$ ($K_2 <!~K_1$);
+    \item There is a DRS $K_{1'}$, such that $K_{1'} \leq K_1$ and 
+      $K_2 \leq K_{1'}$.
   \end{itemize}
-  where: DRS $K_i$ directly subordinates DRS $K_j$ ($K_j <!~K_i$) iff:
+  \end{definition}
+
+\noindent Thus, a DRS is always subordinated by itself, and by any DRS that
+directly, or indirectly subordinates it. Direct subordination between two
+DRSs $K_1$ and $K_2$ means that $K_2$ is either part of a condition in
+$K_1$, or that $K_1$ serves as its antecedent in some binary operation. This
+is formally defined below.
+
+\begin{definition}[DRS Direct Subordination]~\\
+DRS $K_i$ directly subordinates DRS $K_j$ ($K_j <!~K_i$) iff:
   \begin{itemize}
     \item $\neg K_j$, $\Box K_j$ or $\Diamond K_j$ is a DRS condition in
       $K_i$;
@@ -72,33 +82,34 @@ DRS $K_1$ subordinates DRS $K_2$ ($K_2 \leq K_1$) iff:
   \end{itemize}
 \end{definition}
 
-In PDRT, projection pointers refer to contexts that may or may not be part
-of the current discourse structure. They are, however, related to the PDRS
-in which they are introduced via a subordination relation, since the
-interpretation site of some linguistic content is necessarily accessible
-from its introduction site. Moreover, projected contexts may subordinate
-other projected contexts, which happens for example in the case of embedded
-presuppositions. So, in order to properly define the projection path of
-projected content in PDRT, the subordination properties of projected
+Now, in order to properly define accessibility in PDRT, we need to take into
+account the contexts introduced by the projection pointers.  In case
+a pointer occurs free, it introduces a projected context, whose
+accessibility conditions are undefined, except for the fact that this
+context needs to be accessible from the context in which it was introduced,
+since the interpretation site of some linguistic content is necessarily
+accessible from its introduction site. Moreover, projected contexts may
+subordinate other projected contexts, which happens for example in the case
+of embedded presuppositions. So, in order to properly define the projection
+path of projected content in PDRT, the subordination properties of projected
 contexts should be explicitly part of the PDRS. We do this by enhancing each
 PDRS with a set of \MAPs: Minimally Accessible Projected contexts, which are
-basically tuples describing subordination pairs of contexts. This results in
-the following definition of basic PDRSs:
+basically tuples describing pairs of  subordinating contexts. This results
+in the following definition of basic PDRSs:
 
 \begin{definition}[Basic PDRS] \label{def:bPDRS}~\\
-A Basic PDRS is a quadruple $\langle \rho, \{\mu_1 ... \mu_l\}, 
-\{\delta_1 ... \delta_n\}, \{\chi_1 ... \chi_m\}\rangle$, where:
+A Basic PDRS is a quadruple $\langle \rho, \{\mu_1 ... \mu_n\}, 
+\{\delta_1 ... \delta_m\}, \{\chi_1 ... \chi_l\}\rangle$, where:
   \begin{enumerate}[i.]
     \item $\rho$ is a projection variable;
-    \item $\{\mu_1 ... \mu_l\}$ is a finite set of \MAPs, with $\mu_k=\langle
-      v_1,v_2\rangle$, such that $v_1$ and $v_2$ are projection variables,
-      and $v_2\leq v_1$.
-    \item $\{\delta_1 ... \delta_n\}$ is a finite set of projected
-      referents, with $\delta_i=\langle v_i, x_i\rangle$, such that $v_i$ is
-      a projection variable, and $x_i$ is a DRS referent;
-    \item $\{\chi_1 ... \chi_m\}$ is a finite set of projected conditions,
-      with $\chi_j = \langle v_j,\gamma_j\rangle$, such that $v_j$ is a
-      projection variable, and $\gamma_j$ is a PDRS condition (which may be
+    \item $\{\mu_1 ... \mu_n\}$ is a finite set of \MAPs, with $\mu_i=\langle
+      v_1,v_2\rangle$, and  $v_1$ and $v_2$ are projection variables;
+    \item $\{\delta_1 ... \delta_m\}$ is a finite set of projected
+      referents, with $\delta_j=\langle v_j, x_j\rangle$, such that $v_j$ is
+      a projection variable, and $x_j$ is a DRS referent;
+    \item $\{\chi_1 ... \chi_l\}$ is a finite set of projected conditions,
+      with $\chi_k = \langle v_k,\gamma_k\rangle$, such that $v_k$ is a
+      projection variable, and $\gamma_k$ is a PDRS condition (which may be
       either basic or complex);
     \item \label{def:bPDRS:Rel} $R(x_1, ..., x_n)$ is a basic PDRS condition,
       with $x_1 ... x_n$ are variables and $R$ is a relation symbol for an
@@ -138,28 +149,37 @@ PDRS-context $\pi_1$ subordinates PDRS-context $\pi_2$ ($\pi_2 \leq \pi_1$)
 iff:
 \begin{itemize}
   \item $\pi_1 = \pi_2$;
-  \item $\langle \pi_2,\pi_1\rangle$ is an element of the set of \MAPs~of some PDRS $P_i$;
-  \item $\pi_1$ directly subordinates $\pi_2$;
+  \item $\pi_1$ directly subordinates $\pi_2$ ($\pi_2 <!~\pi_1$);
+  \item $\pi_1$ is a minimally accessible context with respect to $\pi_2$
+    ($\pi_2 \preceq \pi_1$);    
   \item There is a PDRS-context $\pi_{1'}$, such that $\pi_1$ subordinates
     $\pi_{1'}$ and $\pi_{1'}$ subordinates $\pi_2$.
 \end{itemize}
-where: PDRS-context $\pi_i$ directly subordinates PDRS-context $\pi_j$ 
+\end{definition}
+
+\noindent Again, we see a strong correlation to the definition for DRS
+subordination (Definition~\ref{def:DRSsub}), with the addition of minimally
+accessible contexts as possible subordinating contexts. Direct subordination for
+PDRSs is defined as follows:
+
+\begin{definition}[PDRS-context Direct Subordination]~\\
+PDRS-context $\pi_i$ directly subordinates PDRS-context $\pi_j$ 
 ($\pi_j <!~\pi_i$) iff:
-\begin{itemize}
-  \item $\langle\pi_i,\neg P_j\rangle$,
-    $\langle\pi_i,\Box P_j\rangle$,
-    or $\langle\pi_i,\Diamond P_j\rangle$ is a projected condition in
-    some PDRS $P_k$, and $\rho(P_j) = \pi_j$;
-  \item $\langle\pi_i,x:P_j\rangle$ is a projected condition in some
-    PDRS $P_k$, for some $x$, and $\rho(P_j) = \pi_j$;
-  \item  $\langle\pi_i,P_j \Rightarrow P_{j'}\rangle$ or
-    $\langle\pi_i,P_j \vee P_{j'}\rangle$ is a projected condition in
-    some PDRS $P_k$, and $\rho(P_j) = \pi_j$ or $\rho(P_{j'}) = \pi_j$;
-  \item There is a PDRS $P_k$, such that $P_i \Rightarrow P_j$ or 
-    $P_i \vee P_j$ is a PDRS condition in $P_k$, and $\rho(P_i) = \pi_i$ 
-    and $\rho(P_j) = \pi_j$. 
+  \begin{itemize}
+    \item $\langle\pi_i,\neg P_j\rangle$,
+      $\langle\pi_i,\Box P_j\rangle$,
+      or $\langle\pi_i,\Diamond P_j\rangle$ is a projected condition in
+      some PDRS $P_k$, and $\rho(P_j) = \pi_j$;
+    \item $\langle\pi_i,x:P_j\rangle$ is a projected condition in some
+      PDRS $P_k$, for some $x$, and $\rho(P_j) = \pi_j$;
+    \item  $\langle\pi_i,P_j \Rightarrow P_{j'}\rangle$ or
+      $\langle\pi_i,P_j \vee P_{j'}\rangle$ is a projected condition in
+      some PDRS $P_k$, and $\rho(P_j) = \pi_j$ or $\rho(P_{j'}) = \pi_j$;
+    \item There is a PDRS $P_k$, such that $P_i \Rightarrow P_j$ or 
+      $P_i \vee P_j$ is a PDRS condition in $P_k$, and $\rho(P_i) = \pi_i$ 
+      and $\rho(P_j) = \pi_j$. 
     %NB this is about PDRS condition instead of projected condition
-\end{itemize}
+  \end{itemize}
 \end{definition}
 
 \noindent Note that direct subordination for PDRS-contexts is not defined on
@@ -171,6 +191,26 @@ is relevant for determining accessibility between contexts. This means that
 some sub-PDRS that is part of the conditions of another PDRS, need not be
 subordinated by it. 
 
+Finally, we define minimally accessible PDRS contexts as those dependencies
+made explicit in the \MAPs, plus the cases in which some projected context
+occurs free.
+
+\begin{definition}[Minimally Accessible PDRS-Contexts]~\\
+PDRS-context $\pi_i$ is a minimally accessible context with
+respect to PDRS-context $\pi_j$ ($\pi_j \preceq \pi_i$) iff:
+  \begin{itemize}
+    \item $\langle \pi_2,\pi_1\rangle$ is an element of the set of
+      \MAPs~of some PDRS $P_i$;
+    \item There is some PDRS $P_i$, such that $\pi_1$ is introduced in $P_i$
+      and $\rho(P_i)=\pi_2$, and $\pi_1$ is free in $P_i$. 
+      %There is a PDRS $P_i$, such that $\rho(P_i) = \pi_2$ and 
+      %$\pi_1 \in PVars(P_i)$, and there is no PDRS $P_j$, such that 
+      %$\pi_2 \leq \rho(P_j)$ and $\rho(P_j) = \pi_1$;
+       %%$\pi_1$ is introduced in (some sub-PDRS of) $\pi_2$, and $\pi_1$ 
+       %%is free w.r.t. $\pi_2$;
+  \end{itemize}
+\end{definition}
+
 The $\leq$-relation creates a partial order over all PDRS-contexts, provided
 that subordination is defined for all projected contexts via the \MAPs. This
 results in a directed graph, called the \textit{Accessibility Graph}, over
@@ -181,12 +221,11 @@ graph is weakly connected,\footnote{A directed graph $G$ is weakly connected
 a path between $v_1$ and $v_2$.} a \emph{connected} PDRS. We will assume
 that all PDRSs are complete throughout the rest of this paper, unless stated
 otherwise.
-%XXX Can we/Do we want to allow non-connected PDRSs in this sense? Isn't it
-%the case that a free pointer necessarily subordinates its context of
-%introduction? Should this be part of the definition of subordination? But:
-%it seems like this might result in a circular definition, where
-%accessibility depends on free pointers, and free pointers on accessibility.
-%XXX Define properly in Sandbox 
+%XXX Can we/Do we want to allow non-connected PDRSs in this sense? Yes: only
+%in case of unresolved Merges (but then watch out for accidental bindings!)
+%%XXX Define properly in Sandbox 
+% All basic PDRSs are connected PDRSs. 
+
 
 %resolved PDRS (no projected contexts): accessibility graph becomes tree.
 
