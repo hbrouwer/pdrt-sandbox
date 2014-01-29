@@ -67,30 +67,30 @@ edges (PMerge p1 p2) = edges p1 ++ edges p2
 edges (PDRS l m _ c) = ((l,l):m) `union` pconEdges c
   where pconEdges :: [PCon] -> [Edge]
         pconEdges [] = []
-        pconEdges (PCon p (Rel _ _):cs) = ((l,p):pconEdges cs)
+        pconEdges (PCon p (Rel _ _):cs) = (l,p):pconEdges cs
         pconEdges (PCon p (Neg p1):cs)
-          | noEdges p1 = ((l,p):pconEdges cs)
+          | noEdges p1 = (l,p):pconEdges cs
           | otherwise  = ((pdrsLabel p1,p) : edges p1) `union` ((l,p):pconEdges cs)
         pconEdges (PCon p (Imp p1 p2):cs)
-          | noEdges p1 && noEdges p2      = ((l,p):pconEdges cs)
+          | noEdges p1 && noEdges p2      = (l,p):pconEdges cs
           | not(noEdges p1) && noEdges p2 = ((pdrsLabel p1,p) : edges p1) `union` ((l,p):pconEdges cs)
           | noEdges p1 && not(noEdges p2) = ((pdrsLabel p2,p) : edges p2) `union` ((l,p):pconEdges cs)
           | otherwise                     = ((pdrsLabel p1,p) : edges p1) `union` 
               ((pdrsLabel p2,pdrsLabel p1) : edges p2) `union` ((l,p):pconEdges cs)
         pconEdges (PCon p (Or p1 p2):cs)
-          | noEdges p1 && noEdges p2      = ((l,p):pconEdges cs)
+          | noEdges p1 && noEdges p2      = (l,p):pconEdges cs
           | not(noEdges p1) && noEdges p2 = ((pdrsLabel p1,p) : edges p1) `union` ((l,p):pconEdges cs)
           | noEdges p1 && not(noEdges p2) = ((pdrsLabel p2,p) : edges p2) `union` ((l,p):pconEdges cs)
           | otherwise                     = ((pdrsLabel p1,p) : edges p1) `union` 
               ((pdrsLabel p2,pdrsLabel p1) : edges p2) `union` ((l,p):pconEdges cs)
         pconEdges (PCon p (Prop _ p1):cs)
-          | noEdges p1 = ((l,p):pconEdges cs)
+          | noEdges p1 = (l,p):pconEdges cs
           | otherwise  = ((pdrsLabel p1,p) : edges p1) `union` ((l,p):pconEdges cs)
         pconEdges (PCon p (Diamond p1):cs)
-          | noEdges p1 = ((l,p):pconEdges cs)
+          | noEdges p1 = (l,p):pconEdges cs
           | otherwise  = ((pdrsLabel p1,p) : edges p1) `union` ((l,p):pconEdges cs)
         pconEdges (PCon p (Box p1):cs)
-          | noEdges p1 = ((l,p):pconEdges cs)
+          | noEdges p1 = (l,p):pconEdges cs
           | otherwise  = ((pdrsLabel p1,p) : edges p1) `union` ((l,p):pconEdges cs)
         noEdges :: PDRS -> Bool
         noEdges (LambdaPDRS {}) = True
