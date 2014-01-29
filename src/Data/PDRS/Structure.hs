@@ -13,6 +13,7 @@ Structural operations on PDRSs
 module Data.PDRS.Structure
 (
   pdrsLabel
+, pdrsLabels
 , pdrsUniverse
 , emptyPDRS
 , isLambdaPDRS
@@ -39,6 +40,23 @@ pdrsLabel (PMerge p1 p2)
   | isLambdaPDRS p2 = pdrsLabel p1
   | otherwise       = pdrsLabel p2
 pdrsLabel (PDRS l _ _ _) = l
+
+---------------------------------------------------------------------------
+-- | Returns all the labels in a 'PDRS'.
+---------------------------------------------------------------------------
+pdrsLabels :: PDRS -> [PVar]
+pdrsLabels (LambdaPDRS _) = []
+pdrsLabels (AMerge p1 p2) = pdrsLabels p1 ++ pdrsLabels p2
+pdrsLabels (PMerge p1 p2) = pdrsLabels p1 ++ pdrsLabels p2 
+pdrsLabels (PDRS l _ _ c) = l:concatMap labels c
+  where labels :: PCon -> [PVar]
+        labels (PCon _ (Rel _ _ ))   = []
+        labels (PCon _ (Neg p1))     = pdrsLabels p1
+        labels (PCon _ (Imp p1 p2))  = pdrsLabels p1 ++ pdrsLabels p2
+        labels (PCon _ (Or p1 p2))   = pdrsLabels p1 ++ pdrsLabels p2
+        labels (PCon _ (Prop _ p1))  = pdrsLabels p1
+        labels (PCon _ (Diamond p1)) = pdrsLabels p1
+        labels (PCon _ (Box p1))     = pdrsLabels p1
 
 ---------------------------------------------------------------------------
 -- | Returns the universe of a PDRS

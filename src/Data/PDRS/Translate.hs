@@ -15,6 +15,7 @@ module Data.PDRS.Translate
 (
   pdrsToFOL
 , pdrsToDRS
+, stripPVars
 ) where
 
 import qualified Data.DRS.DataType as D
