@@ -1,0 +1,85 @@
+\section{Operations on PDRSs}\label{sec:operations}
+
+\subsection{Properties}
+
+
+
+\subsection{Translations}
+
+A projection table (\textsc{ptable}) is an $n\times3$ matrix, which can be
+represented as a set of triples, where each triple consists of some PDRS
+content (a referent, a predicate or an operator with PDRS label(s)), the
+introduction site of the content, and the projection site of the content,
+i.e.: \textsc{ptable}= $\{[C,I,P]~|~C=$ PDRS content $\wedge$ $I=$ an
+introduction site $\wedge$ $P=$ a projection site$\}$. The translation from
+a PDRS to a projection table can be straightforwardly defined using two
+operations $\mathcal{T}$ and $\mathcal{I}$, defined in the following seven
+clauses (here, $O^1$ indicates a unary operator: i.e., one of $\{\neg, \Box,
+\Diamond$\}; and $O^2$ a binary operator: i.e., one of $\{\Rightarrow,
+\vee\}$).
+
+\begin{definition}[PDRS to Projection Table]~\\\vspace{-12pt}
+\begin{enumerate}
+  \item $\mathcal{T}(\langle\rho,\{\mu_1...\mu_n\},
+    \{\delta_1...\delta_m\}, \{\chi_1...\chi_l\}\rangle$)\\
+    = $\mathcal{I}(\mu_1,\rho)\cup...\cup \mathcal{I}(\mu_n,\rho)\cup
+      \mathcal{I}(\delta_1,\rho)\cup...\cup \mathcal{I}(\delta_m,\rho)\cup
+      \mathcal{I}(\chi_1,\rho)\cup...\cup \mathcal{I}(\chi_l,\rho)$
+      %What about the MAPs?
+  \item $\mathcal{I}(\langle v_1, v_2 \rangle,\rho_i)
+    = \{[\langle v_1, v_2 \rangle,\rho_i,\rho_i]\}$
+  \item $\mathcal{I}(\langle v_i, x_i \rangle,\rho_i)
+    = \{[x_i,\rho_i,v_i]\}$
+  \item $\mathcal{I}(\langle v_i, R(x_1...x_j) \rangle,\rho_i)
+    = \{[R(x_1...x_j),\rho_i,v_i]\}$
+  \item $\mathcal{I}(\langle v_i, O^1 K_j) \rangle,\rho_i)
+    = \{[O^1 \rho(K_j),\rho_i,v_i]\} \cup \mathcal{T}(K_j)$
+  \item $\mathcal{I}(\langle v_i,  O^2(K_j, K_k) \rangle,\rho_i)
+    = \{[O^2(\rho(K_j),\rho(K_k)),\rho_i,v_i]\} \cup \mathcal{T}(K_j)
+      \cup \mathcal{T}(K_k)$
+  \item $\mathcal{I}(\langle v_i, x_i:K_j \rangle,\rho_i)
+    = \{[x_i:\rho(K_j),\rho_i,v_i]\} \cup \mathcal{T}(K_j)$
+\end{enumerate}
+\end{definition}
+
+To reconstruct a PDRS from a projection table, we need to
+retrieve the information about the structure of the original PDRS,
+and then insert all other PDRS content at the correct introduction site. For
+the first step, we need to know the label of the outer PDRS, and the labels
+of all sub-PDRSs. The latter information can be simply derived from the PDRS
+content represented in \textsc{ptable} $T$: \textsc{sub-pdrss} $=\{l~|~O^1
+  l \in \bigcup C ~\vee~ O^2(l,l') \in \bigcup C ~\vee~ O^2(l',l) \in
+\bigcup C ~\vee~ x:l \in \bigcup C \}$, where $\bigcup C$ represents all
+PDRS content represented in \textsc{ptable} $T$. Since the label of the
+outer PDRS by definition is the only label that occurs as an introduction
+site but not as a sub-PDRS, it can be retrieved as follows:
+\textsc{outer-label} $=\{i~|~i\in\bigcup I \wedge i \notin
+\textsc{sub-pdrss}\}$, where $\bigcup I$ is the collection of all
+introduction sites in $T$.
+
+With this information, we can re-create the original PDRS starting from an
+empty PDRS with the \textsc{outer-label} as label. Then all other content
+can be incrementally inserted on the basis of the introduction site
+associated with the PDRS content. When translating a PDRS to a DRS, all
+content needs to be moved to the projection site, instead of the
+introduction site, since the information provided by the pointers will be
+lost, so all content needs to occur at its interpretation site in order to
+obtain the desired truth-conditional interpretation. One constraint on this
+operation is the occurrence of free pointers the projection site of
+presupposed content. These free contexts can be retrieved from the
+projection table by collecting all projection contexts that do not occur
+within the \textsc{sub-pdrss} or as the \textsc{outer-label} of $T$:
+\textsc{free-contexts} $=\{p~|~p\in\bigcup P \wedge p \notin
+\textsc{sub-pdrss} \wedge p \notin \textsc{outer-label}\}$, where $\bigcup
+P$ is the collection of all projection sites in $T$.
+%what about an empty PDRS? With this def of projection table it is
+%impossible to retrieve its label.. Idea: Maybe add recursive accessibility
+%of label in the same way as maps? Yes!
+
+In order to determine the interpretation site of such presupposed content,
+the \textsc{free-contexts} need to be translated into the labels from the
+\textsc{sub-pdrss} or the \textsc{outer-label}. For this, we can use the
+\MAPs, which are available in the projection table as empty PDRS content.
+
+\subsection{Higher-order functions}
+%pdrsIsSameNP etc

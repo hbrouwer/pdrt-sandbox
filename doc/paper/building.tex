@@ -1,4 +1,5 @@
 \section{Building Projective Discourse Representation Structures}
+\label{sec:building}
 
 % nice introduction
 
@@ -82,7 +83,7 @@ DRS $K_i$ directly subordinates DRS $K_j$ ($K_j <!~K_i$) iff:
   \end{itemize}
 \end{definition}
 
-Now, in order to properly define accessibility in PDRT, we need to take into
+Now, for the accessibility relations in PDRT we need to take into
 account the contexts introduced by the projection pointers.  In case
 a pointer occurs free, it introduces a projected context, whose
 accessibility conditions are undefined, except for the fact that this
@@ -141,8 +142,8 @@ PDRS (formally, the label of a PDRS $P_i$ is represented as $\rho(P_i)$).
 Now we can define subordination for PDRSs. As described above, we need to
 consider both sub-PDRSs and projected contexts when defining accessibility.
 Therefore, we define accessibility over \textit{PDRS-contexts} instead of
-PDRSs. A PDRS-context may refer to a PDRS (via its label), or to
-a projected context created by a pointer.
+PDRSs. A PDRS-context may refer to a PDRS (via its label), or to a projected
+context created by a pointer. PDRS subordination is then defined as follows:
 
 \begin{definition}[PDRS-context Subordination]~\\
 PDRS-context $\pi_1$ subordinates PDRS-context $\pi_2$ ($\pi_2 \leq \pi_1$)
@@ -157,10 +158,13 @@ iff:
 \end{itemize}
 \end{definition}
 
-\noindent Again, we see a strong correlation to the definition for DRS
-subordination (Definition~\ref{def:DRSsub}), with the addition of minimally
-accessible contexts as possible subordinating contexts. Direct subordination for
-PDRSs is defined as follows:
+\noindent Where the definition for direct subordination is defined over
+PDRS-contexts, which means that direct subordination is defined on the basis
+of the pointer associated with the PDRS condition in which the sub-PDRS
+occurs, and not on the basis of the set of conditions of some PDRS, as is
+the case for DRS subordination (see Definition~\ref{def:DRSsub}).  This is
+because the pointers indicate where some content is interpreted, which is
+relevant for determining accessibility between contexts.
 
 \begin{definition}[PDRS-context Direct Subordination]~\\
 PDRS-context $\pi_i$ directly subordinates PDRS-context $\pi_j$ 
@@ -182,14 +186,6 @@ PDRS-context $\pi_i$ directly subordinates PDRS-context $\pi_j$
   \end{itemize}
 \end{definition}
 
-\noindent Note that direct subordination for PDRS-contexts is not defined on
-the basis of the set of conditions of some PDRS, as is the case for DRS
-subordination in Definition~\ref{def:DRSsub}, but on the basis of the
-pointer associated with the PDRS condition in which the sub-PDRS occurs.
-This is because pointers indicate where some content is interpreted, which
-is relevant for determining accessibility between contexts. This means that
-some sub-PDRS that is part of the conditions of another PDRS, need not be
-subordinated by it. 
 
 Finally, we define minimally accessible PDRS contexts as those dependencies
 made explicit in the \MAPs, plus the cases in which some projected context
@@ -211,28 +207,34 @@ respect to PDRS-context $\pi_j$ ($\pi_j \preceq \pi_i$) iff:
   \end{itemize}
 \end{definition}
 
-The $\leq$-relation creates a partial order over all PDRS-contexts, provided
-that subordination is defined for all projected contexts via the \MAPs. This
+The $\leq$-relation creates a partial order over all PDRS-contexts. This
 results in a directed graph, called the \textit{Accessibility Graph}, over
 all PDRS-contexts in a given PDRS. We will call a PDRS whose accessibility
 graph is weakly connected,\footnote{A directed graph $G$ is weakly connected
-  iff for all pairs of vertices ($v_1$,$v_2$) in $G$ it holds that if all
-  directed edges in $G$ are replaced by undirected edges, then there is
-a path between $v_1$ and $v_2$.} a \emph{connected} PDRS. We will assume
-that all PDRSs are complete throughout the rest of this paper, unless stated
-otherwise.
-%XXX Can we/Do we want to allow non-connected PDRSs in this sense? Yes: only
-%in case of unresolved Merges (but then watch out for accidental bindings!)
+iff for all pairs of vertices ($v_1$,$v_2$) in $G$ it holds that if all
+directed edges in $G$ are replaced by undirected edges, then there is a path
+between $v_1$ and $v_2$.} a \emph{connected} PDRS. All basic PDRSs are
+connected PDRss, because projection variables either occur free (in which
+case they are accessible from their introduction site), or are bound by some
+sub-PDRS, which is necessarily accessible from the global PDRS. We will see
+that unresolved structures, introduced below, may result in accessibility
+graphs that consist of multiple non-connected components.
+%XXX unresolved Merges may result in a non-connected graph (but then watch
+%out for accidental bindings!)
 %%XXX Define properly in Sandbox 
-% All basic PDRSs are connected PDRSs. 
-
 
 %resolved PDRS (no projected contexts): accessibility graph becomes tree.
 
-\subsection{Variable binding}
+\subsection{Variable Binding}
 
-Now we are ready to define free and bound variables.  This is necessary to
-define projection, anaphoric binding, PDRS renaming, etc.
+Up to this point we have been talking informally about free and bound
+referents and projection variables. DRT and PDRT are dynamic semantic
+formalisms, which means that the meaning structures simultaneously provide
+semantic content and serve as a context for novel information. That is, the
+referents introduced in a (P)DRS may serve as antecedents for later
+introduced anaphoric expressions. In DRT, a referent is bound in case it is
+introduced in the universe of some accessible DRS, as formally defined below
+(here, $U(K_i)$ indicates the set of referents in the universe of $K_i$).
 
 \begin{definition}[DRS bound variables]~\\
 DRS variable $x$, introduced in DRS $K_i$, is bound iff:
@@ -245,16 +247,9 @@ There exists a DRS $K_j$, such that
 \end{quote}
 \end{definition}
 
-\begin{definition}[PDRS bound projection variables]~\\
-Projection variable $v$, introduced in PDRS $P_i$, is bound iff:
-\begin{quote}
-There exists a PDRS $P_j$, such that
-\begin{enumerate}[i.]
-  \item $\rho(P_i) \leq \rho(P_j)$; %remember that subordination for PDRSs was defined over PDRS-contexts
-  \item $v = \rho(P_j)$.
-\end{enumerate}
-\end{quote}
-\end{definition}
+In PDRT, subordination was defined over PDRS-contexts (see
+Definition~\ref{def:PDRSsub}), which makes sure that we allow
+non-hierarchical binding through projection.
 
 \begin{definition}[PDRS bound projected referents]~\\
 Projected referent $\langle p,r\rangle$, introduced in PDRS $P_i$, is bound
@@ -271,6 +266,18 @@ There exists a PDRS-context $\pi_j$, such that
 \end{enumerate}
 \end{quote}
 \end{definition}
+
+\begin{definition}[PDRS bound projection variables]~\\
+Projection variable $v$, introduced in PDRS $P_i$, is bound iff:
+\begin{quote}
+There exists a PDRS $P_j$, such that
+\begin{enumerate}[i.]
+  \item $\rho(P_i) \leq \rho(P_j)$; 
+  \item $v = \rho(P_j)$.
+\end{enumerate}
+\end{quote}
+\end{definition}
+
 
 \subsection{Combining Structures}
 
@@ -325,7 +332,7 @@ function $\mathcal{R}$ renames all bound variables (projection variables and
 DRS referents) in the first PDRS that overlap with variables in the second
 PDRS.
 
-\begin{definition}[PDRS Assertive Merge]~\\
+\begin{definition}[PDRS Assertive Merge]\label{def:amerge}~\\
 Given PDRSs $P_i=\langle \rho_i,M_i,U_i,C_i \rangle$ and
 $P_j=\langle \rho_j,M_j,U_j,C_j \rangle$, the assertive merge between $P_i$
 and $P_j$ ($P_i + P_j$) is defined as follows:
@@ -372,7 +379,7 @@ of \MAPs~is enhanced with a relation expressing the accessibility between
 the resulting PDRS and the context created through projection, i.e.,
 the label of the projected PDRS.
 
-\begin{definition}[PDRS Projective Merge]~\\
+\begin{definition}[PDRS Projective Merge]\label{def:pmerge}~\\
 Given PDRSs $P_i=\langle \rho_i,M_i,U_i,C_i \rangle$ and 
 $P_j=\langle \rho_j,M_j,U_j,C_j\rangle$, the projective merge between $P_i$
 and $P_j$ ($P_i \ast P_j$) is defined as follows:
@@ -386,46 +393,147 @@ and $P_j$ ($P_i \ast P_j$) is defined as follows:
       $\mathcal{R}(P_j,P_i)$
 \end{definition}
 
-Now that we have defined the merge operations, we can create complex (P)DRSs
-by combining multiple simple (P)DRSs. However, these operations only allow
-us to combine \emph{complete} structures, representing for example sentences
-or propositions, but there is no way to build up structures from even
-smaller building blocks, such as words, since the current framework is
-simply not powerful enough to express the meaning of such constituents. For
-this, we need a way to define unresolved structures that still need to be
-combined with some additional content in order to form a complete PDRS.
-Here, we follow \citeasnoun{muskens1996combining}, who defined Compositional
-DRT, a formalism that combines the dynamic semantics of DRT with a Montague
-style composition procedure.
+The merge operations provide a good handle for defining an incremental
+construction procedure for (P)DRSs.
+
 
 \subsection{Unresolved Structures}
 
-\citeasnoun{muskens1996combining}
+The operations described so far allow for the combination of \emph{complete}
+structures, representing for example sentences or propositions, but there is
+no way to build up structures from even smaller building blocks, such as
+words, since the current framework is simply not powerful enough to express
+the meaning of such constituents. For this, we need a way to define
+unresolved structures that still need to be combined with some additional
+content in order to form a complete PDRS.  Here, we follow
+\citeasnoun{muskens1996combining}, who defined Compositional DRT,
+a formalism that combines the dynamic semantics of DRT with a Montague style
+composition procedure.
+
+In Compositional DRT (CDRT), each syntactic category can be defined using an
+unresolved DRS, defined by means of lambda abstractions. For example, a noun
+is considered to introduce a condition on a referent that still needs to be
+defined, which can be represented as follows (using the flat representation
+for DRSs): 
+
+\ex. ``\textit{man}'':~~ $\lambda x.$\flatdrs{}{man($x$)}
+
+When combined with a suitable referent, this unresolved DRS is transformed
+into a resolved DRS with a free variable, which can become bound after
+merging with a DRS that contains this variable in its universe. So, the
+interaction between beta reduction (the elimination of lambda-terms) and
+merge operations is crucial for obtaining proper DRSs. In CDRT, this
+interaction is explicitly part of the lexical semantics associated with the
+syntactic structures, as the unresolved structure representing the
+determiner ``\textit{a}'' illustrates: 
+
+\ex. ``\textit{a}'':~~ 
+  $\lambda p.\lambda q.(($\flatdrs{$x$}{}$~+~p(x))+q(x))$
+
+A determiner is thus defined as introducing a DRS with a single referent,
+which needs to be merged with two unresolved DRSs in order to form
+a completely resolved structure (i.e., a sentence), or, in type-theoretic
+terms, a determiner is of the type: $(e\rightarrow t)\rightarrow
+(e\rightarrow t) \rightarrow t$. Now we can apply beta reduction to create
+the noun phrase ``\textit{a man}'', which will be of type $(e\rightarrow t)
+\rightarrow t$:
+
+\ex. ``\textit{a man}'':~~ 
+  $\lambda p.\lambda q.(($\flatdrs{$x$}{}$~+~p(x))+q(x))$ ($\lambda x.$
+  \flatdrs{}{man($x$)}$)~\stackrel{\beta}{=}~$ $\lambda q.($
+  \flatdrs{$x$}{man($x$)}$~+~q(x))$ 
+
+Based on these type-theoretic principles, we can define unresolved
+structures for a wide range of lexical items, ranging from simple structures
+for basic items like nouns, to more complex abstractions for particles or
+prepositions, for example, since these introduce complex dependencies.  In
+the same way, a compositional version of PDRT can be defined, in which the
+unresolved structures contain PDRSs that are combined using assertive and
+projective merge. With this machinery, we can deal with projection in
+a straightforward and intuitive way on the lexical level: presupposition
+triggers introduce a projective merge to insert their content in their local
+context, instead of introducing a constant
+\citeaffixed{kamp1993discourse,muskens1996combining}{cf.} or requiring
+a post-hoc projection mechanism \citeaffixed{sandt1992presupposition}{cf.}
+(but note the correspondence to the lexical DRS semantics defined by
+\citeasnoun{bos2003implementing} using the $\alpha$-operator).  For example,
+a name like ``\emph{John}'' is a noun phrase that introduces
+a presupposition about the existence of an entity named `John'; this can be
+represented by means of a lambda-term of type $(e\rightarrow t)\rightarrow
+t$, with a projective merge to combine the PDRS that introduces `John' with
+the unresolved structure:
+
+\ex. ``\textit{John}'':~~ 
+  $\lambda p.($\flatpdrs{$1$}{$1\gets x$}{$1\gets$John($x$)}{}$~*~p(x))$
+
+When combined with a term of type $e\rightarrow t$, the pointer associated
+with `John' ($1$ in the example above) will become free because by
+definition of projective merge it is not renamed to match the label of the
+context PDRS (see Definition~\ref{def:pmerge}). Note, however, that the
+presupposition may still become bound in the larger discourse, when part of
+a PDRS that is combined with an antecedent PDRS that matches its label. This
+implies that determining the projection site of a presupposition is part of
+constructing its lexical semantics, which makes sense in the light of the
+context-dependency of meaning. 
+
+Table~\ref{tab:lexPDRS} shows the unresolved PDRSs for a set of basic
+lexical items. The examples illustrate that the interchanging of assertive
+and projective merge nicely captures the correspondence between projecting
+and non-projecting sibling items, such as the determiners ``\textit{a}'' and
+``\textit{the}''. In section~\ref{sec:operations}, we will discuss some more
+(operations on) lexical semantics, and in section~\ref{sec:playing} we will
+come back to the issue of determining the right projection site for
+projected content. %XXX Wel doen!
 
 \begin{table}
   \caption{PDRT representations for a set of lexical items.}
   \label{tab:lexPDRS}
-  \centering
-\begin{tabular}{| l | l | l |}
+  \centering\small
+\begin{tabular}{| l | c  | c |}
 \hline
-{\bf Item} & {\bf DRT Semantics} & {\bf PDRT Semantics}\\
+{\bf\normalsize Item}  & {\bf\normalsize Category} & 
+  {\bf\normalsize PDRT Semantics}\\
 \hline
-a     & $\lambda p.\lambda q.(($\flatdrs{$x$}{} $~+~p(x))+q(x))$
-      & $\lambda p.\lambda q.(($\flatpdrs{$1$}{$x_1$}{}{}$~+~p(x))+q(x))$\\
-\hline
-the   &
-      & $\lambda p.\lambda q.(($\flatpdrs{$1$}{$x_1$}{}{}$~+~p(x))*q(x))$\\
-\hline
-John  &
-      &  $\lambda p.($\flatpdrs{$1$}{$x_1$}{John$_1$($x$)}{}$~*~p(x))$\\
-\hline
-man   &
-      & $\lambda x.$\flatpdrs{$1$}{}{man$_1$($x$)}{}\\
-\hline
-walks &
-      & $\lambda p. \lambda q. (p(\lambda x. (
-        $\flatpdrs{1}{$e_1$}{walk$_1$($e$), Theme$_1$($e,x$)}{}
-        $+~q(e))))$\\
+\normalsize{a}       & DET & 
+  $\lambda p.\lambda q.(($\pdrs{$1$}{$1\gets x$}{}{}$~+~p(x))+q(x))$\\
+%\hline
+\normalsize{the}     & DET & 
+  $\lambda p.\lambda q.(($\pdrs{$1$}{$1\gets x$}{}{}$~+~p(x))*q(x))$\\
+%\hline
+\normalsize{dog}     & N  & 
+  $\lambda x.$(\pdrs{$1$}{}{$1\gets$dog($x$)}{})\\
+%\hline
+\normalsize{John}    & NP & 
+  $\lambda p.($\pdrs{$1$}{$1\gets x$}{$1\gets$John($x$)}{}$~*~p(x))$\\
+%\hline
+\normalsize{happy}   & ADJ &  
+  $\lambda p. \lambda x.($\pdrs{$1$}{$1\gets e$}{$1\gets$happy($e$)\\
+    $1\gets$Patient($e,x$)}{}$~+~p(x))$\\
+%\hline
+\normalsize{his}     & POS & 
+  $\lambda p.\lambda q. \lambda r.((q(\lambda x.($\pdrs{$1$}{$1\gets y$}{
+    $1\gets$male($x$)\\ $1\gets$of($y,x$)}{}$))~+~p(y))~*~r(y))$\\
+%\hline
+\normalsize{bark}    & V & 
+  $\lambda p. \lambda q. (p(\lambda x. ($\pdrs{1}{$1\gets e$}{
+    $1\gets$walk($e$)\\ $1\gets$Theme($e,x$)}{}$+~q(e))))$\\
+%\hline
+\normalsize{love}    & V & 
+  $\lambda p. \lambda q.\lambda r. (q(\lambda x. (p(\lambda y.($\pdrs{1}{
+    $1\gets e$}{$1\gets$love($e$)\\ $1\gets$Experiencer($e,x$)\\ 
+    $1\gets$Stimulus($e,y$)}{}$+~r(e))))))$\\
+%\hline
+\normalsize{believe} & V & 
+  $\lambda p. \lambda q. \lambda r. (q(\lambda x.($\pdrs{$1$}{$1\gets e$
+    ~~$1\gets k$}{$1\gets$believe($e$)\\ $1\gets$Agent($e,x$)\\
+    $1\gets$Theme($e,k$)\\ $1\gets k:(p(\lambda y.($\flatpdrs{$2$}{~}{~}{~}$))
+    ~+~p(\lambda z.($\flatpdrs{$3$}{~}{~}{~}))}{}$~+~r(e))))$\\
+%\hline
+\normalsize{know}    & V & 
+  $\lambda p. \lambda q. \lambda r. (q(\lambda x.($\pdrs{$1$}{$1\gets e$
+    ~~$1\gets k$}{$1\gets$know($e$)\\ $1\gets$Agent($e,x$)\\
+    $1\gets$Theme($e,k$)\\ $1\gets k:(p(\lambda y.($\flatpdrs{$2$}{~}{~}{~}$))
+    ~*~p(\lambda z.($\flatpdrs{$3$}{~}{~}{~}))}{}$~+~r(e))))$\\
 \hline
 \end{tabular}
 \end{table}
