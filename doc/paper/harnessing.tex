@@ -13,6 +13,10 @@
 \usepackage{amssymb}
 \usepackage{verbatim}%for comment command
 
+% why doesn't this work:
+\newtheorem{subdefinition}[theorem]{Definition}
+\renewcommand{\thesubdefinition}{\thedefinition\alph{subdefinition}}
+
 %%%%% Macro's %%%%%
 
 \newcommand{\drs}[2]

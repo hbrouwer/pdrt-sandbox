@@ -3,22 +3,26 @@
 
 % nice introduction
 
-\subsection{Basic Structures and Subordination}
+\subsection{Basic Structures}
 
-We define basic DRSs following \citeasnoun{bos2003implementing}, with the
-exception that equality between variables (i.e., $x_1=x_2$) is not
-a separate DRS condition, but is treated as a variant of a 2-place predicate
-(i.e., $R(x_1,x_2)$, where $R$ equals $=$). This definition basically
-follows the definition proposed by \citeasnoun{kamp1993discourse}, without
-their duplex conditions, in order to allow for a direct translation to
-first-order logic.
+The box representations shown in Section~\ref{sec:preliminaries} are an
+intuitive way to look at DRSs and PDRSs, but less useful for formal
+reasoning about these structures. For this, we adhere to the set-theoretical
+underpinnings of the formalism as described by
+\citeasnoun{kamp1993discourse}, without their duplex conditions in order to
+allow for a direct translation to first-order logic (see
+Section~\ref{sec:translations}). This definition basically follows the one
+proposed by \citeasnoun{bos2003implementing}, with the exception that
+equality between variables (i.e., $x_1=x_2$) is not a separate DRS
+condition, but is treated as a variant of a 2-place predicate (i.e.,
+$R(x_1,x_2)$, where $R$ equals $=$). The definition of a basic DRS then
+looks as follows:
 
 \begin{definition}[Basic DRS] \label{def:bDRS}~\\
 A Basic DRS is a tuple $\langle \{x_1 ... x_n\},\{\gamma_1 ... \gamma_m\} 
 \rangle$, where:
  \begin{enumerate}[i.]
-  \item $\{x_1 ... x_n\}$ is a finite set of variables (called ``DRS
-    referents'');
+  \item $\{x_1 ... x_n\}$ is a finite set of variables;
   \item $\{\gamma_1 ... \gamma_m\}$ is a finite set of DRS conditions (which
     may be either basic or complex);
   \item\label{def:bDRS:Rel} $R(x_1, ..., x_n)$ is a basic DRS condition,
@@ -33,70 +37,20 @@ A Basic DRS is a tuple $\langle \{x_1 ... x_n\},\{\gamma_1 ... \gamma_m\}
  \end{enumerate} 
 \end{definition}
 
-% set of referents is DRS universe
+\noindent The variables in a DRS are also called \textit{DRS referents} or
+\textit{discourse referents}, and the set of referents is called the
+\textit{universe} of the DRS.
 %%more explanation?
 
 The main difference between a basic DRS and a basic PDRS is that in PDRT all
 structures introduce a label, which can accordingly bind the pointers
-associated with the PDRS referents and conditions. We will refer to labels
-and pointers together as \textit{projection variables}. This description
-results in the definition of a PDRS as a triple of a projection variable,
-a set of projected referents (i.e., DRS referents associated with a pointer)
-and a set of projected conditions. However, such a definition omits an
-essential part of the information that is required to properly represent
-projection phenomena, namely their \emph{projection path}. In DRT, the
-projection path (or ``projection line'', as
-\citeasnoun{sandt1992presupposition} calls it) of some projected content
-determines which DRSs are accessible from the introduction site to find
-a possible antecedent in or otherwise to accommodate into. Accessibility
-between DRSs is standardly defined based on a subordination relation
-($\leq$) between DRSs, i.e., DRS $K_1$ is accessible from DRS $K_2$
-\textit{iff} $K_2\leq K_1$, where subordination is recursively defined as
-follows:
-
-\begin{definition}[DRS Subordination]\label{def:DRSsub}~\\
-DRS $K_1$ subordinates DRS $K_2$ ($K_2 \leq K_1$) iff:
-  \begin{itemize}
-    \item $K_1 = K_2$;
-    \item $K_1$ directly subordinates $K_2$ ($K_2 <!~K_1$);
-    \item There is a DRS $K_{1'}$, such that $K_{1'} \leq K_1$ and 
-      $K_2 \leq K_{1'}$.
-  \end{itemize}
-  \end{definition}
-
-\noindent Thus, a DRS is always subordinated by itself, and by any DRS that
-directly, or indirectly subordinates it. Direct subordination between two
-DRSs $K_1$ and $K_2$ means that $K_2$ is either part of a condition in
-$K_1$, or that $K_1$ serves as its antecedent in some binary operation. This
-is formally defined below.
-
-\begin{definition}[DRS Direct Subordination]~\\
-DRS $K_i$ directly subordinates DRS $K_j$ ($K_j <!~K_i$) iff:
-  \begin{itemize}
-    \item $\neg K_j$, $\Box K_j$ or $\Diamond K_j$ is a DRS condition in
-      $K_i$;
-    \item $x:K_j$ is a DRS condition in $K_i$ for some $x$;
-    \item $K_j \Rightarrow K_k$, $K_k \Rightarrow K_j$, $K_j \vee K_k$, or 
-      $K_k \vee K_j$ is a DRS condition in $K_i$ for some DRS $K_k$;
-    \item There is a DRS $K_k$, such that $K_i \Rightarrow K_j$ or $K_i \vee K_j$
-      is a DRS condition in $K_k$.
-  \end{itemize}
-\end{definition}
-
-Now, for the accessibility relations in PDRT we need to take into
-account the contexts introduced by the projection pointers.  In case
-a pointer occurs free, it introduces a projected context, whose
-accessibility conditions are undefined, except for the fact that this
-context needs to be accessible from the context in which it was introduced,
-since the interpretation site of some linguistic content is necessarily
-accessible from its introduction site. Moreover, projected contexts may
-subordinate other projected contexts, which happens for example in the case
-of embedded presuppositions. So, in order to properly define the projection
-path of projected content in PDRT, the subordination properties of projected
-contexts should be explicitly part of the PDRS. We do this by enhancing each
-PDRS with a set of \MAPs: Minimally Accessible Projected contexts, which are
-basically tuples describing pairs of  subordinating contexts. This results
-in the following definition of basic PDRSs:
+associated with the PDRS referents and conditions.  Moreover, as described
+in Section~\ref{sec:pdrt}, the contexts referred to by the pointers may
+introduce various dependencies, which is reflected in a set of minimally
+accessible projection contexts, or \MAPs~for short.  Thus, in set-theoretic
+terms, a basic PDRS is a quadruple that consists of a label, a set of \MAPs,
+a set of projected referents (i.e., DRS referents associated with
+a pointer), and a set of projected conditions. This is formalized below:
 
 \begin{definition}[Basic PDRS] \label{def:bPDRS}~\\
 A Basic PDRS is a quadruple $\langle \rho, \{\mu_1 ... \mu_n\}, 
@@ -138,6 +92,59 @@ entire projected referent/condition, whereas in other cases we need only to
 refer to one of the elements of the tuple. Similarly, we refer to the first
 element of the quadruple representing a PDRS, as the \textit{label} of the
 PDRS (formally, the label of a PDRS $P_i$ is represented as $\rho(P_i)$).
+We will refer to labels and pointers together as \textit{projection
+variables}.
+
+\subsection{Subordination and Accessibility}
+
+%However, such a definition omits an essential part of the information that
+%is required to properly represent projection phenomena, namely their
+%\emph{projection path}. 
+In DRT, the projection path (or ``projection line'', as
+\citeasnoun{sandt1992presupposition} calls it) of some projected content
+determines which DRSs are accessible from the introduction site to find
+a possible antecedent in or otherwise to accommodate into. Accessibility
+between DRSs is standardly defined based on a subordination relation
+($\leq$) between DRSs, i.e., DRS $K_1$ is accessible from DRS $K_2$
+\textit{iff} $K_2\leq K_1$, where subordination is recursively defined as
+follows:
+
+\begin{definition}[DRS Subordination]\label{def:DRSsub}~\\
+DRS $K_1$ subordinates DRS $K_2$ ($K_2 \leq K_1$) iff:
+  \begin{itemize}
+    \item $K_1 = K_2$;
+    \item $K_1$ directly subordinates $K_2$ ($K_2 <!~K_1$);
+    \item There is a DRS $K_{1'}$, such that $K_{1'} \leq K_1$ and 
+      $K_2 \leq K_{1'}$.
+  \end{itemize}
+\end{definition}
+
+\begin{subdefinition}[DRS Direct Subordination]~\\
+DRS $K_i$ directly subordinates DRS $K_j$ ($K_j <!~K_i$) iff:
+  \begin{itemize}
+    \item $\neg K_j$, $\Box K_j$ or $\Diamond K_j$ is a DRS condition in
+      $K_i$;
+    \item $x:K_j$ is a DRS condition in $K_i$ for some $x$;
+    \item $K_j \Rightarrow K_k$, $K_k \Rightarrow K_j$, $K_j \vee K_k$, or 
+      $K_k \vee K_j$ is a DRS condition in $K_i$ for some DRS $K_k$;
+    \item There is a DRS $K_k$, such that $K_i \Rightarrow K_j$ or $K_i \vee K_j$
+      is a DRS condition in $K_k$.
+  \end{itemize}
+\end{subdefinition}
+
+\noindent Thus, a DRS is always subordinated by itself, and by any DRS that
+directly, or indirectly subordinates it. Direct subordination between two
+DRSs $K_1$ and $K_2$ means that $K_2$ is either part of a condition in
+$K_1$, or that $K_1$ serves as its antecedent in some binary operation.
+
+For the accessibility relations in PDRT we need to take into
+account the contexts introduced by the projection pointers.  In case
+a pointer occurs free, it introduces a projected context, whose
+accessibility conditions are undefined, except for the fact that this
+context needs to be accessible from the context in which it was introduced,
+since the interpretation site of some linguistic content is necessarily
+accessible from its introduction site.
+%%%
 
 Now we can define subordination for PDRSs. As described above, we need to
 consider both sub-PDRSs and projected contexts when defining accessibility.
@@ -145,7 +152,7 @@ Therefore, we define accessibility over \textit{PDRS-contexts} instead of
 PDRSs. A PDRS-context may refer to a PDRS (via its label), or to a projected
 context created by a pointer. PDRS subordination is then defined as follows:
 
-\begin{definition}[PDRS-context Subordination]~\\
+\begin{definition}[PDRS-context Subordination]\label{def:PDRSsub}~\\
 PDRS-context $\pi_1$ subordinates PDRS-context $\pi_2$ ($\pi_2 \leq \pi_1$)
 iff:
 \begin{itemize}
@@ -166,7 +173,7 @@ the case for DRS subordination (see Definition~\ref{def:DRSsub}).  This is
 because the pointers indicate where some content is interpreted, which is
 relevant for determining accessibility between contexts.
 
-\begin{definition}[PDRS-context Direct Subordination]~\\
+\begin{subdefinition}[PDRS-context Direct Subordination]~\\
 PDRS-context $\pi_i$ directly subordinates PDRS-context $\pi_j$ 
 ($\pi_j <!~\pi_i$) iff:
   \begin{itemize}
@@ -184,14 +191,13 @@ PDRS-context $\pi_i$ directly subordinates PDRS-context $\pi_j$
       and $\rho(P_j) = \pi_j$. 
     %NB this is about PDRS condition instead of projected condition
   \end{itemize}
-\end{definition}
-
+\end{subdefinition}
 
 Finally, we define minimally accessible PDRS contexts as those dependencies
 made explicit in the \MAPs, plus the cases in which some projected context
 occurs free.
 
-\begin{definition}[Minimally Accessible PDRS-Contexts]~\\
+\begin{subdefinition}[Minimally Accessible PDRS-Contexts]~\\
 PDRS-context $\pi_i$ is a minimally accessible context with
 respect to PDRS-context $\pi_j$ ($\pi_j \preceq \pi_i$) iff:
   \begin{itemize}
@@ -205,7 +211,7 @@ respect to PDRS-context $\pi_j$ ($\pi_j \preceq \pi_i$) iff:
        %%$\pi_1$ is introduced in (some sub-PDRS of) $\pi_2$, and $\pi_1$ 
        %%is free w.r.t. $\pi_2$;
   \end{itemize}
-\end{definition}
+\end{subdefinition}
 
 The $\leq$-relation creates a partial order over all PDRS-contexts. This
 results in a directed graph, called the \textit{Accessibility Graph}, over
@@ -247,9 +253,15 @@ There exists a DRS $K_j$, such that
 \end{quote}
 \end{definition}
 
-In PDRT, subordination was defined over PDRS-contexts (see
-Definition~\ref{def:PDRSsub}), which makes sure that we allow
-non-hierarchical binding through projection.
+In PDRT, the interpretation site of the semantic content, indicated by the
+pointer, determines whether some referent is bound. Again, a referent is
+bound if it occurs in some universe as an accessible antecedent. However,
+since in PDRT all referents and conditions are associated with a pointer,
+and may therefore be projected, the accessibility of antecedents should not
+be determined on the basis of the PDRS in which a referent is introduced,
+but by where it is interpreted. Thus, a projected referent is bound in case
+there exists some referent pointing to an accessible context in any universe
+in the global PDRS. 
 
 \begin{definition}[PDRS bound projected referents]~\\
 Projected referent $\langle p,r\rangle$, introduced in PDRS $P_i$, is bound
@@ -267,6 +279,16 @@ There exists a PDRS-context $\pi_j$, such that
 \end{quote}
 \end{definition}
 
+\noindent Since by definition the interpretation context of some semantic
+content is accessible from its context of introduction, it follows from this
+definition that the projection context of the antecedent is also accessible
+from the introduction site of the projected referent ($\rho(P_i) \leq
+\pi_j$). 
+
+Finally, we can define bound projection variables in PDRT in the same way as
+referents in DRT, except that the antecedent variable is required to
+function as the label of some accessible PDRS:
+
 \begin{definition}[PDRS bound projection variables]~\\
 Projection variable $v$, introduced in PDRS $P_i$, is bound iff:
 \begin{quote}
@@ -281,10 +303,15 @@ There exists a PDRS $P_j$, such that
 
 \subsection{Combining Structures}
 
-Combining two DRSs simply means taking the union of the sets of referents
-and conditions from both DRSs. One important condition on combing structures
-is that no accidental binding of variables occurs. To see this, consider the
-following example:
+Up to this point, we have defined basic structures and their related
+properties, including context accessibility and bound variables.  As the aim
+of a semantic formalism is to provide a framework for constructing meaning
+representations, the logical next step is to define a way to combine
+structures in order to create larger meaning representations. In DRT,
+combining two DRS is defined straightforwardly as taking the union of the
+sets of referents and conditions from both DRSs. One important condition on
+combing structures is that no accidental binding of variables occurs. To see
+this, consider the following example:
 
 \ex. John smiles. Mary cries.\\
   \drs{x}{John(x)\\ smiles(x)} $\Cup$ \drs{x}{Mary(x)\\cries(x)} = 
@@ -304,7 +331,7 @@ anaphoric binding between DRSs, since variables that occur free will not be
 renamed and may thus become bound. The resulting definition for DRS Merge is
 shown below:
 
-\begin{definition}[DRS Merge]~\\
+\begin{definition}[DRS Merge]\label{def:DRSmerge}~\\
 Given DRSs $K_i=\langle U_i,C_i \rangle$ and $K_j=\langle U_j,C_j \rangle$,
 the DRS merge between $K_i$ and $K_j$ ($K_i + K_j$) is defined as follows:
   \begin{quote}
@@ -339,45 +366,36 @@ and $P_j$ ($P_i + P_j$) is defined as follows:
   \begin{quote}
     $P_i + P_j = 
       \langle \rho_{j'}, 
-      M_{i}[\rho_1\backslash\rho_{j'}] \cup M_{j'},
-      U_{i}[\rho_1\backslash\rho_{j'}] \cup U_{j'},
-      C_{i}[\rho_1\backslash\rho_{j'}] \cup C_{j'}\rangle$
+      M_{i}[\rho_i\backslash\rho_{j'}] \cup M_{j'},
+      U_{i}[\rho_i\backslash\rho_{j'}] \cup U_{j'},
+      C_{i}[\rho_i\backslash\rho_{j'}] \cup C_{j'}\rangle$
   \end{quote}
   where: $P_{j'} = \langle \rho_{j'}, M_{j'}, U_{j'}, C_{j'} \rangle =$
       $\mathcal{R}(P_j,P_i)$
 \end{definition}
 
-\noindent Note that assertive merge, unlike DRS merge, is a non-symmetrical
-operation, meaning that the order of the arguments changes the outcome of
-the operation. However, it is straightforward to show that changing the
-order of the arguments results in an $\alpha$-equivalent PDRS, since the
-only difference is that the projection variables and referents may be named
-differently. This implies that the assertive merge operation is
-interpretation-symmetrical, since the order of the arguments does not affect
-the truth-values of the resulting PDRS.
-
-The operation for assertive merge results in a PDRS where all content has
-the same status as it had before merging. However, we are interested in
-creating a formalism in which some content may become projected during
-discourse construction.  Intuitively, projected content (and in particular
-presupposed content) has a status that is prior to asserted content.
-Therefore, we define ``projective merge'' as an operation that results in
-the content of its first argument to become projected in the resulting PDRS.
-This operation is very similar to the $\alpha$-operator introduced by
-\cite{bos2003implementing}, taking into account the projection variables in
-a PDRS. Projection in PDRT means that the pointer of the projected content
-indicates some accessible PDRS-context, which may either be instantiated by
-a higher PDRS, or it may be a context that is projected since the pointer is
-not bound by any label. By defining projective merge in such a way that the
-projected content keeps its own pointer, we allow the projection variables
-to become bound in an accessible PDRS, just as in the case of anaphoric
-binding in DRT via the use of free variables that are not renamed during
-merging. Since we want the result of the projective merge to be a connected
-PDRS, the only addition to taking the set-theoretic union of the content of
-the projected PDRS and the (renamed) context PDRS, is that the resulting set
-of \MAPs~is enhanced with a relation expressing the accessibility between
-the resulting PDRS and the context created through projection, i.e.,
-the label of the projected PDRS.
+\noindent The operation for assertive merge results in a PDRS where all
+content has the same status as it had before merging. However, we are
+interested in creating a formalism in which some content may become
+projected during discourse construction.  Intuitively, projected content
+(and in particular presupposed content) has a status that is prior to
+asserted content.  Therefore, we define ``projective merge'' as an operation
+that results in the content of its first argument to become projected in the
+resulting PDRS.  This operation is very similar to the $\alpha$-operator
+introduced by \cite{bos2003implementing}, taking into account the projection
+variables in a PDRS. Projection in PDRT means that the pointer of the
+projected content indicates some accessible PDRS-context, which may either
+be instantiated by a higher PDRS, or it may be a context that is projected
+since the pointer is not bound by any label. By defining projective merge in
+such a way that the projected content keeps its own pointer, we allow the
+projection variables to become bound in an accessible PDRS, just as in the
+case of anaphoric binding in DRT via the use of free variables that are not
+renamed during merging. Since we want the result of the projective merge to
+be a connected PDRS, the only addition to taking the set-theoretic union of
+the content of the projected PDRS and the (renamed) context PDRS, is that
+the resulting set of \MAPs~is enhanced with a relation expressing the
+accessibility between the resulting PDRS and the context created through
+projection, i.e., the label of the projected PDRS.
 
 \begin{definition}[PDRS Projective Merge]\label{def:pmerge}~\\
 Given PDRSs $P_i=\langle \rho_i,M_i,U_i,C_i \rangle$ and 
@@ -393,9 +411,67 @@ and $P_j$ ($P_i \ast P_j$) is defined as follows:
       $\mathcal{R}(P_j,P_i)$
 \end{definition}
 
-The merge operations provide a good handle for defining an incremental
-construction procedure for (P)DRSs.
+\noindent In contrast to DRS Merge defined in Definition~\ref{def:DRSmerge},
+the merge operations for PDRSs, defined in Definitions~\ref{def:amerge} and
+\ref{def:pmerge} are non-symmetrical operations. This means that changing
+the order of the arguments changes the outcome of the operation. In both
+PDRS merges, the second PDRS functions as a kind of context in which the
+content of the first PDRS is integrated, since the resulting PDRS will have
+the label of the second PDRS. However, for the Assertive Merge
+(Definition~\ref{def:amerge}) it is straightforward to show that changing
+the order of the arguments results in an $\alpha$-equivalent PDRS, since the
+only difference is that the projection variables and referents may be named
+differently. This implies that the assertive merge operation is
+interpretation-symmetrical, since the order of the arguments does not affect
+the truth-values of the resulting PDRS. This, however, does not hold for
+Projective Merge (Definition~\ref{def:pmerge}), since the status of the
+content in the resulting PDRS is determined by the ordering of the merged
+arguments: the asserted content of the first PDRS will be projected in the
+resulting PDRS. This asymmetry results in a non-trivial interaction between
+the two PDRS merges, represented in Table~\ref{tab:mergeinteractions}.
 
+\begin{table}[h]
+  \caption{Interaction between Assertive and Projective merge}
+  \label{tab:mergeinteractions}
+  \centering
+  \begin{tabular}{| l c l |}
+    \hline
+    $A + (B + \Gamma)$ & $=$ & $(A + B) + \Gamma$\\
+    \hline
+    $A * (B * \Gamma)$ & $=$ & $(A * B) * \Gamma$\\
+    \hline
+    $A * (B + \Gamma)$ & $=$ & $(A * B) + \Gamma$\\
+    \hline
+    $A + (B * \Gamma)$ & $=$ & $B * (A + \Gamma) ~~=~~ (B * A) + \Gamma$\\
+    \hline\hline
+    $(A + B) * \Gamma$ & $=$ &  $(A + \mathcal{E}(B)) * (B * \Gamma)$\\
+                       &&  \textit{where:} $\mathcal{E}(B) = \langle \rho(B), \{\}, \{\}, \{\}\rangle$\\
+    \hline
+  \end{tabular}
+\end{table}
+
+\noindent The first two rows of Table~\ref{tab:mergeinteractions} illustrate
+the associativity of both merge operations. The third and fourth row show
+the interaction between the different merges. Note that the asymmetry of the
+projective merge operation results in an unbalanced behaviour in the fourth
+row, where the projective merge retains precedence over the assertive merge
+operation. Intuitively, this is because projected content has a status that
+is prior to asserted content, which means that it must be allowed to come
+first.  Finally, the fifth row illustrates the equivalence for the last
+possible configuration. Here, again, the asymmetry of the projective merge
+prevents an associative equivalence. Since the content of the first
+PDRS~($A$) needs to be $\alpha$-converted on the basis of the label of the
+second PDRS ($B$), we introduce an auxiliary PDRS via a function
+$\mathcal{E}$ that creates an empty PDRS with the label of its argument
+PDRS. With this auxiliary PDRS, the desired equivalence can be derived.
+
+With the merge operations in place, we can combine basic (P)DRSs in order to
+form larger meaning representations. In particular the distinction between
+assertive and projective merge in PDRT provides a handle for constructing
+meaning representations that consist of different types of content: asserted
+content and projected content. In the next section, we define unresolved
+structures on the basis of these merge operations, in order to represent
+lexical meaning.
 
 \subsection{Unresolved Structures}
 
