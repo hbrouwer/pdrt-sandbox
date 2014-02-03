@@ -26,11 +26,12 @@ import Data.DRS.Variables (drsRefToDRSVar,drsRelToString)
 
 import Data.PDRS.DataType (PDRS(..), PVar, PRef(..), PDRSRef(..), PCon(..), PDRSRel(..))
 import qualified Data.PDRS.DataType as PDRS
+import Data.PDRS.LambdaCalculus (pdrsPurify)
 import Data.PDRS.Structure
 import Data.PDRS.Translate (stripPVars)
 import Data.PDRS.Variables
 
-import Data.List ((\\), intercalate, nub)
+import Data.List ((\\), intercalate, nub, union)
 import Data.Maybe (fromJust, isNothing)
 
 ---------------------------------------------------------------------------
@@ -194,9 +195,8 @@ ptSubPDRSs (PTable t) = concatMap sub t
 ptAccommodate :: PTable -> PTable
 ptAccommodate pt@(PTable t)
   | null fps  = pt
-  | otherwise = ptAccommodate (ptRenamePVar fp (accSite fp) pt)
+  | otherwise = ptAccommodate (ptRenamePVar (head fps) (accSite (head fps)) pt)
   where fps = ptFreeContexts pt
-        fp  = head fps
         accSite :: PVar -> PVar
         accSite p
           | isNothing m = ptOuterLabel pt
@@ -247,21 +247,21 @@ insertItems ((c,i,a):is) s p
           | st == l    = case c' of
               (MAP (p1,p2))
                 | p1 == p2  -> pdrs
-                | otherwise -> PDRS l (m ++ [(p1,p2)]) u c
-              (Ref r)       -> PDRS l m (u ++ [PRef p' r]) c
-              (Rel r d)     -> PDRS l m u (c ++ [PCon p' (PDRS.Rel r d)])
-              (Neg pv)      -> PDRS l m u (c ++ [PCon p' (PDRS.Neg (PDRS pv [] [] []))])
-              (Imp pv1 pv2) -> PDRS l m u (c ++ [PCon p' (PDRS.Imp (PDRS pv1 [] [] []) (PDRS pv2 [] [] []))])
-              (Or pv1 pv2)  -> PDRS l m u (c ++ [PCon p' (PDRS.Or (PDRS pv1 [] [] []) (PDRS pv2 [] [] []))])
-              (Prop r pv)   -> PDRS l m u (c ++ [PCon p' (PDRS.Prop r (PDRS pv [] [] []))])
-              (Diamond pv)  -> PDRS l m u (c ++ [PCon p' (PDRS.Diamond (PDRS pv [] [] []))])
-              (Box pv)      -> PDRS l m u (c ++ [PCon p' (PDRS.Box (PDRS pv [] [] []))])
+                | otherwise -> PDRS l (m `union` [(p1,p2)]) u c
+              (Ref r)       -> PDRS l m (u `union` [PRef p' r]) c
+              (Rel r d)     -> PDRS l m u (c `union` [PCon p' (PDRS.Rel r d)])
+              (Neg pv)      -> PDRS l m u (c `union` [PCon p' (PDRS.Neg (PDRS pv [] [] []))])
+              (Imp pv1 pv2) -> PDRS l m u (c `union` [PCon p' (PDRS.Imp (PDRS pv1 [] [] []) (PDRS pv2 [] [] []))])
+              (Or pv1 pv2)  -> PDRS l m u (c `union` [PCon p' (PDRS.Or (PDRS pv1 [] [] []) (PDRS pv2 [] [] []))])
+              (Prop r pv)   -> PDRS l m u (c `union` [PCon p' (PDRS.Prop r (PDRS pv [] [] []))])
+              (Diamond pv)  -> PDRS l m u (c `union` [PCon p' (PDRS.Diamond (PDRS pv [] [] []))])
+              (Box pv)      -> PDRS l m u (c `union` [PCon p' (PDRS.Box (PDRS pv [] [] []))])
           | otherwise = PDRS l m u (map (inCon (c',i',p') st) c)
           where inCon :: Item -> PVar -> PCon -> PCon
-                inCon it st pc'@(PCon _ (PDRS.Rel _ _)) = pc'
-                inCon it st (PCon p (PDRS.Neg p1))      = PCon p (PDRS.Neg     (insertItem it st p1))
-                inCon it st (PCon p (PDRS.Imp p1 p2))   = PCon p (PDRS.Imp     (insertItem it st p1) (insertItem it st p2))
-                inCon it st (PCon p (PDRS.Or p1 p2))    = PCon p (PDRS.Or      (insertItem it st p1) (insertItem it st p2))
-                inCon it st (PCon p (PDRS.Prop r p1))   = PCon p (PDRS.Prop r  (insertItem it st p1))
-                inCon it st (PCon p (PDRS.Diamond p1))  = PCon p (PDRS.Diamond (insertItem it st p1))
-                inCon it st (PCon p (PDRS.Box p1))      = PCon p (PDRS.Box     (insertItem it st p1))
+                inCon i s pc@(PCon _ (PDRS.Rel _ _)) = pc
+                inCon i s (PCon p (PDRS.Neg p1))     = PCon p (PDRS.Neg     (insertItem i s p1))
+                inCon i s (PCon p (PDRS.Imp p1 p2))  = PCon p (PDRS.Imp     (insertItem i s p1) (insertItem i s p2))
+                inCon i s (PCon p (PDRS.Or p1 p2))   = PCon p (PDRS.Or      (insertItem i s p1) (insertItem i s p2))
+                inCon i s (PCon p (PDRS.Prop r p1))  = PCon p (PDRS.Prop r  (insertItem i s p1))
+                inCon i s (PCon p (PDRS.Diamond p1)) = PCon p (PDRS.Diamond (insertItem i s p1))
+                inCon i s (PCon p (PDRS.Box p1))     = PCon p (PDRS.Box     (insertItem i s p1))
