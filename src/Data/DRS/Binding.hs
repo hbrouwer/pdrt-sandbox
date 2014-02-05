@@ -45,8 +45,7 @@ drsBoundRef r ld@(DRS lu _) gd@(DRS gu gc)
                 antecedent (Imp d1 d2)   = (r `elem` drsUniverse d1 && isSubDRS ld d2)
                   || (isSubDRS ld d1 && drsBoundRef r ld d1)
                   || (isSubDRS ld d2 && drsBoundRef r ld d2)
-                antecedent (Or d1 d2)    = (r `elem` drsUniverse d1 && isSubDRS ld d2)
-                  || (isSubDRS ld d1 && drsBoundRef r ld d1)
+                antecedent (Or d1 d2)    = (isSubDRS ld d1 && drsBoundRef r ld d1)
                   || (isSubDRS ld d2 && drsBoundRef r ld d2)
                 antecedent (Prop _ d1)   = isSubDRS ld d1 && drsBoundRef r ld d1
                 antecedent (Diamond d1)  = isSubDRS ld d1 && drsBoundRef r ld d1

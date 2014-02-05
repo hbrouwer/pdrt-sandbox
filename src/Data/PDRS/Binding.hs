@@ -120,8 +120,7 @@ pdrsBoundPVar pv lp gp@(PDRS l _ _ c) = pv == pdrsLabel lp || pv == l || any bou
         bound (PCon _ (Imp p1 p2))  = pv == pdrsLabel p1 && isSubPDRS lp p2
           ||  isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
           ||  isSubPDRS lp p2 && pdrsBoundPVar pv lp p2
-        bound (PCon _ (Or p1 p2))   = pv == pdrsLabel p1 && isSubPDRS lp p2
-          ||  isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
+        bound (PCon _ (Or p1 p2))   = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
           ||  isSubPDRS lp p2 && pdrsBoundPVar pv lp p2
         bound (PCon _ (Prop _ p1))  = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
         bound (PCon _ (Diamond p1)) = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
