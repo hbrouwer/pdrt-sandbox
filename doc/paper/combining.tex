@@ -63,17 +63,17 @@ DRS referents) in the first PDRS that overlap with variables in the second
 PDRS.
 
 \begin{definition}[PDRS Assertive Merge]\label{def:amerge}~\\
-Given PDRSs $P_i=\langle \rho_i,M_i,U_i,C_i \rangle$ and
-$P_j=\langle \rho_j,M_j,U_j,C_j \rangle$, the assertive merge between $P_i$
+Given PDRSs $P_i=\langle l_i,M_i,U_i,C_i \rangle$ and
+$P_j=\langle l_j,M_j,U_j,C_j \rangle$, the assertive merge between $P_i$
 and $P_j$ ($P_i + P_j$) is defined as follows:
   \begin{quote}
     $P_i + P_j = 
-      \langle \rho_{j'}, 
-      M_{i}[\rho_i\backslash\rho_{j'}] \cup M_{j'},
-      U_{i}[\rho_i\backslash\rho_{j'}] \cup U_{j'},
-      C_{i}[\rho_i\backslash\rho_{j'}] \cup C_{j'}\rangle$
+      \langle l_{j'}, 
+      M_{i}[l_i\backslash l_{j'}] \cup M_{j'},
+      U_{i}[l_i\backslash l_{j'}] \cup U_{j'},
+      C_{i}[l_i\backslash l_{j'}] \cup C_{j'}\rangle$
   \end{quote}
-  where: $P_{j'} = \langle \rho_{j'}, M_{j'}, U_{j'}, C_{j'} \rangle =$
+  where: $P_{j'} = \langle l_{j'}, M_{j'}, U_{j'}, C_{j'} \rangle =$
       $\mathcal{R}(P_j,P_i)$
 \end{definition}
 
@@ -101,16 +101,16 @@ accessibility between the resulting PDRS and the context created through
 projection, i.e., the label of the projected PDRS.
 
 \begin{definition}[PDRS Projective Merge]\label{def:pmerge}~\\
-Given PDRSs $P_i=\langle \rho_i,M_i,U_i,C_i \rangle$ and 
-$P_j=\langle \rho_j,M_j,U_j,C_j\rangle$, the projective merge between $P_i$
+Given PDRSs $P_i=\langle l_i,M_i,U_i,C_i \rangle$ and 
+$P_j=\langle l_j,M_j,U_j,C_j\rangle$, the projective merge between $P_i$
 and $P_j$ ($P_i \ast P_j$) is defined as follows:
   \begin{quote}
     $P_i \ast P_j = 
-      \langle \rho_{j'}, 
-        M_{i}\cup M_{j'}\cup\{\langle\rho_{j'},\rho_{i}\rangle\}, 
+      \langle l_{j'}, 
+        M_{i}\cup M_{j'}\cup\{\langle l_{j'},l_{i}\rangle\}, 
         U_{i}\cup U_{j'},C_{i} \cup C_{j'}\rangle$
   \end{quote}
-  where: $P_{j'} = \langle \rho_{j'}, M_{j'}, U_{j'}, C_{j'} \rangle =$ 
+  where: $P_{j'} = \langle l_{j'}, M_{j'}, U_{j'}, C_{j'} \rangle =$ 
       $\mathcal{R}(P_j,P_i)$
 \end{definition}
 
@@ -139,16 +139,16 @@ the two PDRS merges, represented in Table~\ref{tab:mergeinteractions}.
   \centering
   \begin{tabular}{| l c l |}
     \hline
-    $A + (B + \Gamma)$ & $=$ & $(A + B) + \Gamma$\\
+    $A + (B + C)$ & $=$ & $(A + B) + C$\\
     \hline
-    $A * (B * \Gamma)$ & $=$ & $(A * B) * \Gamma$\\
+    $A * (B * C)$ & $=$ & $(A * B) * C$\\
     \hline
-    $A * (B + \Gamma)$ & $=$ & $(A * B) + \Gamma$\\
+    $A * (B + C)$ & $=$ & $(A * B) + C$\\
     \hline
-    $A + (B * \Gamma)$ & $=$ & $B * (A + \Gamma) ~~=~~ (B * A) + \Gamma$\\
+    $A + (B * C)$ & $=$ & $B * (A + C) ~~=~~ (B * A) + C$\\
     \hline\hline
-    $(A + B) * \Gamma$ & $=$ &  $(A + \mathcal{E}(B)) * (B * \Gamma)$\\
-                       &&  \textit{where:} $\mathcal{E}(B) = \langle \rho(B), \{\}, \{\}, \{\}\rangle$\\
+    $(A + B) * C$ & $=$ &  $(A + \mathcal{E}(B)) * (B * C)$\\
+                  &&  \textit{where:} $\mathcal{E}(B) = \langle lab(B), \{\}, \{\}, \{\}\rangle$\\
     \hline
   \end{tabular}
 \end{table}

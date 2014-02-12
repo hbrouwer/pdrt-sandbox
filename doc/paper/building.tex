@@ -25,8 +25,8 @@ A Basic DRS is a tuple $\langle \{x_1 ... x_n\},\{\gamma_1 ... \gamma_m\}
   \item $\{x_1 ... x_n\}$ is a finite set of variables;
   \item $\{\gamma_1 ... \gamma_m\}$ is a finite set of DRS conditions (which
     may be either basic or complex);
-  \item\label{def:bDRS:Rel} $R(x_1, ..., x_n)$ is a basic DRS condition,
-    with $x_1 ... x_n$ are variables and $R$ is a relation symbol for an
+  \item\label{def:bDRS:Rel} $R(x_i, ..., x_j)$ is a basic DRS condition,
+    with $x_i ... x_j$ are variables and $R$ is a relation symbol for an
     $n$-place predicate;
   \item $\neg K$, $\Box K$ and $\Diamond K$ are complex DRS conditions, with
     $K$ is a DRS;
@@ -63,21 +63,21 @@ referents associated with a pointer), and a set of projected conditions.
 This is formalized below:
 
 \begin{definition}[Basic PDRS] \label{def:bPDRS}~\\
-A Basic PDRS is a quadruple $\langle \rho, \{\mu_1 ... \mu_n\}, 
-\{\delta_1 ... \delta_m\}, \{\chi_1 ... \chi_l\}\rangle$, where:
+A Basic PDRS is a quadruple $\langle l, \{\mu_1 ... \mu_n\}, 
+\{\delta_1 ... \delta_m\}, \{\chi_1 ... \chi_k\}\rangle$, where:
   \begin{enumerate}[i.]
-    \item $\rho$ is a projection variable;
+    \item $l$ is a projection variable;
     \item $\{\mu_1 ... \mu_n\}$ is a finite set of \MAPs, with $\mu_i=\langle
       v_1,v_2\rangle$, and  $v_1$ and $v_2$ are projection variables;
     \item $\{\delta_1 ... \delta_m\}$ is a finite set of projected
       referents, with $\delta_j=\langle v_j, x_j\rangle$, such that $v_j$ is
       a projection variable, and $x_j$ is a DRS referent;
-    \item $\{\chi_1 ... \chi_l\}$ is a finite set of projected conditions,
-      with $\chi_k = \langle v_k,\gamma_k\rangle$, such that $v_k$ is a
-      projection variable, and $\gamma_k$ is a PDRS condition (which may be
+    \item $\{\chi_1 ... \chi_k\}$ is a finite set of projected conditions,
+      with $\chi_l = \langle v_l,\gamma_l\rangle$, such that $v_l$ is a
+      projection variable, and $\gamma_l$ is a PDRS condition (which may be
       either basic or complex);
-    \item \label{def:bPDRS:Rel} $R(x_1, ..., x_n)$ is a basic PDRS condition,
-      with $x_1 ... x_n$ are variables and $R$ is a relation symbol for an
+    \item \label{def:bPDRS:Rel} $R(x_i, ..., x_j)$ is a basic PDRS condition,
+      with $x_i ... x_j$ are variables and $R$ is a relation symbol for an
       $n$-place predicate;
     \item $\neg P$, $\Box P$ and $\Diamond P$ are complex PDRS conditions,
       with $P$ is a PDRS;
@@ -101,7 +101,7 @@ respectively. This is useful, since in some cases we are interested in the
 entire projected referent/condition, whereas in other cases we need only to
 refer to one of the elements of the tuple. Similarly, we refer to the first
 element of the quadruple representing a PDRS, as the \textit{label} of the
-PDRS (formally, the label of a PDRS $P_i$ is represented as $\rho(P_i)$).
+PDRS (formally, the label of a PDRS $P_i$ is represented as $lab(P_i)$).
 We will refer to labels and pointers together as \textit{projection
 variables}.  Again, we can represent PDRSs using the same representations as
 defined for DRSs: the set-theoretic representation, the box representation
@@ -188,14 +188,14 @@ PDRS-context $\pi_i$ directly subordinates PDRS-context $\pi_j$
     \item $\langle\pi_i,\neg P_j\rangle$,
       $\langle\pi_i,\Box P_j\rangle$,
       or $\langle\pi_i,\Diamond P_j\rangle$ is a projected condition in
-      some PDRS $P_k$, and $\rho(P_j) = \pi_j$;
+      some PDRS $P_k$, and $lab(P_j) = \pi_j$;
     \item $\langle\pi_i,x:P_j\rangle$ is a projected condition in some
-      PDRS $P_k$, for some $x$, and $\rho(P_j) = \pi_j$;
+      PDRS $P_k$, for some $x$, and $lab(P_j) = \pi_j$;
     \item  $\langle\pi_i,P_j \Rightarrow P_{j'}\rangle$ or
       $\langle\pi_i,P_j \vee P_{j'}\rangle$ is a projected condition in
-      some PDRS $P_k$, and $\rho(P_j) = \pi_j$ or $\rho(P_{j'}) = \pi_j$;
+      some PDRS $P_k$, and $lab(P_j) = \pi_j$ or $lab(P_{j'}) = \pi_j$;
     \item There is a PDRS $P_k$, such that $P_i \Rightarrow P_j$ is a PDRS
-      condition in $P_k$, and $\rho(P_i) = \pi_i$ and $\rho(P_j) = \pi_j$.
+      condition in $P_k$, and $lab(P_i) = \pi_i$ and $lab(P_j) = \pi_j$.
     %NB this is about PDRS condition instead of projected condition
   \end{itemize}
 \end{subdefinition}
@@ -206,12 +206,12 @@ respect to $\pi_j$ ($\pi_j \preceq \pi_i$) iff:
   \begin{itemize}
     \item $\pi_j = \pi_i$;
     \item There is some PDRS $P_k$, such that $\pi_i$ is introduced in $P_k$
-      and $\rho(P_k)=\pi_j$;
+      and $lab(P_k)=\pi_j$;
     \item $\langle \pi_j,\pi_i\rangle$ is an element of the set of
       \MAPs~of some PDRS $P_k$;
       %Moet dit nog gekwalificeerd worden? Ziets als:
-      %, such that $\rho(P_k) \leq \pi_j$, and either
-      %$\rho(P_k) \leq \pi_i$, or $\pi_i$ occurs free. % check this def!
+      %, such that $lab(P_k) \leq \pi_j$, and either
+      %$lab(P_k) \leq \pi_i$, or $\pi_i$ occurs free. % check this def!
     \item There exists a $\pi_k$, such that $\pi_j \preceq \pi_k$ and $\pi_k \preceq \pi_i$.
       % identity and transitive closure now duplicate in subordination
       % definition, but necessary for using this sub-definition separately.
@@ -223,15 +223,24 @@ respect to $\pi_j$ ($\pi_j \preceq \pi_i$) iff:
 The $\leq$-relation creates a partial order over all PDRS-contexts. This
 results in a directed graph, called the \textit{Accessibility Graph}, over
 all PDRS-contexts in a given PDRS. We will call a PDRS whose accessibility
-graph is weakly connected,\footnote{A directed graph $G$ is weakly connected
-iff for all pairs of vertices ($v_1$,$v_2$) in $G$ it holds that if all
-directed edges in $G$ are replaced by undirected edges, then there is a path
-between $v_1$ and $v_2$.} a \emph{connected} PDRS. All basic PDRSs are
-connected PDRss, because projection variables either occur free (in which
-case they are accessible from their introduction site), or are bound by some
-sub-PDRS, which is necessarily accessible from the global PDRS. We will see
-that unresolved structures, introduced below, may result in accessibility
-graphs that consist of multiple non-connected components.
+graph is weakly connected, a \emph{connected} PDRS:
+
+\begin{definition}[Connectedness]~\\
+  A PDRS $P$ is connected iff:
+  \begin{itemize}
+    \item The projection graph $G_P$ of $P$ is weakly connected, i.e., for
+      all pairs of vertices ($v_1$,$v_2$) in $G_P$ it holds that if all
+      directed edges in $G_P$ are replaced by undirected edges, then there is
+      a path between $v_1$ and $v_2$.  
+  \end{itemize}
+\end{definition}
+
+\noindent All basic PDRSs are connected PDRss, because projection variables
+either occur free (in which case they are accessible from their introduction
+site), or are bound by some sub-PDRS, which is necessarily accessible from
+the global PDRS. We will see that unresolved structures, introduced below,
+may result in accessibility graphs that consist of multiple non-connected
+components.
 %XXX unresolved Merges may result in a non-connected graph (but then watch
 %out for accidental bindings!)
 %%XXX Define properly in Sandbox 
@@ -281,21 +290,27 @@ Projection variable $v$, introduced in PDRS $P_i$, is bound iff:
 \begin{quote}
 There exists a PDRS $P_j$, such that
 \begin{enumerate}[i.]
-  \item $\rho(P_i) \leq \rho(P_j)$; 
-  \item $v = \rho(P_j)$.
+  \item $lab(P_i) \leq lab(P_j)$; 
+  \item $v = lab(P_j)$.
 \end{enumerate}
 \end{quote}
 \end{definition}
 
 \begin{definition}[PDRS Free projection variables]~
   \begin{enumerate}[i.]
-    \item $FPV(\langle l, M, U, C \rangle) = (\bigcup_{m\in M} FPV(m) \cup \bigcup_{u\in U} FPV(u) \cup \bigcup_{c\in C} FPV(c)) - \{l\}$
+    \item $FPV(\langle l, M, U, C \rangle) 
+      = (\bigcup_{m\in M} FPV(m) \cup \bigcup_{u\in U} FPV(u) 
+      \cup \bigcup_{c\in C} FPV(c)) - \{l\}$
     \item $FPV(\langle p_1, p_2\rangle) = \{p_1, p_2\}$
     \item $FPV(\langle p, r\rangle) = \{p\}$
     \item $FPV(\langle p, R(...)\rangle) = \{p\}$
-    \item $FPV(\langle p,\neg K\rangle) = FPV(\langle p,\Diamond K\rangle) = FPV(\langle p,\Box K\rangle) = FPV(\langle p,x:K\rangle) = \{p\} \cup FPV(K)$
-    \item $FPV(\langle p,K_1 \Rightarrow K_2\rangle) = \{p\}\cup FPV(K_1) \cup (FPV(K_2) - \rho(K_1))$
-    \item $FPV(\langle p,K_1 \vee K_2\rangle) = \{p\}\cup FPV(K_1) \cup FPV(K_2)$
+    \item $FPV(\langle p,\neg K\rangle) = FPV(\langle p,\Diamond K\rangle)
+      = FPV(\langle p,\Box K\rangle) = FPV(\langle p,x:K\rangle) 
+      = \{p\} \cup FPV(K)$
+    \item $FPV(\langle p,K_1 \Rightarrow K_2\rangle) 
+      = \{p\}\cup FPV(K_1) \cup (FPV(K_2) - lab(K_1))$
+    \item $FPV(\langle p,K_1 \vee K_2\rangle) 
+      = \{p\}\cup FPV(K_1) \cup FPV(K_2)$
   \end{enumerate}
 \end{definition}
 
@@ -308,11 +323,11 @@ and may therefore be projected, the accessibility of antecedents should not
 be determined on the basis of the PDRS in which a referent is introduced,
 but by where it is interpreted. Thus, a projected referent is bound in case
 there exists some referent pointing to an accessible context in any universe
-in the global PDRS. Since by definition the interpretation context of some semantic
-content is accessible from its context of introduction, it follows from this
-definition that the projection context of the antecedent is also accessible
-from the introduction site of the projected referent ($\rho(P_i) \leq
-\pi_j$). 
+in the global PDRS. Since by definition the interpretation context of some
+semantic content is accessible from its context of introduction, it follows
+from this definition that the projection context of the antecedent is also
+accessible from the introduction site of the projected referent ($lab(P_i)
+\leq \pi_j$). 
 
 \begin{definition}[PDRS bound projected referent]~\\
 Projected referent $\langle p,r\rangle$, introduced in PDRS $P_i$, is bound
@@ -321,8 +336,8 @@ in global PDRS $P$ iff:
 There exists a PDRS-context $\pi_j \in PVars(P)$, such that
 \begin{enumerate}[i.]
   \item $p \leq \pi_j$; 
-%  \item $\rho(P_i) \leq \pi_j$; 
-    %XXX is this by definition true, since $\rho(P_i) \leq p$ (given a
+%  \item $lab(P_i) \leq \pi_j$; 
+    %XXX is this by definition true, since $lab(P_i) \leq p$ (given a
     %connected PDRS)?
   \item There exists some PDRS $P_j$, such that 
     $\langle \pi_j,r\rangle \in U(P_j)$.
@@ -422,8 +437,14 @@ these into account for creating possible bound projection referents.
       \end{enumerate}
 \end{subdefinition}
 
-
-Now we can define several properties:
+Based on the definitions of free and bound variables, we can define several
+properties of DRSs and PDRSs. Firstly, a (P)DRS without any free discourse
+referents is called a \textit{proper} (P)DRS. In general, a (P)DRS
+representing a complete sentence or preposition will be proper, meaning that
+none of the referents remain underspecified. As we will see in
+Section~\ref{sec:unresolved}, unresolved structures representing lexical
+items may contain (P)DRSs that are not (yet) proper, thus containing free
+referents.
 
 \begin{definition}[Properness]~\\
 A DRS $K$/PDRS $P$ is proper iff:
@@ -432,16 +453,42 @@ A DRS $K$/PDRS $P$ is proper iff:
 \end{itemize}
 \end{definition}
 
+In PDRT, we have defined free and bound referents, as well as free and bound
+projection variables. This provides us with an extra level of information
+about the projective properties of PDRSs. In particular, a PDRS without any
+free projection variables does not contain any unresolved presuppositions,
+which we will call a \textit{non-presuppositional} or \textit{simple} PDRS.
 
 \begin{definition}[Simpleness]~\\
-A PDRS $P$ is simple (i.e., non-presuppositional) iff
+A PDRS $P$ is simple iff
 \begin{itemize}
   \item $P$ does not contain any free pointers: $FPV(P) = \emptyset$.
 \end{itemize}
 \end{definition}
 
+\noindent Note that in a simple PDRS not all content needs to be asserted;
+some pointers may be bound by labels of accessible contexts. Thus, we can
+also define a property that describes PDRSs with only asserted content, we
+will call these  \textit{projectionless}, or \textit{plain} PDRSs.
+%or: settled
 
-\begin{definition}[Pureness]~\\
+\begin{definition}[Plainness]
+A PDRS $P$ is plain iff
+\begin{itemize}
+  \item All projection variables in $P$ are locally accommodated.
+\end{itemize}
+\end{definition}
+
+\noindent Following these definitions, all plain PDRSs are simple PDRSs, but
+not all simple PDRSs are plain. Simple, non-plain PDRSs are those PDRSs in
+which some content is accommodated at a higher level, but not presupposed
+(also referred to as \textit{intermediate accommodation}).%illustrate?
+
+Finally, the property of \emph{purity} refers to the occurrence of duplicate
+uses of variables. In DRT, if a variable occurs as DRS referent in multiple
+accessible universes, this may result in ambiguous bindings. %%%
+
+\begin{definition}[Purity]~\\
 A DRS $K$/PDRS $P$ is pure iff:
 \begin{itemize}
   \item $K$/$P$ does not contain any otiose declarations of (projection) variables
@@ -450,7 +497,7 @@ A DRS $K$/PDRS $P$ is pure iff:
       \item For all $K_1$, $K_2$, such that $K_2 \leq K_1 \leq K$: 
         $U(K_2) \cap (U(K_1) \cup FV(K)) = \emptyset$
       \item For all $P_1$, $P_2$, such that $P_2 \leq P_1 \leq K$: 
-        $\{\rho(P_2)\} \cap (\{\rho(P_1)\} \cup FPR(P)) = \emptyset$
+        $\{lab(P_2)\} \cap (\{lab(P_1)\} \cup FPR(P)) = \emptyset$
     \end{itemize}
 \end{itemize}
 \end{definition}
