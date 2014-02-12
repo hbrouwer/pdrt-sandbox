@@ -15,6 +15,8 @@ module Data.PDRS.Properties
   isProperPDRS
 , isPurePDRS
 , isPresupPDRS
+, isSimplePDRS
+, isPlainPDRS
 , pdrsIsDifferentNP
 , pdrsIsSameNP
 ) where
@@ -39,7 +41,6 @@ import Data.PDRS.Variables
 --
 --  * @p@ does not contain any free referents
 ---------------------------------------------------------------------------
-
 isProperPDRS :: PDRS -> Bool
 isProperPDRS p = isProperSubPDRS p p
   where isProperSubPDRS (LambdaPDRS _) _      = True
@@ -62,7 +63,6 @@ isProperPDRS p = isProperSubPDRS p p
 --
 --  * @p@ does not contain any duplicate (otiose) variables
 ---------------------------------------------------------------------------
-
 isPurePDRS :: PDRS -> Bool
 isPurePDRS p = p == pdrsPurify p
 
@@ -74,10 +74,34 @@ isPurePDRS p = p == pdrsPurify p
 --  * @p@ contains free pointers
 ---------------------------------------------------------------------------
 isPresupPDRS :: PDRS -> Bool
-isPresupPDRS (LambdaPDRS {}) = False
-isPresupPDRS (AMerge p1 p2)  = isPresupPDRS p1 || isPresupPDRS p2
-isPresupPDRS (PMerge {})     = True
-isPresupPDRS p@(PDRS {})     = any (`pdrsIsFreePVar` p) (pdrsPVars p)
+isPresupPDRS (LambdaPDRS{}) = False
+isPresupPDRS (AMerge p1 p2) = isPresupPDRS p1 || isPresupPDRS p2
+isPresupPDRS (PMerge{})     = True
+isPresupPDRS p@(PDRS{})     = any (`pdrsIsFreePVar` p) (pdrsPVars p)
+
+isSimplePDRS :: PDRS -> Bool
+isSimplePDRS = not . isPresupPDRS
+
+---------------------------------------------------------------------------
+-- | Returns whether a 'PDRS' is /plain/, where:
+--
+-- [A 'PDRS' @p@ is plain /iff/]
+--
+--  * all projection pointers in @p@ are locally bound
+---------------------------------------------------------------------------
+isPlainPDRS :: PDRS -> Bool
+isPlainPDRS (LambdaPDRS{}) = True
+isPlainPDRS (AMerge p1 p2) = isPlainPDRS p1 && isPlainPDRS p2
+isPlainPDRS (PMerge{})     = False
+isPlainPDRS (PDRS l _ u c) = all (\(PRef p _) -> p==l) u && all plain c
+  where plain :: PCon -> Bool
+        plain (PCon p (Rel{}))      = p==l
+        plain (PCon p (Neg p1))     = p==l && isPlainPDRS p1
+        plain (PCon p (Imp p1 p2))  = p==l && isPlainPDRS p1 && isPlainPDRS p2
+        plain (PCon p (Or p1 p2))   = p==l && isPlainPDRS p1 && isPlainPDRS p2
+        plain (PCon p (Prop _ p1))  = p==l && isPlainPDRS p1
+        plain (PCon p (Diamond p1)) = p==l && isPlainPDRS p1
+        plain (PCon p (Box p1))     = p==l && isPlainPDRS p1
 
 ---------------------------------------------------------------------------
 -- | Disjoins 'unresolved PDRS' @n1@ from 'unresolved PDRS' @n2@.
