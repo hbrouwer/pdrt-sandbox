@@ -29,7 +29,7 @@ import Data.PDRS.ProjectionGraph
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 
-import Data.List (delete, intersect, nub, partition, union)
+import Data.List (intersect, nub, partition, union)
 
 ---------------------------------------------------------------------------
 -- * Exported
@@ -326,7 +326,7 @@ unboundDupPRefs (PMerge p1 p2)    gp eps = (eps2,dps1 ++ dps2)
         (eps2,dps2) = unboundDupPRefs p2 gp eps1
 unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
   where (eps1,dps1) = dups c (eps ++ uu)
-        uu = unboundPRefs u
+        uu = filter (\pr -> not (pdrsPBoundPRef pr lp gp)) u
         -- | Returns whether 'PRef' @pr@ is /duplicate/ wrt a list of 'PRef's.
         dup :: PRef -> [PRef] -> Bool
         dup _ []                                       = False
@@ -340,7 +340,7 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
         dups [] eps = (eps,[])
         dups (PCon p (Rel _ d):pcs)    eps = (eps2,dps1 ++ dps2)
           where (eps2,dps2) = dups pcs (eps ++ upd)
-                upd  = unboundPRefs $ map (PRef p) d
+                upd  = filter (\pr -> not (pdrsPBoundPRef pr lp gp)) (map (PRef p) d)
                 dps1 = filter (`dup` eps) upd
         dups (PCon p (Neg p1):pcs)     eps = (eps2,dps1 ++ dps2)
           where (eps1,dps1) = unboundDupPRefs p1 gp eps
@@ -356,19 +356,16 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
         dups (PCon p (Prop r p1):pcs)  eps = (eps3,dps1 ++ dps2 ++ dps3)
           where (eps1,dps1) = unboundDupPRefs p1 gp eps
                 (eps2,dps2) = dups pcs eps1
-                (eps3,dps3) = (eps2 ++ unboundPRefs [pr],filter (`dup` eps) [pr])
-                pr          = PRef p r
+                (eps3,dps3) = (eps2 ++ pr,filter (`dup` eps) pr)
+                  where pr
+                          | pdrsPBoundPRef (PRef p r) lp gp = []
+                          | otherwise                       = [PRef p r]
         dups (PCon p (Diamond p1):pcs) eps = (eps2,dps1 ++ dps2)
           where (eps1,dps1) = unboundDupPRefs p1 gp eps
                 (eps2,dps2) = dups pcs eps1
         dups (PCon p (Box p1):pcs)     eps = (eps2,dps1 ++ dps2)
           where (eps1,dps1) = unboundDupPRefs p1 gp eps
                 (eps2,dps2) = dups pcs eps1
-        -- | Returns whether a referent is bound by some other referent
-        -- than itself.
-        unboundPRefs :: [PRef] -> [PRef]
-        unboundPRefs prs = snd $ partition (\pr ->
-          any (flip (pdrsPRefBoundByPRef pr lp) gp) (delete pr (pdrsUniverses gp))) prs
 
 ---------------------------------------------------------------------------
 -- | Returns whether a 'PRef' @pr@ is /independent/ based on a list of

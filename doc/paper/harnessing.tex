@@ -13,8 +13,7 @@
 \usepackage{amssymb}
 \usepackage{verbatim}%for comment command
 
-% why doesn't this work:
-\newtheorem{subdefinition}[theorem]{Definition}
+\newtheorem{subdefinition}{Definition}[theorem]
 \renewcommand{\thesubdefinition}{\thedefinition\alph{subdefinition}}
 
 %%%%% Macro's %%%%%
@@ -35,7 +34,7 @@
 
 \newcommand{\flatdrs}[2]
 {
-  \hspace{-8pt}\begin{tabular}[t]{l}[#1$|$#2]\end{tabular}\hspace{-8pt}
+  \hspace{-8pt}\begin{tabular}[t]{l}[#1~$|$~#2]\end{tabular}\hspace{-8pt}
 }
 
 \newcommand{\pdrs}[4]
@@ -56,7 +55,7 @@
 
 \newcommand{\flatpdrs}[4]
 {
-  \hspace{-3pt}#1:\hspace{-5pt}\begin{tabular}[t]{l}[#2$|$#3$|$#4]\end{tabular}\hspace{-8pt}
+  \hspace{-3pt}#1:\hspace{-5pt}\begin{tabular}[t]{l}[#2~$|$~#3~$|$~#4]\end{tabular}\hspace{-8pt}
 }
 
 \newcommand{\MAPs}{\textsc{map}s}
@@ -66,15 +65,16 @@
 %%%% Begin Document %%%%
 \begin{document}
 
-\title{Harnessing Projection: A formal implementation of 
+\title{Harnessing Projection: An implementation of 
   Projective Discourse Representation Theory}
 
-%\author{Noortje J. Venhuizen$^*$ \email{n.j.venhuizen@rug.nl}\\
-%{\normalsize \bf Johan Bos}$^*$ \email{johan.bos@rug.nl}\\
-%{\normalsize \bf Harm Brouwer}$^{*,**}$ \email{harm.brouwer@rug.nl}\\
-%\AND \addr{$^*$CLCG, University of Groningen, Groningen, The Netherlands}
-%\AND \addr{$^{**}$BCN, University of Groningen, Groningen, The Netherlands}
-%}
+\author{Noortje J. Venhuizen$^*$ \email{n.j.venhuizen@rug.nl}\\
+{\normalsize \bf Johan Bos}$^*$ \email{johan.bos@rug.nl}\\
+{\normalsize \bf Petra Hendriks}$^*$ \email{p.hendriks@rug.nl}\\
+{\normalsize \bf Harm Brouwer}$^{*,**}$ \email{harm.brouwer@rug.nl}\\
+\AND \addr{$^*$CLCG, University of Groningen, Groningen, The Netherlands}
+\AND \addr{$^{**}$BCN, University of Groningen, Groningen, The Netherlands}
+}
 
 \maketitle
 \thispagestyle{empty}
@@ -92,7 +92,9 @@
 
 \input{building}
 
-\input{operations}
+\input{combining}
+
+\input{translating}
 
 \input{playing}
 

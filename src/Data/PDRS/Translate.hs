@@ -60,7 +60,7 @@ movePContent :: PDRS -> PDRS -> PDRS -> PDRS
 movePContent lp@(LambdaPDRS _) _ _  = lp
 movePContent (AMerge p1 p2)    p gp = movePContent p2 (movePContent p1 p gp) gp
 movePContent (PMerge p1 p2)    p gp = movePContent p2 (movePContent p1 p gp) gp
-movePContent (PDRS _ _ u c)    p gp = move c (insertPRefs u p gp)
+movePContent (PDRS _ _ u c)    p gp = move c $ insertPRefs (filter (\r -> not (pdrsPBoundPRef r p gp)) u) p gp
   where move :: [PCon] -> PDRS -> PDRS
         move [] p                          = p
         move (pc@(PCon _ (Rel _ _)):pcs) p = move pcs (insertPCon pc p gp)
