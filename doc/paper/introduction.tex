@@ -1,70 +1,264 @@
-\section{Introduction}
+\section{Introduction}\label{sec:introduction}
 
-Semantic frameworks aim to be wide coverage, as well as formally adequate.
-DRT: one of the most influential.
-
-Formally well-defined: model-theoretic backbone
-\cite{kamp1981theory,kamp1993discourse}, compositional construction
-\cite{muskens1996combining}.
-
-Wide coverage: anaphora, tense \cite{kamp1981theory}, quantification \&
-plurality \cite{kamp1993discourse}, attitude reports
-\cite{asher1986belief,asher1989belief,zeevat1996neoclassical,maier2009presupposing}
-discourse structure \cite{asher2003logics}, and presupposition
-\cite{sandt1992presupposition,kamp1994drs,krahmer1998presupposition,geurts1999presuppositions}
-
-We have proposed a novel treatment of presupposition in which it is treated
-as part of a larger class of projection phenomena, does not require
-a two-stage resolution strategy, and distinction between asserted and
-projected content (i.e., explicit information structure): PDRT
-\cite{venhuizen2013iwcs}.  Pointers indicate interpretation site. Can be
-shown to account for various projection phenomena.  However, adding
-projection pointers affects fundamental aspects of DRT non-trivially:
-accessibility, binding, construction. 
+The semantic property of projection, traditionally associated with
+presuppositions, has challenged many structure-driven formal semantic
+analyses. Linguistic content is said to project if it is interpreted outside
+the scope of an operator that syntactically subordinates it. This happens,
+for example, if a presupposition-triggering expression is introduced within
+the scope of a negation: in the sentence ``\textit{It is not the case that
+the man is happy}'' the definite noun phrase ``\textit{the man}''
+syntactically occurs inside the scope of the negation, but it is interpreted
+as if occurring outside of its scope (corresponding to the reading: $\exists
+x(man(x) \wedge \neg happy(x))$). This behaviour has often been treated as
+a deviation from standard meaning construction, despite the prevalence of
+expressions exhibiting it. Therefore, we have proposed a formalism that
+centralizes the property of projection as a strategy for integrating
+material into the foregoing context. The formalism is called Projective
+Discourse Representation Theory \citeaffixed{venhuizen2013iwcs}{PDRT;}, and
+is an extension of Discourse Representation Theory
+\cite{kamp1981theory,kamp1993discourse}. In PDRT, presuppositions are
+treated as part of a larger class of \textit{projection phenomena}
+\citeaffixed{simons2010projects}{cf.}, including anaphora and conventional
+implicatures \cite{potts2005logic}. By associating linguistic material with
+a \textit{pointer} to indicate the interpretation site, an explicit
+distinction is made between the surface form of an utterance, and its
+logical interpretation. The analysis can be shown to account for various
+projection phenomena \citeaffixed{venhuizen2014salt}{e.g., conventional
+implicatures;}. Crucially, however, adding projection pointers to all
+linguistic material affects the formal properties of DRT non-trivially; the
+occurrence of projected material at the interpretation site results in
+non-hierarchical variable binding, and violates the traditional DRT notion
+of accessible contexts, thereby compromising the basic construction
+procedure.
 
 In this paper, we will describe the formal implications of extending DRT
 with projection pointers. After briefly describing the motivation behind
-this DRT extension in Section~\ref{sec:background}, we systematically
-derive the formal definitions of PDRT from the DRT definitions for building
-and combining structures, and show where they diverge
-(Sections~\ref{sec:building} and~\ref{sec:combining}).  By providing
-a translation from PDRT to DRT in Section~\ref{sec:translating}, we show
-that PDRT inherits all formal interpretive properties of DRT, together with
-its inference mechanisms.  We introduce an implementation of DRT and PDRT,
-called \textsc{pdrt-sandbox}, which implements all these definitions, and
-provides a full-fledged toolkit for use in NLP applications. In
-Section~\ref{sec:playing}, we offer some directions for applying the
-formalism and implementation. Finally, Section~\ref{sec:conclusions}
-concludes the paper.
+this DRT extension, we systematically derive the formal definitions of PDRT
+from the DRT definitions for building and combining structures, and show
+where they diverge (Sections~\ref{sec:building} and~\ref{sec:combining}). By
+providing a translation from PDRT to DRT in Section~\ref{sec:translating},
+we show that PDRT inherits all formal interpretive properties of DRT,
+together with its inference mechanisms.  We introduce an implementation of
+DRT and PDRT, called \textsc{pdrt-sandbox}, which implements all these
+definitions, and provides a full-fledged toolkit for use in NLP
+applications. In Section~\ref{sec:playing}, we offer some directions for
+applying the formalism and implementation. Finally,
+Section~\ref{sec:conclusions} concludes the paper.
+
+\subsection{Discourse Representation Theory}
+
+In the dynamic semantic framework of Discourse Representation Theory
+\citeaffixed{kamp1993discourse}{DRT;}, the meaning of a discourse is
+represented by means of recursive structures called `Discourse
+Representation Structures' (DRSs). A DRS consists of a set of discourse
+referents and a set of conditions on these referents. Conditions may be
+either \textit{basic}, reflecting a property or a relation between
+referents, or \textit{complex}, reflecting logical structure introduced by
+semantic operators such as negation, implication, and modal operators. DRSs
+are often visualized using a box-representation, with the set of referents
+appearing in the top of the box, and the set of conditions on these
+referents below.  Example \Next shows the DRS of a donkey sentence
+\citeaffixed{geach1962reference}{adapted from}. This example shows a DRS
+with a single complex condition representing an implication, which itself
+consists of two embedded DRSs, the first containing two referents and a set
+of three basic conditions, and the second containing a single basic
+condition.
+
+\ex. If a farmer owns a donkey, he feeds it.\\\hspace*{-0.2cm}
+  \drs{}{
+    \drs{x~~y}{farmer(x)\\ donkey(y)\\ own(x,y)}
+    $\Rightarrow$
+    \drs{}{feed(x,y)}}
+
+Each (embedded) DRS can be seen as representing an \textit{context},
+together reflecting the logical form of the discourse. Crucially, anaphoric
+binding of referents is determined on the basis of the accessibility between
+contexts; in the example above, the antecedent DRS of the implication is
+accessible from the consequent DRS, and as a result the variables introduced
+by the pronouns become bound by the referents introduced in the antecedent
+DRS. 
+
+The straightforward analysis of anaphora was one of the main motivations
+behind the development of DRT \cite{kamp1981theory,heim1982semantics}, but
+it has been shown that the framework can account for a wide range of other
+linguistic phenomena, including: tense \cite{kamp1981theory}, quantification
+\& plurality \cite{kamp1993discourse}, attitude reports
+\cite{asher1986belief,asher1989belief,zeevat1996neoclassical,maier2009presupposing}
+discourse structure \cite{asher2003logics}, and presupposition
+\cite{sandt1992presupposition,krahmer1998presupposition,geurts1999presuppositions}.
+While illustrating the flexibility the framework, the analysis of
+presuppositions in particular also emphasizes some limitations of the
+framework. Next we will describe this analysis and motivate the proposed
+extension to DRT, which was developed in particular to account for what we
+call projection phenomena.
+
+\subsection{Beyond the surface structure}
+
+In the DRT framework \textit{form} determines \textit{interpretation}, that
+is, the context in which some content is introduced determines how it is
+interpreted. Thus, if some content occurs within the (syntactic) scope of,
+for example, an implication or a negation in the linguistic surface form, it
+will be interpreted within the logical scope of this operator. This tight
+correspondence between form and meaning challenges a parsimonious account of
+presuppositions and other \textit{projection phenomena}
+\citeaffixed{potts2005logic}{e.g., conventional implicatures; cf.}, as these
+are generally interpreted outside the logical scope of any operator that
+embeds them \citeaffixed[for an overview]{simons2010projects}{see}.  That
+is, replacing the indefinite noun phrase `a farmer' in example \Last by the
+proper name `John' does not just imply replacing the predicate in the
+associated DRS, but it requires moving the referent and condition describing
+`John' to outside the scope of the implication in order to obtain the
+appropriate interpretation: there exists some person named `John', for whom
+it holds that if he owns a donkey, then he feeds it.  This process of
+resolving presuppositions in DRT was formalized by
+\citeasnoun{sandt1992presupposition}. In the account that has become known
+as `binding and accommodation theory'
+\cite{geurts1999presuppositions,beaver2002presupposition,bos2003implementing},
+\citename{sandt1992presupposition} treats presupposition projection as
+a variety of anaphora resolution: a presupposition first occurs marked at
+its introduction site, and after discourse construction it is either
+\textit{bound} to an accessible antecedent, or \textit{accommodated} at an
+accessible context. This is illustrated in example \Next, where the
+presupposition triggered by the proper name `John' yet needs to be resolved
+in Stage I \Next[a], and has been accommodated to the global context in
+Stage II \Next[b].
+
+\begin{flushleft}
+\begin{minipage}{0.85\linewidth}
+\begin{multicols}{2}
+\ex. If John owns a donkey, he feeds it.
+\a.Stage I\\\hspace*{-0.2cm}{
+  \drs{}{
+    \drs{y}{donkey(y)\\ own(x,y)\\ \begin{tabular}{l}\noalign{\smallskip}
+        \begin{tabular}{:l:} \hdashline x\\\hdashline John(x)\\\hdashline 
+       \end{tabular}\smallskip\end{tabular}}
+    $\Rightarrow$
+    \drs{}{feed(x,y)}}
+  }
+  \b.\vspace*{0.1cm}Stage II\\\hspace*{-0.2cm}{
+  \drs{x}{John(x)\\
+    \drs{y}{donkey(y)\\ own(x,y)}
+    $\Rightarrow$
+    \drs{}{feed(x,y)}}
+  }
+
+\end{multicols}
+\end{minipage}\\
+\end{flushleft}
+
+\noindent Although the algorithm proposed by binding and accommodation
+theory results in representations with the desired interpretation for
+presuppositions, the process of arriving at this interpretation, as well as
+the obtained representations, are not completely satisfactory. Firstly, the
+two-stage process of deriving the representations is at odds with
+a compositional construction procedure for DRSs, as presuppositions are only
+resolved \textit{after} discourse construction, and the intermediate
+representations with unresolved DRSs are ill-defined with respect to formal
+properties like accessibility and variable binding. Secondly, since in the
+final representations no distinction can be made between asserted and
+presupposed content, the information structure of the discourse becomes
+obliterated \cite{kracht1994logic,krahmer1998presupposition}.
+
+%, and distinction between asserted and
+%projected content (i.e., explicit information structure)
+
+In order to provide a parsimonious account of presuppositions, as part of
+the larger class of projection phenomena, we have proposed an extension to
+DRT, called Projective DRT \citeaffixed{venhuizen2013iwcs}{PDRT;}. In PDRT,
+an explicit distinction is made between the context in which some linguistic
+content is \textit{introduced}, and where it is \textit{interpreted},
+reflecting the separation between linguistic surface form and
+truth-conditional interpretation.
+
+\subsection{Projective DRT}
+
+The representation structures in Projective DRT are called PDRSs, and each
+PDRS introduces a \textit{label} that can be used as an identifier
+\citeaffixed{asher2003logics}{similar to the context identifiers implicitly
+assumed by other DRT extensions, for example SDRT;}.  All referents and
+conditions of a PDRS are associated with a \textit{pointer}, which is used
+to indicate in which context the material is \textit{interpreted} by means
+of binding the pointer to a context label.  In the default case, the pointer
+is bound by the label of the PDRS in which the content is introduced, thus
+indicating asserted material which is interpreted locally. In the case of
+projected material, however, the content should be interpreted in some
+higher context; this is indicated by either binding the pointer to an
+accessible PDRS label, or by means of a free pointer. Pointing to a higher
+PDRS means that the content is interpreted within the context of that PDRS.
+In case the pointer occurs free, no interpretation site has been determined
+yet; the pointer may still become bound during discourse construction, or it
+may remain free, which means that the content needs to be accommodated. 
+%%betere overgang
+The context indicated by a free pointer needs to be accessible from the
+context in which it is introduced.  To formalize this, PDRSs are enhanced
+with a set of \MAPs: Minimally Accessible Projection contexts, which are
+basically tuples describing pairs of subordinating contexts
+\citeaffixed{reyle1993dealing,reyle1995reasoning}{cf.}. This additional
+level of information also allows for the incorporation of other constrains
+between (projected) contexts, such as those posed by embedded
+presuppositions. 
+
+Example \Next[a] shows the PDRS of a sentence with only asserted content,
+and \Next[b] shows a PDRS with a presupposition.  The labels introduced by
+the PDRSs are shown on top of each PDRS, and the pointers associated with
+referents and conditions are indicated using the $\gets$-operator. The
+\MAPs~are shown below the conditions of a PDRS, where the context indicated
+by the free pointer needs to be accessible from the current context.
+
+\begin{flushleft}
+\begin{minipage}{0.85\linewidth}
+\begin{multicols}{2}
+\ex. \a. Nobody sees any man.\\\hspace*{-0.3cm}{
+  \pdrs{1}{}{
+    $1\gets\neg$\pdrs{2}{$2\gets x, 2\gets y$}{
+      $2\gets$person($x$)\\ $2\gets$man($y$)\\ $2\gets$see($x,y$)
+    }{}
+  }{}
+}
+\b. Nobody sees John.\\\hspace*{-0.3cm}{
+  \pdrs{1}{}{
+    $1\gets\neg$\pdrs{2}{$2\gets x, 5\gets y$}{
+      $2\gets$person($x$)\\ $5\gets$John($y$)\\ $2\gets$see($x,y$)
+    }{$2 \leq 5$}
+  }{}
+}
+
+\end{multicols}
+\end{minipage}\\
+\end{flushleft}
+
+\noindent In \Last[a], all pointers are bound by their local PDRS, meaning
+that all material is accommodated locally.  This representation is identical
+to the standard DRT representation of this sentence, except for the addition
+of labels to PDRSs and pointers to all referents and conditions. In
+\Last[b], on the other hand, the proper name ``John'' triggers
+a presupposition about the existence of someone called `John'. The pointer
+occurs free, meaning that no antecedent has been found yet. In case no
+further context becomes available, the interpretation site can be determined
+based on different heuristics. For example, the pragmatic constraints
+proposed by \citeasnoun{sandt1992presupposition} may be applied, resulting
+in a reading where the presupposition is globally accommodated. 
+%%%Explain!
+%According to \citeasnoun{sandt1992presupposition} determining an
+%appropriate accommodation site depends on several essentially pragmatic
+%constraints, such as informativity and consistency.  Two important semantic
+%(i.e., logical?) constraints are that the interpretation site is accessible
+%from the introduction site, and that not variables become free after
+%projection XXX account not dependent on this analysis
+
+So, instead of physically moving semantic material on the representation
+level to the context of interpretation, as in
+\possessivecite{sandt1992presupposition} account, projection is realized by
+setting a variable equation between pointers and context labels.  This
+allows for a compositional treatment of projection phenomena that does not
+assume a two-stage resolution algorithm.  Moreover, the resulting semantic
+representation stays close to the linguistic surface structure, making it
+easy to evaluate.  Only at the interpretation stage, i.e., when providing
+a model-theoretic interpretation of the representation structures, the
+content needs to be moved to its accommodation site in order to obtain the
+desired interpretation.
+%%%XXX
 
 
 
 
-
-%Presuppositions are a fundamental aspect of linguistic meaning since they
-%relate the content of an utterance to the unfolding discourse. A definite
-%description like ``the man'', for example, introduces a male discourse
-%entity that is salient in the current discourse context.  Yet, in many
-%formal semantic accounts, these phenomena have been treated as deviations
-%from standard meaning construction, e.g., by resolving them only in
-%a second step of processing \cite{sandt1992presupposition}. This is
-%unsatisfactory for a number of reasons, mainly because it precludes an
-%incremental compositional treatment of projection phenomena such as
-%presuppositions.  Therefore, we have recently proposed Projective DRT
-%(PDRT), which builds upon the widely used Discourse Representation Theory
-%\cite{kamp1981theory,kamp1993discourse}.  PDRT deals with projected content
-%during discourse construction, without losing any information about where
-%information is introduced or interpreted \cite{venhuizen2013iwcs}.
-
-%In order to evaluate its properties and applications, we implemented PDRT as
-%a Haskell library, called \textsc{pdrt-sandbox}. This library includes machinery
-%for representing PDRSs, as well as traditional DRSs, a translation from PDRT
-%to DRT and FOL, and the different types of merge operations for (P)DRSs.
-%Unresolved structures with lambda-abstractions \cite{muskens1996combining} are
-%implemented as pure Haskell functions by exploiting Haskell's
-%lambda-theoretic foundations. Several (P)DRS representations can be chosen
-%as target output, including the well-known box-representations,
-%a set-theoretic notation and flat, non-recursive, table-structures.
-%\textsc{pdrt-sandbox} provides a comprehensive toolkit for use in NLP applications,
-%and paves way for a more thorough understanding of the behaviour of
-%projection phenomena in language.  

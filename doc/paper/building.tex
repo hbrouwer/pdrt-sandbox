@@ -1,11 +1,11 @@
 \section{Building Projective Discourse Representation Structures}
 \label{sec:building}
 
-% nice introduction
+%syntax, subordination & accessibility, variable binding
 
 \subsection{Basic Structures}
 
-The box representations shown in Section~\ref{sec:background} are an
+The box representations shown in Section~\ref{sec:introduction} are an
 intuitive way to look at DRSs and PDRSs, but less useful for formal
 reasoning about these structures. For this, we adhere to the set-theoretical
 underpinnings of the formalism as described by
@@ -42,7 +42,7 @@ A Basic DRS is a tuple $\langle \{x_1 ... x_n\},\{\gamma_1 ... \gamma_m\}
 \textit{universe} of the DRS.  There are several representations that can be
 used to represent a DRS besides its set-theoretical representation. The most
 widely used representation is the box representation already illustrated in
-section~\ref{sec:background}, but for reasons of space we will also
+Section~\ref{sec:introduction}, but for reasons of space we will also
 sometimes use the linear box representation. Example~\Next shows the three
 different representations for one sentence:
 
@@ -54,13 +54,12 @@ different representations for one sentence:
 Moving to the theory of PDRT, the main difference between a basic DRS and
 a basic PDRS is that in PDRT all structures introduce a label, which can
 accordingly bind the pointers associated with the PDRS referents and
-conditions.  Moreover, as described in Section~\ref{sec:background}, the contexts
-referred to by the pointers may introduce various dependencies, which is
-reflected in a set of minimally accessible projection contexts, or \MAPs~for
-short.  Thus, in set-theoretic terms, a basic PDRS is a quadruple that
-consists of a label, a set of \MAPs, a set of projected referents (i.e., DRS
-referents associated with a pointer), and a set of projected conditions.
-This is formalized below:
+conditions.  Moreover, the contexts referred to by the pointers may
+introduce various dependencies, which is reflected in a set of minimally
+accessible projection contexts, or \MAPs~for short. Thus, in set-theoretic
+terms, a basic PDRS is a quadruple that consists of a label, a set of \MAPs,
+a set of projected referents (i.e., DRS referents associated with
+a pointer), and a set of projected conditions.  This is formalized below:
 
 \begin{definition}[Basic PDRS] \label{def:bPDRS}~\\
 A Basic PDRS is a quadruple $\langle l, \{\mu_1 ... \mu_n\}, 
