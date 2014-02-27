@@ -1,0 +1,327 @@
+\section{Combining Structures}\label{sec:combining}
+
+In the previous section we have defined basic structures and their related
+properties, including context accessibility and bound variables.  As the aim
+of a semantic formalism is to provide a framework for constructing meaning
+representations, the logical next step is to define a way to combine
+structures in order to create larger meaning representations. In this
+section, we first describe how complete structures can be merged together,
+and then introduce unresolved structures in order to create meaning
+representations for smaller building blocks, like words.
+
+\subsection{Merging}
+
+In DRT, combining two DRS is defined straightforwardly as taking the union
+of the sets of referents and conditions from both DRSs. One important
+condition on combing structures is that no accidental binding of variables
+occurs. To see this, consider the following example:
+
+\ex. John smiles. Mary cries.\\
+  \drs{x}{John(x)\\ smiles(x)} $\Cup$ \drs{x}{Mary(x)\\cries(x)} = 
+  \drs{x}{John(x)\\ smiles(x)\\ Mary(x)\\ cries(x)}
+
+\noindent This example illustrates that simply taking the set-theoretic
+union of two DRSs may result in the wrong interpretation, since the
+resulting DRS in \Last only introduces one referent, with four properties,
+whereas the desired interpretation introduces two referents with each two
+properties. In order to overcome this, we define a renaming function
+$\mathcal{R}(K_1,K_2)$, which renames all (bound) variables in DRS $K_1$
+which overlap with any variables occurring in $K_2$. %\footnote{The renaming
+%function $\mathcal{R}$ is simply $\alpha$-conversion based on a fixed set
+%of variables.} 
+Since only bound variables are renamed, this function still allows for
+anaphoric binding between DRSs, since variables that occur free will not be
+renamed and may thus become bound. The resulting definition for DRS Merge is
+shown below:
+
+\begin{definition}[DRS Merge]\label{def:DRSmerge}~\\
+Given DRSs $K_i=\langle U_i,C_i \rangle$ and $K_j=\langle U_j,C_j \rangle$,
+the DRS merge between $K_i$ and $K_j$ ($K_i + K_j$) is defined as follows:
+  \begin{quote}
+    $K_i + K_j = 
+    \langle U_i\cup U_{j'},C_i \cup C_{j'}\rangle$
+  \end{quote}
+  where: $K_{j'} = \langle U_{j'},C_{j'} \rangle = \mathcal{R}(K_j,K_i)$
+\end{definition}
+
+In PDRT, the projection variables should be taken into account when
+combining structures.  In line with \citeasnoun{venhuizen2013iwcs} we can
+define different types of merge for asserted and projected
+content.\footnote{We here leave out the third merge for CI content described
+in \citeasnoun{venhuizen2013iwcs}, since we have recently defined a new
+analysis for CIs in PDRT that does not adhere to a special type of merge
+\cite{venhuizenInPrepSALT}.} More specifically, ``assertive merge'' is an
+operation between two PDRSs $P_1$ and $P_2$, which results a DRS in which
+the asserted content of both $P_1$ and $P_2$ remains asserted. This is
+effectuated by replacing all occurrences of the label of $P_1$ in the
+universe and conditions of $P_1$ by the label of the resulting PDRS, that
+is, by the label of (the renamed version of) $P_2$. The definition for
+assertive merge is shown below. Here $S[v_1\backslash v_2]$ means that all
+occurrences of $v_1$ in $S$ are replaced by $v_2$. Again, the renaming
+function $\mathcal{R}$ renames all bound variables (projection variables and
+DRS referents) in the first PDRS that overlap with variables in the second
+PDRS.
+
+\begin{definition}[PDRS Assertive Merge]\label{def:amerge}~\\
+Given PDRSs $P_i=\langle l_i,M_i,U_i,C_i \rangle$ and
+$P_j=\langle l_j,M_j,U_j,C_j \rangle$, the assertive merge between $P_i$
+and $P_j$ ($P_i + P_j$) is defined as follows:
+  \begin{quote}
+    $P_i + P_j = 
+      \langle l_{j'}, 
+      M_{i}[l_i\backslash l_{j'}] \cup M_{j'},
+      U_{i}[l_i\backslash l_{j'}] \cup U_{j'},
+      C_{i}[l_i\backslash l_{j'}] \cup C_{j'}\rangle$
+  \end{quote}
+  where: $P_{j'} = \langle l_{j'}, M_{j'}, U_{j'}, C_{j'} \rangle =$
+      $\mathcal{R}(P_j,P_i)$
+\end{definition}
+
+\noindent The operation for assertive merge results in a PDRS where all
+content has the same status as it had before merging. However, we are
+interested in creating a formalism in which some content may become
+projected during discourse construction.  Intuitively, projected content
+(and in particular presupposed content) has a status that is prior to
+asserted content.  Therefore, we define ``projective merge'' as an operation
+that results in the content of its first argument to become projected in the
+resulting PDRS.  This operation is very similar to the $\alpha$-operator
+introduced by \cite{bos2003implementing}, taking into account the projection
+variables in a PDRS. Projection in PDRT means that the pointer of the
+projected content indicates some accessible PDRS-context, which may either
+be instantiated by a higher PDRS, or it may be a context that is projected
+since the pointer is not bound by any label. By defining projective merge in
+such a way that the projected content keeps its own pointer, we allow the
+projection variables to become bound in an accessible PDRS, just as in the
+case of anaphoric binding in DRT via the use of free variables that are not
+renamed during merging. Since we want the result of the projective merge to
+be a connected PDRS, the only addition to taking the set-theoretic union of
+the content of the projected PDRS and the (renamed) context PDRS, is that
+the resulting set of \MAPs~is enhanced with a relation expressing the
+accessibility between the resulting PDRS and the context created through
+projection, i.e., the label of the projected PDRS.
+
+\begin{definition}[PDRS Projective Merge]\label{def:pmerge}~\\
+Given PDRSs $P_i=\langle l_i,M_i,U_i,C_i \rangle$ and 
+$P_j=\langle l_j,M_j,U_j,C_j\rangle$, the projective merge between $P_i$
+and $P_j$ ($P_i \ast P_j$) is defined as follows:
+  \begin{quote}
+    $P_i \ast P_j = 
+      \langle l_{j'}, 
+        M_{i}\cup M_{j'}\cup\{\langle l_{j'},l_{i}\rangle\}, 
+        U_{i}\cup U_{j'},C_{i} \cup C_{j'}\rangle$
+  \end{quote}
+  where: $P_{j'} = \langle l_{j'}, M_{j'}, U_{j'}, C_{j'} \rangle =$ 
+      $\mathcal{R}(P_j,P_i)$
+\end{definition}
+
+\noindent In contrast to DRS Merge defined in Definition~\ref{def:DRSmerge},
+the merge operations for PDRSs, defined in Definitions~\ref{def:amerge} and
+\ref{def:pmerge} are non-symmetrical operations. This means that changing
+the order of the arguments changes the outcome of the operation. In both
+PDRS merges, the second PDRS functions as a kind of context in which the
+content of the first PDRS is integrated, since the resulting PDRS will have
+the label of the second PDRS. However, for the Assertive Merge
+(Definition~\ref{def:amerge}) it is straightforward to show that changing
+the order of the arguments results in an $\alpha$-equivalent PDRS, since the
+only difference is that the projection variables and referents may be named
+differently. This implies that the assertive merge operation is
+interpretation-symmetrical, since the order of the arguments does not affect
+the truth-values of the resulting PDRS. This, however, does not hold for
+Projective Merge (Definition~\ref{def:pmerge}), since the status of the
+content in the resulting PDRS is determined by the ordering of the merged
+arguments: the asserted content of the first PDRS will be projected in the
+resulting PDRS. This asymmetry results in a non-trivial interaction between
+the two PDRS merges, represented in Table~\ref{tab:mergeinteractions}.
+
+\begin{table}[h]
+  \caption{Interaction between Assertive and Projective merge}
+  \label{tab:mergeinteractions}
+  \centering
+  \begin{tabular}{| l c l |}
+    \hline
+    $A + (B + C)$ & $=$ & $(A + B) + C$\\
+    \hline
+    $A * (B * C)$ & $=$ & $(A * B) * C$\\
+    \hline
+    $A * (B + C)$ & $=$ & $(A * B) + C$\\
+    \hline
+    $A + (B * C)$ & $=$ & $B * (A + C) ~~=~~ (B * A) + C$\\
+    \hline\hline
+    $(A + B) * C$ & $=$ &  $(A + \mathcal{E}(B)) * (B * C)$\\
+                  &&  \textit{where:} $\mathcal{E}(B) = \langle lab(B), \{\}, \{\}, \{\}\rangle$\\
+    \hline
+  \end{tabular}
+\end{table}
+
+\noindent The first two rows of Table~\ref{tab:mergeinteractions} illustrate
+the associativity of both merge operations. The third and fourth row show
+the interaction between the different merges. Note that the asymmetry of the
+projective merge operation results in an unbalanced behaviour in the fourth
+row, where the projective merge retains precedence over the assertive merge
+operation. Intuitively, this is because projected content has a status that
+is prior to asserted content, which means that it must be allowed to come
+first.  Finally, the fifth row illustrates the equivalence for the last
+possible configuration. Here, again, the asymmetry of the projective merge
+prevents an associative equivalence. Since the content of the first
+PDRS~($A$) needs to be $\alpha$-converted on the basis of the label of the
+second PDRS ($B$), we introduce an auxiliary PDRS via a function
+$\mathcal{E}$ that creates an empty PDRS with the label of its argument
+PDRS. With this auxiliary PDRS, the desired equivalence can be derived.
+
+With the merge operations in place, we can combine basic (P)DRSs in order to
+form larger meaning representations. In particular the distinction between
+assertive and projective merge in PDRT provides a handle for constructing
+meaning representations that consist of different types of content: asserted
+content and projected content. In the next section, we define unresolved
+structures on the basis of these merge operations, in order to represent
+lexical meaning.
+
+\begin{definition}[Resolvedness]~\\
+A DRS $K$/PDRS $P$ is resolved iff:
+\begin{itemize}
+  \item $K$/$P$ does not contain any unresolved merges.
+\end{itemize}
+\end{definition}
+
+\subsection{Unresolved Structures}
+
+The operations described so far allow for the combination of \emph{complete}
+structures, representing for example sentences or propositions, but there is
+no way to build up structures from even smaller building blocks, such as
+words, since the current framework is simply not powerful enough to express
+the meaning of such constituents. For this, we need a way to define
+unresolved structures that still need to be combined with some additional
+content in order to form a complete PDRS.  Here, we follow
+\citeasnoun{muskens1996combining}, who defined Compositional DRT,
+a formalism that combines the dynamic semantics of DRT with a Montague style
+composition procedure.
+
+In Compositional DRT (CDRT), each syntactic category can be defined using an
+unresolved DRS, defined by means of lambda abstractions. For example, a noun
+is considered to introduce a condition on a referent that still needs to be
+defined, which can be represented as follows (using the flat representation
+for DRSs): 
+
+\ex. ``\textit{man}'':~~ $\lambda x.$\flatdrs{}{man($x$)}
+
+When combined with a suitable referent, this unresolved DRS is transformed
+into a resolved DRS with a free variable, which can become bound after
+merging with a DRS that contains this variable in its universe. So, the
+interaction between beta reduction (the elimination of lambda-terms) and
+merge operations is crucial for obtaining proper DRSs. In CDRT, this
+interaction is explicitly part of the lexical semantics associated with the
+syntactic structures, as the unresolved structure representing the
+determiner ``\textit{a}'' illustrates: 
+
+\ex. ``\textit{a}'':~~ 
+  $\lambda p.\lambda q.(($\flatdrs{$x$}{}$~+~p(x))+q(x))$
+
+A determiner is thus defined as introducing a DRS with a single referent,
+which needs to be merged with two unresolved DRSs in order to form
+a completely resolved structure (i.e., a sentence), or, in type-theoretic
+terms, a determiner is of the type: $(e\rightarrow t)\rightarrow
+(e\rightarrow t) \rightarrow t$. Now we can apply beta reduction to create
+the noun phrase ``\textit{a man}'', which will be of type $(e\rightarrow t)
+\rightarrow t$:
+
+\ex. ``\textit{a man}'':~~ 
+  $\lambda p.\lambda q.(($\flatdrs{$x$}{}$~+~p(x))+q(x))$ ($\lambda x.$
+  \flatdrs{}{man($x$)}$)~\stackrel{\beta}{=}~$ $\lambda q.($
+  \flatdrs{$x$}{man($x$)}$~+~q(x))$ 
+
+Based on these type-theoretic principles, we can define unresolved
+structures for a wide range of lexical items, ranging from simple structures
+for basic items like nouns, to more complex abstractions for particles or
+prepositions, for example, since these introduce complex dependencies.  In
+the same way, a compositional version of PDRT can be defined, in which the
+unresolved structures contain PDRSs that are combined using assertive and
+projective merge. With this machinery, we can deal with projection in
+a straightforward and intuitive way on the lexical level: presupposition
+triggers introduce a projective merge to insert their content in their local
+context, instead of introducing a constant
+\citeaffixed{kamp1993discourse,muskens1996combining}{cf.} or requiring
+a post-hoc projection mechanism \citeaffixed{sandt1992presupposition}{cf.}
+(but note the correspondence to the lexical DRS semantics defined by
+\citeasnoun{bos2003implementing} using the $\alpha$-operator).  For example,
+a name like ``\emph{John}'' is a noun phrase that introduces
+a presupposition about the existence of an entity named `John'; this can be
+represented by means of a lambda-term of type $(e\rightarrow t)\rightarrow
+t$, with a projective merge to combine the PDRS that introduces `John' with
+the unresolved structure:
+
+\ex. ``\textit{John}'':~~ 
+  $\lambda p.($\flatpdrs{$1$}{$1\gets x$}{$1\gets$John($x$)}{}$~*~p(x))$
+
+When combined with a term of type $e\rightarrow t$, the pointer associated
+with `John' ($1$ in the example above) will become free because by
+definition of projective merge it is not renamed to match the label of the
+context PDRS (see Definition~\ref{def:pmerge}). Note, however, that the
+presupposition may still become bound in the larger discourse, when part of
+a PDRS that is combined with an antecedent PDRS that matches its label. This
+implies that determining the projection site of a presupposition is part of
+constructing its lexical semantics, which makes sense in the light of the
+context-dependency of meaning. 
+
+Table~\ref{tab:lexPDRS} shows the unresolved PDRSs for a set of basic
+lexical items. The examples illustrate that the interchanging of assertive
+and projective merge nicely captures the correspondence between projecting
+and non-projecting sibling items, such as the determiners ``\textit{the}''
+and ``\textit{a}'', and the factive verb ``\textit{know}'' and its
+non-factive equivalent ``\textit{believe}''. In
+section~\ref{sec:operations}, we will discuss some more (operations on)
+lexical semantics, and in section~\ref{sec:playing} we will come back to the
+issue of determining the right projection site for projected content.
+%XXX Wel doen!
+
+\begin{table}
+  \caption{PDRT representations for a set of lexical items.}
+  \label{tab:lexPDRS}
+  \centering\small
+\begin{tabular}{| l | c  | c |}
+\hline
+{\bf\normalsize Item}  & {\bf\normalsize Category} & 
+  {\bf\normalsize PDRT Semantics}\\
+\hline
+\normalsize{a}       & DET & 
+  $\lambda p.\lambda q.(($\pdrs{$1$}{$1\gets x$}{}{}$~+~p(x))+q(x))$\\
+%\hline
+\normalsize{the}     & DET & 
+  $\lambda p.\lambda q.(($\pdrs{$1$}{$1\gets x$}{}{}$~+~p(x))*q(x))$\\
+%\hline
+\normalsize{dog}     & N  & 
+  $\lambda x.$(\pdrs{$1$}{}{$1\gets$dog($x$)}{})\\
+%\hline
+\normalsize{John}    & NP & 
+  $\lambda p.($\pdrs{$1$}{$1\gets x$}{$1\gets$John($x$)}{}$~*~p(x))$\\
+%\hline
+\normalsize{happy}   & ADJ &  
+  $\lambda p. \lambda x.($\pdrs{$1$}{$1\gets e$}{$1\gets$happy($e$)\\
+    $1\gets$Patient($e,x$)}{}$~+~p(x))$\\
+%\hline
+\normalsize{his}     & POS & 
+  $\lambda p.\lambda q. \lambda r.((q(\lambda x.($\pdrs{$1$}{$1\gets y$}{
+    $1\gets$male($x$)\\ $1\gets$of($y,x$)}{}$))~+~p(y))~*~r(y))$\\
+%\hline
+\normalsize{bark}    & V & 
+  $\lambda p. \lambda q. (p(\lambda x. ($\pdrs{1}{$1\gets e$}{
+    $1\gets$walk($e$)\\ $1\gets$Theme($e,x$)}{}$+~q(e))))$\\
+%\hline
+\normalsize{love}    & V & 
+  $\lambda p. \lambda q.\lambda r. (q(\lambda x. (p(\lambda y.($\pdrs{1}{
+    $1\gets e$}{$1\gets$love($e$)\\ $1\gets$Experiencer($e,x$)\\ 
+    $1\gets$Stimulus($e,y$)}{}$+~r(e))))))$\\
+%\hline
+\normalsize{believe} & V & 
+  $\lambda p. \lambda q. \lambda r. (q(\lambda x.($\pdrs{$1$}{$1\gets e$
+    ~~$1\gets k$}{$1\gets$believe($e$)\\ $1\gets$Agent($e,x$)\\
+    $1\gets$Theme($e,k$)\\ $1\gets k:(p(\lambda y.($\flatpdrs{$2$}{~}{~}{~}$))
+    ~+~p(\lambda z.($\flatpdrs{$3$}{~}{~}{~}))}{}$~+~r(e))))$\\
+%\hline
+\normalsize{know}    & V & 
+  $\lambda p. \lambda q. \lambda r. (q(\lambda x.($\pdrs{$1$}{$1\gets e$
+    ~~$1\gets k$}{$1\gets$know($e$)\\ $1\gets$Agent($e,x$)\\
+    $1\gets$Theme($e,k$)\\ $1\gets k:(p(\lambda y.($\flatpdrs{$2$}{~}{~}{~}$))
+    ~*~p(\lambda z.($\flatpdrs{$3$}{~}{~}{~}))}{}$~+~r(e))))$\\
+\hline
+\end{tabular}
+\end{table}

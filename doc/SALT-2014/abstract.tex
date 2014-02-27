@@ -1,0 +1,223 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{natbib}
+\renewcommand\bibsection{\vspace{-0.25cm}\paragraph{\normalsize \refname}}
+
+\usepackage{linguex}
+\renewcommand\firstrefdash{}
+
+\usepackage[margin=1in]{geometry}
+
+
+\usepackage{amssymb}
+\usepackage{verbatim}%for comment command
+\usepackage{amsthm}
+\usepackage{multicol}
+
+%%%%% Boxes %%%%%
+
+\newcommand{\drs}[2]
+{\begin{tabular}{c}
+  \noalign{\smallskip}
+  \begin{tabular}{|l|}
+    \hline #1\\ \hline #2\\ \hline
+  \end{tabular}
+  \smallskip
+\end{tabular}
+}
+
+\newcommand{\pdrs}[3]
+{\begin{tabular}{c}
+  \noalign{\smallskip}
+  $#1:$
+  \begin{tabular}{|l|}
+    \hline #2\\ \hline #3\\ \hline %\small#4 \\ \hline
+  \end{tabular}
+  \smallskip
+\end{tabular}
+}
+
+\newcommand{\pdrsmap}[4]
+{\begin{tabular}{c}
+  \noalign{\smallskip}
+  $#1:$
+  \begin{tabular}{|l|}
+    \hline #2\\ \hline #3\\ \hline \small #4 \\ \hline
+  \end{tabular}
+  \smallskip
+\end{tabular}
+}
+
+\let\oldthebibliography=\thebibliography
+  \let\endoldthebibliography=\endthebibliography
+  \renewenvironment{thebibliography}[1]{%
+    \begin{oldthebibliography}{#1}%
+      \setlength{\parskip}{0ex}%
+      \setlength{\itemsep}{0ex}%
+  }{
+    \end{oldthebibliography}%
+  }
+
+%%%% Begin Document %%%%
+\begin{document}
+\pagestyle{empty}
+\thispagestyle{empty}
+
+\section*{How and Why Conventional Implicatures Project}
+
+\noindent 
+%It is well-known that the meanings of utterances are structured
+%into parts that behave differently with respect to how they are interpreted
+%in the unfolding discourse.
+It is well-known that a single utterance may convey different types of
+information, for example \emph{new} and \emph{old} information. It is not
+always clear, however, how these types of content relate to each other.
+Simons et al. \cite{simons2010projects} define content that does not
+address the Question Under Discussion
+\cite[cf.][]{roberts1996information-short} as \textit{not at-issue} (or
+\emph{off-issue}).  At-issueness affects the interpretation of semantic
+content. In particular, off-issue content tends to be unaffected by
+operators such as negation; it \emph{projects}.  The three most prominent
+classes of projection phenomena are anaphora, presuppositions, and
+conventional implicatures (CIs; as defined by Potts, \cite{potts2005logic}). 
+%they are called like that because they are implicatures triggered by the
+%conventional meaning of linguistic expressions.  
+The correspondence between the former two forms the basis for one of the
+major accounts of presuppositions
+\citep{sandt1992presupposition-short,geurts1999presuppositions}. On the
+other hand, formal analyses of CIs have mainly focused on differentiating
+between the semantic contribution of presuppositional and CI content by
+introducing different meaning dimensions
+\cite{potts2005logic,nouwen2007appositives-short}, or different types of
+discourse update \citep{anderbois2010crossing}.  However, such accounts shed
+little light on the commonalities underlying the projection behaviour that
+is shared among off-issue content.
+
+%% XXX andere overgang?
+Therefore, we propose a unidimensional and incremental analysis of
+conventional implicatures, which highlights their correspondence to
+presuppositions, and anaphora.  We focus on supplemental CIs, triggered by
+subordinated constructions such as appositives, e.g.,
+\emph{``John\underline{, a linguist,} was not at the party''}. Our analysis
+is based on the observations that (i) CIs always attach to an anchor, and
+(ii) CIs never project further than their anchor, and (iii) the anchor
+itself always projects.  These observations have led to several
+syntactocentric analyses for CIs
+\cite[e.g.,][]{nouwen2007appositives-short,schlenker2013supplements}, but
+these fail to capture the \emph{semantic} property of at-issueness. We
+propose a Montague-style semantic analysis that treats CIs as
+`projection-anaphoric' (\emph{p-anaphoric}) to their anchor. This means that
+CI content inherits the projection site from its anchor, while contributing
+novel information to the discourse context. In contrast, presuppositions are
+`reference-anaphoric' \citep[cf.][]{sandt1992presupposition-short}, which
+signals previously established content and entails p-anaphoricity. The
+analysis is formalized in Projective DRT \cite{venhuizen2013iwcs-short},
+a representational framework in which projection sites are explicitly part
+of the semantic representations.  The analysis explains the interpretational
+differences between presuppositions and CIs, without stipulating
+a fundamental distinction between them.
+
+\vspace{-0.4cm}
+\paragraph{The \emph{why}: CIs are projection-anaphoric.} van der Sandt's
+\citep{sandt1992presupposition-short} proposal to treat presupposition
+projection as anaphora resolution, formalized in DRT \cite{kamp1981theory-short},
+is based on the observation that presuppositions behave in a way similar to
+anaphora. Conventional implicatures, on the other hand, are more similar to
+regular assertions, since they are infelicitous in a context in which their
+content has already been established, as in \emph{``John is a linguist.(...)
+\#John, a linguist, ..''}. Like presuppositions, however, CIs are off-issue
+and thus project out of embedded contexts. These characteristics can be
+brought together, by treating CIs as \emph{projection-anaphoric} to their
+anchor: their content is novel (i.e., non-anaphoric), but projects along
+with the presupposition triggered by their anchor, thus contributing novel
+information to the projection site of the anchor.  Moreover, since CIs are
+non-restrictive, they require a specific, and therefore projecting anchor.
+%e.g., in \emph{``If a professor, who is famous, comes to the party,..''}
+%the indefinite must single out a specific professor since otherwise the
+%relative clause will be restrictive. 
+This explains why CIs are infelicitous when anchored to a non-specific
+indefinite, as in \emph{\#``No man, a linguist,..''}. Thus, besides
+`piggybacking' on their anchor, CIs require their anchor to project,
+which explains why, like presuppositions, they tend to project globally.
+In order to formalize this
+behaviour, we need a framework in which projection sites are explicitly part
+of the semantic representations.  This is part and parcel of Projective DRT
+\cite{venhuizen2013iwcs-short}, where projection pointers indicate
+the integration site of semantic content. 
+
+\vspace{-0.4cm} \paragraph{The \emph{how}: CIs in PDRT.} In Projective DRT, the
+correspondence between anaphora and presuppositions is taken a step further
+by treating projection as variable binding. Each context introduces
+a \emph{label} that can bind the \emph{pointers} associated with the
+discourse referents and conditions, indicating where the content is
+interpreted. To formalize p-anaphoricity, we add structural information to
+PDRSs, via a subordination relation between contexts
+\citep[cf.][]{reyle1993dealing-short}.
+%: $A \leq B$ means that $A$ is subordinated to $B$. 
+The projection of presuppositions is signalled by means
+of a strict subordination ($<$).  CIs project as well, but also
+introduce an equality between their projection site and the one
+provided by their anchor.  In example \Next labels and
+pointers are indicated with a subscript, and contextual constraints are shown
+after the conditions. 
+%Example \Next[b] shows a presupposition embedded in a CI, which projects
+%relative to the projection site of the CI itself.
+
+\vspace{-0.25cm}
+\ex.  Mary, a linguist, laughs.\\
+{\small 
+  $[~x_3,~z_2~
+   |~Mary_3(x),~linguist_2(z),~x=_2z,~laugh_1(x)~
+ |~1 < 3,~1 < 2,~2=3]_1$
+}
+
+\vspace{-0.25cm}\noindent In contrast to a van der Sandtian analysis of CIs
+based on variable trapping, PDRT predicts the infelicity of attaching a CI
+to a non-projecting anchor. Due to the p-anaphoricity of CIs together with
+their projecting nature, this results in conflicting contextual constraints,
+as illustrated in example \Next, with the conflicting constraints
+indicated in bold.
+
+\vspace{-0.25cm}
+\ex. \#No man, a linguist, laughs.\\
+{\small 
+  $[|\neg_1[~x_2,~z_3~
+   |~man_2(x),~linguist_3(z),~x=_3z,~laugh_2(x)~
+   |{\mathbf{~2 < 3,~3 = 2}},~2 < 1]_2|]_1$
+}
+
+\vspace{-0.25cm} \noindent An incremental construction procedure is crucial
+for a proper account of CI content, because of its interaction with asserted
+content, e.g., via anaphoric dependencies \citep{anderbois2010crossing}.  In
+PDRT, this incremental construction can be formalized using Montague
+semantics \citep[cf.][]{muskens1996combining}.  Importantly, since
+projection is directly part of the incremental construction, and not treated
+as a post-hoc mechanism \citep[as in][]{sandt1992presupposition-short},
+anaphoric dependencies as well as conflicting contextual constraints are
+directly available during discourse construction. To test and evaluate the
+non-trivial procedure of dealing with projection variables during discourse
+construction, we have implemented PDRT as a Haskell library, called
+\textsc{pdrt-sandbox}.
+%providing a platform for testing and evaluating the PDRT framework, as well
+%as its predictions with respect to the behaviour of CIs
+
+%We have implemented the construction
+%procedure of PDRSs, as well as their translation to DRT and FOL, in a
+%Haskell library called \textsc{pdrt-sandbox}, which treats unresolved
+%structures as pure Haskell functions. This provides a platform to evaluate
+%the framework, as well as its predictions with respect to the behaviour of CIs. 
+
+\vspace{-0.4cm} \paragraph{Toward a unified account of off-issue content.}
+Formal approaches to semantics aim to capture all aspects of the meaning of
+an utterance. This means incorporating different types of content (for
+example, \emph{old} versus \emph{new}), while taking into account the
+interaction between them. We provide a first step toward such a unified
+analysis of off-issue and at-issue content. By treating CIs as
+projection-anaphora, we can explain their kinship to the class of off-issue
+content, without introducing an extra level of complexity.
+
+\footnotesize
+
+\bibliographystyle{abbrv} 
+\bibliography{../../presupposition} 
+\end{document}
