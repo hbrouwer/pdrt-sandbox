@@ -96,14 +96,14 @@ as defined by Potts \cite{potts2005logic}) \cite{simons2010projects}.
 %conventional meaning of linguistic expressions.
 The correspondence between the former two forms the basis for one of the
 major accounts of presuppositions
-\citep{sandt1992presupposition-short,geurts1999presuppositions}. On the
-other hand, formal analyses of CIs have mainly focused on differentiating
+\citep{sandt1992presupposition-short,geurts1999presuppositions}. In
+contrast, formal analyses of CIs have mainly focused on differentiating
 between the semantic contribution of presuppositional and CI content by
 introducing different meaning dimensions
 \cite{potts2005logic,nouwen2007appositives-short}, or different types of
-discourse updating \citep{anderbois2010crossing}. However, such accounts shed
-little light on the commonalities underlying the projection behaviour that
-is shared among presuppositions, anaphora, and CIs.
+discourse updating \citep{anderbois2010crossing}. However, such accounts
+shed little light on the commonalities underlying the projection behaviour
+that is shared among the three classes.
 
 %% XXX andere overgang?
 We propose a unidimensional and incremental analysis of conventional
@@ -112,50 +112,53 @@ anaphora.  We focus on supplemental CIs, triggered by subordinated
 constructions such as appositives, e.g., \emph{``John\underline{,
 a linguist,} was not at the party''}. Our analysis is based on the
 observations that (i) CIs always attach to an anchor, and (ii) the anchor
-itself always projects, and (iii) CIs always project as far as their anchor.
-These observations have led to several syntactocentric analyses for CIs
-\cite[e.g.,][]{nouwen2007appositives-short,schlenker2013supplements,nouwen2014note},
+itself always projects, and (iii) CIs always project to their anchor.  These
+observations have led to several syntactocentric analyses for CIs
+\cite[e.g.,][]{nouwen2007appositives-short,schlenker2013supplements,nouwen2014note-short},
 but these fail to capture the \emph{semantic} properties underlying the
 projection behaviour of CIs, presuppositions and anaphora. We therefore
-propose a Montague-style semantic analysis that treats CIs as
-`projection-anaphoric' (\emph{p-anaphoric}) to their anchor. This means that
-CI content inherits the projection site from its anchor, while contributing
-novel information to the discourse context. In contrast, presuppositions are
+propose a Montagovian semantic analysis that treats CIs as
+`projection-anaphoric' (\emph{p-anaphoric}) to their anchor, that is, they
+introduce an equality between their projection site and the one introduced
+by their anchor. At the same time, CIs contribute novel information to the
+discourse context created by the anchor. In contrast, presuppositions are
 `reference-anaphoric' \citep[cf.][]{sandt1992presupposition-short}, which
 signals previously established content and entails p-anaphoricity. The
 analysis is formalized in Projective DRT \cite{venhuizen2013iwcs-short},
 a representational framework in which projection sites are explicitly part
-of the semantic representations.  The analysis explains the interpretational
+of the semantic representations. It explains the interpretational
 differences between presuppositions and CIs, without stipulating
 a fundamental distinction between them.
 
 %\vspace{-0.4cm}
 \paragraph{CIs are projection-anaphoric.} van der Sandt's
 \citep{sandt1992presupposition-short} proposal to treat presupposition
-projection as anaphora resolution, formalized in DRT \cite{kamp1981theory-short},
-is based on the observation that presuppositions behave in a way similar to
-anaphora. Conventional implicatures, on the other hand, are more similar to
-regular assertions, since they are infelicitous in a context in which their
-content has already been established, as in \emph{``John is a linguist.(...)
-\#John, a linguist, ..''}. Like presuppositions, however, CIs are off-issue
-and thus project out of embedded contexts. These characteristics can be
-brought together, by treating CIs as \emph{projection-anaphoric} to their
-anchor: their content is novel (i.e., non-anaphoric), but projects along
-with the presupposition triggered by their anchor, thus contributing novel
-information to the projection site of the anchor.  Moreover, since CIs are
+projection as anaphora resolution, formalized in DRT
+\cite{kamp1981theory-short}, is based on the observation that
+presuppositions behave in a way similar to anaphora. CIs, on the other hand,
+are more similar to regular assertions, since they are infelicitous in
+a context in which their content has already been established, as in
+\emph{``John is a linguist.(...) \#John, a linguist, ..''}. Like
+presuppositions, however, CIs provide backgrounded information and project
+out of embedded contexts. These characteristics can be brought together by
+treating CIs as \emph{projection-anaphoric} to their anchor: their content
+is novel (i.e., non-anaphoric), but projects along with the presupposition
+triggered by their anchor, thus contributing novel information to the
+interpretation context of the anchor.  Moreover, since CIs are
 non-restrictive, they require a specific, and therefore projecting anchor.
 %e.g., in \emph{``If a professor, who is famous, comes to the party,..''}
 %the indefinite must single out a specific professor since otherwise the
 %relative clause will be restrictive. 
 This explains why CIs are infelicitous when anchored to a non-specific
 indefinite, as in \emph{\#``No man, a linguist,..''}. Thus, besides
-`piggybacking' on their anchor, CIs require their anchor to project,
-which explains why, like presuppositions, they tend to project globally.
-In order to formalize this
-behaviour, we need a framework in which projection sites are explicitly part
-of the semantic representations.  This is part and parcel of Projective DRT
-\cite{venhuizen2013iwcs-short}, where projection pointers indicate
-the integration site of semantic content. 
+`piggybacking' on their anchor, CIs require their anchor to project, which
+explains why, like presuppositions, they tend to project globally.  In order
+to formalize this behaviour, we need a framework in which projection is
+explicitly part of the semantic representation.  This is part and parcel of
+Projective DRT \cite{venhuizen2013iwcs-short}, an extension of DRT
+\cite{kamp1981theory-short} in which labels and pointers explicitly reflect
+the interaction between the introduction and interpretation context of
+projected content.
 
 %\vspace{-0.4cm} 
 \paragraph{CIs in PDRT.} In Projective DRT, the correspondence between
@@ -167,14 +170,14 @@ add structural information to PDRSs, via a subordination relation between
 contexts \citep[cf.][]{reyle1993dealing-short}.
 %: $A \leq B$ means that $A$ is subordinated to $B$. 
 The projection of presuppositions is signalled by means of a strict
-subordination ($<$).  CIs project as well, but also introduce an equality
-between their projection site and the one provided by their anchor.  In
-example \Next labels and pointers are indicated with a subscript, and
-contextual constraints are shown after the conditions. 
-%Example \Next[b] shows a presupposition embedded in a CI, which projects
-%relative to the projection site of the CI itself.
+subordination ($<$). CIs project as well, but also introduce an equality
+between their projection site and the one provided by their anchor. The PDRS
+in \Next has pointers for three contexts named $1$, $2$ and $3$; $x_i$ is
+a discourse referent pointing to (i.e., is interpreted in) PDRS $i$, and
+$K_j$ is a PDRS labelled $j$. The constraints posed on the contexts are
+shown after the conditions. 
 
-\vspace{-0.25cm}
+\vspace{-0.10cm}
 \ex.  Mary, a linguist, laughs.\\
 {\small 
   $[~x_3,~z_2~
@@ -182,7 +185,7 @@ contextual constraints are shown after the conditions.
  |~1 < 3,~1 < 2,~2=3]_1$
 }
 
-\vspace{-0.25cm}
+\vspace{-0.10cm}
 \noindent In contrast to a van der Sandtian analysis of CIs
 based on variable trapping, PDRT predicts the infelicity of attaching a CI
 to a non-projecting anchor. Due to the p-anaphoricity of CIs together with
@@ -190,7 +193,7 @@ their projecting nature, this results in conflicting contextual constraints,
 as illustrated in example \Next, with the conflicting constraints
 indicated in bold.
 
-\vspace{-0.25cm}
+\vspace{-0.10cm}
 \ex. \#No man, a linguist, laughs.\\
 {\small 
   $[|\neg_1[~x_2,~z_3~
@@ -198,19 +201,18 @@ indicated in bold.
    |{\mathbf{~2 < 3,~3 = 2}},~2 < 1]_2|]_1$
 }
 
-\vspace{-0.25cm} 
+\vspace{-0.10cm} 
 \noindent An incremental construction procedure is crucial
 for a proper account of CI content, because of its interaction with asserted
 content, e.g., via anaphoric dependencies \citep{anderbois2010crossing}.  In
 PDRT, this incremental construction can be formalized using Montague
 semantics \citep[cf.][]{muskens1996combining}.  Importantly, since
-projection is directly part of the incremental construction, and not treated
-as a post-hoc mechanism \citep[as in][]{sandt1992presupposition-short},
-anaphoric dependencies as well as conflicting contextual constraints are
-directly available during discourse construction. To test and evaluate the
-non-trivial procedure of dealing with projection variables during discourse
-construction, we have implemented PDRT as a Haskell library, called
-\textsc{pdrt-sandbox}.
+projection is directly part of the incremental construction, in contrast to
+van der Sandt's account, anaphoric dependencies and conflicting contextual
+constraints are directly available during discourse construction. To test
+and evaluate the non-trivial procedure of dealing with projection variables
+during discourse construction, we have implemented PDRT as a Haskell
+library, called \textsc{pdrt-sandbox}.
 %providing a platform for testing and evaluating the PDRT framework, as well
 %as its predictions with respect to the behaviour of CIs
 
@@ -221,14 +223,15 @@ construction, we have implemented PDRT as a Haskell library, called
 %the framework, as well as its predictions with respect to the behaviour of CIs. 
 
 %\vspace{-0.4cm} 
-\paragraph{Toward a unified account of projected content.} Formal approaches
-to semantics aim to capture all aspects of the meaning of an utterance. This
-means incorporating different types of content (for example, \emph{old}
-versus \emph{new}), while taking into account the interaction between them.
-We provide a first step toward such a unified analysis of projected content.
-By treating CIs as projection-anaphora, we can explain their kinship to
-presuppositions and anaphora, without introducing an extra level of
-complexity to account for the fact that they introduce novel information.
+\paragraph{Towards a unified account of projected content.} Formal
+approaches to semantics aim to capture all aspects of the meaning of an
+utterance. This means incorporating different types of content (for example,
+\emph{old} versus \emph{new}), while taking into account the interaction
+between them.  Our account paves way for such a unified analysis of
+projected content.  By treating CIs as projection-anaphora, we can explain
+their kinship to presuppositions and anaphora, without introducing an extra
+level of complexity to account for the fact that they introduce novel
+information.
 
 \small
 \vspace{0.4cm}

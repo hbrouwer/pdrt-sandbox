@@ -9,20 +9,21 @@ the scope of a negation: in the sentence ``\textit{It is not the case that
 the man is happy}'' the definite noun phrase ``\textit{the man}''
 syntactically occurs inside the scope of the negation, but it is interpreted
 as if occurring outside of its scope (corresponding to the reading: $\exists
-x(man(x) \wedge \neg happy(x))$). This behaviour has often been treated as
-a deviation from standard meaning construction, despite the prevalence of
-expressions exhibiting it. Therefore, we have proposed a formalism that
-centralizes the property of projection as a strategy for integrating
-material into the foregoing context. The formalism is called Projective
-Discourse Representation Theory \citeaffixed{venhuizen2013iwcs}{PDRT;}, and
-is an extension of Discourse Representation Theory
-\cite{kamp1981theory,kamp1993discourse}. In PDRT, presuppositions are
-treated as part of a larger class of \textit{projection phenomena}
-\citeaffixed{simons2010projects}{cf.}, including anaphora and conventional
-implicatures \cite{potts2005logic}. By associating linguistic material with
-a \textit{pointer} to indicate the interpretation site, an explicit
-distinction is made between the surface form of an utterance, and its
-logical interpretation. The analysis can be shown to account for various
+x(man(x) \wedge \neg happy(x))$). In semantic formalisms, this behaviour has
+often been treated as a deviation from standard meaning construction,
+despite the prevalence of expressions exhibiting it.
+%%XXX citaties: sandt1992presupposition,more?
+Therefore, we have proposed a formalism that centralizes the property of
+projection as a strategy for integrating material into the foregoing
+context. This formalism is called Projective Discourse Representation Theory
+\citeaffixed{venhuizen2013iwcs}{PDRT;}, and is an extension of Discourse
+Representation Theory \cite{kamp1981theory,kamp1993discourse}. In PDRT,
+presuppositions are treated as part of a larger class of \textit{projection
+phenomena} \citeaffixed{simons2010projects}{cf.}, including anaphora and
+conventional implicatures \cite{potts2005logic}. By associating linguistic
+material with a \textit{pointer} to indicate the interpretation site, an
+explicit distinction is made between the surface form of an utterance, and
+its logical interpretation. The analysis can be shown to account for various
 projection phenomena \citeaffixed{venhuizen2014salt}{e.g., conventional
 implicatures;}. Crucially, however, adding projection pointers to all
 linguistic material affects the formal properties of DRT non-trivially; the
@@ -57,12 +58,11 @@ referents, or \textit{complex}, reflecting logical structure introduced by
 semantic operators such as negation, implication, and modal operators. DRSs
 are often visualized using a box-representation, with the set of referents
 appearing in the top of the box, and the set of conditions on these
-referents below.  Example \Next shows the DRS of a donkey sentence
-\citeaffixed{geach1962reference}{adapted from}. This example shows a DRS
-with a single complex condition representing an implication, which itself
-consists of two embedded DRSs, the first containing two referents and a set
-of three basic conditions, and the second containing a single basic
-condition.
+referents in the body.  Example \Next shows the DRS of a donkey sentence
+\citeaffixed{geach1962reference}{adapted from}, containing a single complex
+condition representing an implication, which itself consists of two embedded
+DRSs, the first containing two referents and a set of three basic
+conditions, and the second containing a single basic condition.
 
 \ex. If a farmer owns a donkey, he feeds it.\\\hspace*{-0.2cm}
   \drs{}{
@@ -75,22 +75,21 @@ together reflecting the logical form of the discourse. Crucially, anaphoric
 binding of referents is determined on the basis of the accessibility between
 contexts; in the example above, the antecedent DRS of the implication is
 accessible from the consequent DRS, and as a result the variables introduced
-by the pronouns become bound by the referents introduced in the antecedent
-DRS. 
+by the pronouns (``\textit{he}'' and ``\textit{it}'') become bound by the
+referents introduced in the antecedent DRS. 
 
 The straightforward analysis of anaphora was one of the main motivations
 behind the development of DRT \cite{kamp1981theory,heim1982semantics}, but
 it has been shown that the framework can account for a wide range of other
-linguistic phenomena, including: tense \cite{kamp1981theory}, quantification
-\& plurality \cite{kamp1993discourse}, attitude reports
+linguistic phenomena as well, including: tense \cite{kamp1981theory},
+quantification \& plurality \cite{kamp1993discourse}, attitude reports
 \cite{asher1986belief,asher1989belief,zeevat1996neoclassical,maier2009presupposing}
 discourse structure \cite{asher2003logics}, and presupposition
 \cite{sandt1992presupposition,krahmer1998presupposition,geurts1999presuppositions}.
 While illustrating the flexibility the framework, the analysis of
 presuppositions in particular also emphasizes some limitations of the
-framework. Next we will describe this analysis and motivate the proposed
-extension to DRT, which was developed in particular to account for what we
-call projection phenomena.
+framework. Next, we will describe these limitations and motivate the
+proposed extension to DRT.
 
 \subsection{Beyond the surface structure}
 
@@ -164,51 +163,39 @@ obliterated \cite{kracht1994logic,krahmer1998presupposition}.
 
 In order to provide a parsimonious account of presuppositions, as part of
 the larger class of projection phenomena, we have proposed an extension to
-DRT, called Projective DRT \citeaffixed{venhuizen2013iwcs}{PDRT;}. In PDRT,
-an explicit distinction is made between the context in which some linguistic
-content is \textit{introduced}, and where it is \textit{interpreted},
-reflecting the separation between linguistic surface form and
-truth-conditional interpretation.
+DRT, called Projective Discourse Representation Theory
+\citeaffixed{venhuizen2013iwcs}{PDRT;}, in which an explicit distinction is
+made between the context in which some linguistic content is
+\textit{introduced}, and where it is \textit{interpreted}, reflecting the
+separation between linguistic surface form and truth-conditional
+interpretation.
 
 \subsection{Projective DRT}
 
-The representation structures in Projective DRT are called PDRSs, and each
-PDRS introduces a \textit{label} that can be used as an identifier
+In Projective Discourse Representation Theory, the basic structures carry
+more information than the basic DRT structures; in addition to the
+structural and referential content of a DRS, a Projective Discourse
+Representation Structure (PDRS) also makes the information structure of
+a discourse explicit by keeping linguistic content at its introduction site,
+and indicating the interpretation site via a variable. 
+Each PDRS introduces
+a \textit{label} that can be used as an identifier
 \citeaffixed{asher2003logics}{similar to the context identifiers implicitly
 assumed by other DRT extensions, for example SDRT;}.  All referents and
 conditions of a PDRS are associated with a \textit{pointer}, which is used
 to indicate in which context the material is \textit{interpreted} by means
-of binding the pointer to a context label.  In the default case, the pointer
-is bound by the label of the PDRS in which the content is introduced, thus
-indicating asserted material which is interpreted locally. In the case of
-projected material, however, the content should be interpreted in some
-higher context; this is indicated by either binding the pointer to an
-accessible PDRS label, or by means of a free pointer. Pointing to a higher
-PDRS means that the content is interpreted within the context of that PDRS.
-In case the pointer occurs free, no interpretation site has been determined
-yet; the pointer may still become bound during discourse construction, or it
-may remain free, which means that the content needs to be accommodated. 
-%%betere overgang
-The context indicated by a free pointer needs to be accessible from the
-context in which it is introduced.  To formalize this, PDRSs are enhanced
-with a set of \MAPs: Minimally Accessible Projection contexts, which are
-basically tuples describing pairs of subordinating contexts
-\citeaffixed{reyle1993dealing,reyle1995reasoning}{cf.}. This additional
-level of information also allows for the incorporation of other constrains
-between (projected) contexts, such as those posed by embedded
-presuppositions. 
-
-Example \Next[a] shows the PDRS of a sentence with only asserted content,
-and \Next[b] shows a PDRS with a presupposition.  The labels introduced by
-the PDRSs are shown on top of each PDRS, and the pointers associated with
-referents and conditions are indicated using the $\gets$-operator. The
-\MAPs~are shown below the conditions of a PDRS, where the context indicated
-by the free pointer needs to be accessible from the current context.
+of binding the pointer to a context label.  Example \Next shows two PDRSs:
+here, the labels introduced by the PDRSs are shown on top of each PDRS, and
+the pointers associated with referents and conditions are indicated using
+the $\gets$-operator.  Note that each PDRS also contains a footer for
+describing accessibility relations between contexts; these are called
+Minimally Accessible Projection contexts (\MAPs), and will be motivated
+below.
 
 \begin{flushleft}
-\begin{minipage}{0.85\linewidth}
-\begin{multicols}{2}
-\ex. \a. Nobody sees any man.\\\hspace*{-0.3cm}{
+\begin{minipage}{0.9\linewidth}
+  \begin{multicols}{2}
+\ex. \a. Nobody sees a~man.\\\hspace*{-0.3cm}{
   \pdrs{1}{}{
     $1\gets\neg$\pdrs{2}{$2\gets x, 2\gets y$}{
       $2\gets$person($x$)\\ $2\gets$man($y$)\\ $2\gets$see($x,y$)
@@ -227,38 +214,30 @@ by the free pointer needs to be accessible from the current context.
 \end{minipage}\\
 \end{flushleft}
 
-\noindent In \Last[a], all pointers are bound by their local PDRS, meaning
-that all material is accommodated locally.  This representation is identical
-to the standard DRT representation of this sentence, except for the addition
-of labels to PDRSs and pointers to all referents and conditions. In
-\Last[b], on the other hand, the proper name ``John'' triggers
-a presupposition about the existence of someone called `John'. The pointer
-occurs free, meaning that no antecedent has been found yet. In case no
-further context becomes available, the interpretation site can be determined
-based on different heuristics. For example, the pragmatic constraints
-proposed by \citeasnoun{sandt1992presupposition} may be applied, resulting
-in a reading where the presupposition is globally accommodated. 
-%%%Explain!
-%According to \citeasnoun{sandt1992presupposition} determining an
-%appropriate accommodation site depends on several essentially pragmatic
-%constraints, such as informativity and consistency.  Two important semantic
-%(i.e., logical?) constraints are that the interpretation site is accessible
-%from the introduction site, and that not variables become free after
-%projection XXX account not dependent on this analysis
+\noindent In \Last[a], all pointers are bound by the label of the PDRS in
+which the content is introduced, indicating asserted material which is
+interpreted locally (corresponding to the non-specific reading of the
+indefinite noun phrase ``a man'').  This representation is identical to the
+standard DRT representation of this sentence, except for the addition of
+labels to PDRSs and pointers to all referents and conditions. In \Last[b],
+on the other hand, the proper name ``John'' triggers a presupposition about
+the existence of someone called `John'.  The pointer associated with the
+referent and condition describing this presupposition occurs free (i.e., it
+is not bound by the label of any accessible PDRS), meaning that no
+antecedent has been found yet; the pointer may still become bound in some
+higher context during discourse construction, which means that the content
+will be interpreted in that context, or it may remain free, which means that
+the content needs to be accommodated
+\citeaffixed{sandt1992presupposition}{the accommodation site may be
+determined based on various heuristics; see}.
 
-So, instead of physically moving semantic material on the representation
-level to the context of interpretation, as in
-\possessivecite{sandt1992presupposition} account, projection is realized by
-setting a variable equation between pointers and context labels.  This
-allows for a compositional treatment of projection phenomena that does not
-assume a two-stage resolution algorithm.  Moreover, the resulting semantic
-representation stays close to the linguistic surface structure, making it
-easy to evaluate.  Only at the interpretation stage, i.e., when providing
-a model-theoretic interpretation of the representation structures, the
-content needs to be moved to its accommodation site in order to obtain the
-desired interpretation.
 %%%XXX
-
+PDRSs are enhanced with a set of \MAPs: Minimally Accessible Projection
+contexts, which are basically pairs of subordinating contexts
+\citeaffixed{reyle1993dealing,reyle1995reasoning}{cf.}. This additional
+level of information also allows for the incorporation of other constraints
+between (projected) contexts, such as those posed by embedded
+presuppositions. 
 
 
 
