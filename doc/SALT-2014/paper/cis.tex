@@ -1,0 +1,150 @@
+\documentclass{salt}
+
+% This document template was developed by the editors of /Semantics and
+%  Pragmatics/ and minimally modified to work with the salt.cls document
+%  class.
+
+%=====================================================================
+%============================= packages ==============================
+
+\usepackage{natbib}
+\usepackage{linguex}
+\renewcommand\firstrefdash{}
+
+%=====================================================================
+%============================== macros ===============================
+
+\newcommand{\drs}[2]
+{\begin{tabular}{c}
+  \noalign{\smallskip}
+  \begin{tabular}{|l|}
+    \hline #1\\ \hline #2\\ \hline
+  \end{tabular}
+  \smallskip
+\end{tabular}
+}
+
+\newcommand{\pdrs}[4]
+{\begin{tabular}{c}
+  \noalign{\smallskip}
+  $#1:$
+  \begin{tabular}{|l|}
+    \hline #2\\ \hline #3\\ \hline \small #4 \\ \hline
+  \end{tabular}
+  \smallskip
+\end{tabular}
+}
+
+%=====================================================================
+%========================= preamble material =========================
+
+% Metadata for the PDF output. ASCII-only!
+\pdfauthor{Noortje J. Venhuizen, Johan Bos, Petra Hendriks, Harm Brouwer}
+\pdftitle{How and why conventional implicatures project}
+\pdfkeywords{conventional implicatures, CIs, DRT, PDRT, projection}
+
+% Optional short title inside square brackets, for the running headers.
+% If no short title is given, no title appears in the headers.
+\title{How and why conventional implicatures project % in sentence case (down style)
+  \thanks{We thank \ldots}}
+
+% Optional short author (last name only) inside square brackets, for the running headers.
+% If no short author is given, no authors print in the headers.
+\author[Venhuizen et al.]{% As many authors as you like, each separated by \AND.
+  \saltauthor{Noortje J. Venhuizen \\ \institute{University of Groningen}} \AND
+  \saltauthor{Johan Bos \\ \institute{University of Groningen}} \AND
+  \saltauthor{Petra Hendriks \\ \institute{University of Groningen}} \AND
+  \saltauthor{Harm Brouwer \\ \institute{University of Groningen}}%
+}
+
+%=====================================================================
+
+\begin{document}
+
+%=====================================================================
+%============================ frontmatter ============================
+
+\maketitle
+
+%--------------------------------------------------------------------
+% First page headers and page numbers
+%
+% the page number of the first page of this paper
+% \setcounter{page}{1}
+
+% Create the first page headings.
+% This needs to be issued *after* \maketitle.
+%       {volume}{first page}{last page}{year}{not used}{not used}
+\firstpageheadings{24}{000}{000}{2014}{}{}
+%
+%
+%---------------------------------------------------------------------
+
+\begin{abstract}  
+  Abstract here
+\end{abstract}
+
+\begin{keywords}
+  conventional implicatures, CIs, DRT, PDRT, projection %(special formatting is fine)
+\end{keywords}
+
+%=====================================================================
+%============================ article text ===========================
+
+\input{introduction}
+
+%\section{Section}
+%\subsection{Subsection}
+%\subsubsection{Subsubsection}
+%\paragraph{Paragraph}
+%\subparagraph{Subparagraph}
+%
+%\begin{table}
+%  \begin{tabular}{c|c|c}
+%     1 & 2 & 3 \\
+%     la & di & da \\
+%  \end{tabular}
+%  \caption{An example of table}
+%  \label{my_table}
+%\end{table}
+
+%=====================================================================
+
+\bibliography{../../presupposition}
+
+%=====================================================================
+
+\begin{addresses}
+  \begin{address}
+    Noortje J. Venhuizen \\
+    Oude Kijk in 't Jatstraat 26\\
+    9712 EK Groningen\\
+    The Netherlands \\
+    \email{n.j.venhuizen@rug.nl}
+  \end{address}
+  \begin{address}
+    Johan Bos \\
+    Oude Kijk in 't Jatstraat 26\\
+    9712 EK Groningen\\
+    The Netherlands \\
+    \email{johan.bos@rug.nl}
+  \end{address}
+  \begin{address}
+    Petra Hendriks \\
+    Oude Kijk in 't Jatstraat 26\\
+    9712 EK Groningen\\
+    The Netherlands \\
+    \email{p.hendriks@rug.nl}
+  \end{address}
+  \begin{address}
+    Harm Brouwer \\
+    Oude Kijk in 't Jatstraat 26\\
+    9712 EK Groningen\\
+    The Netherlands \\
+    \email{harm.brouwer@rug.nl}
+  \end{address}
+\end{addresses}
+
+%=====================================================================
+
+\end{document}
