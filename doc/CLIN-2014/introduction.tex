@@ -240,8 +240,8 @@ antecedent has been found yet; the pointer may still become bound in some
 higher context during discourse construction, which means that the content
 will be interpreted in that context, or it may remain free, which means that
 the content needs to be accommodated; this accommodation site may be
-determined based on various heuristics, for example the pragmatic constraints proposed by
-\cite{sandt1992presupposition}.
+determined based on various heuristics, for example the pragmatic
+constraints proposed by \cite{sandt1992presupposition}.
 
 An important addition to the representation structures in PDRT is the
 introduction of \textit{Minimally Accessible Projection contexts} (MAPs),
@@ -256,11 +256,49 @@ partial order over underspecified DRSs described by
 With this additional level of information, constraints on (projection)
 contexts can be made explicit in the current framework, such as the
 constraint that the projection site of presuppositions should be accessible
-from their introduction site. As we will see below (in Section~\ref{}) these
-MAPs also allow for a principled definition of the projection pattern of
-embedded presuppositions and conventional implicatures
-\citeaffixed{venhuizen2014salt}{cf.}
+from their introduction site. As we will see below (in
+Section~\ref{sec:playing}) these MAPs also allow for a principled definition
+of the projection pattern of embedded presuppositions and conventional
+implicatures \citeaffixed{venhuizen2014salt}{cf.}
 
-%%XXX brug naar volgende sectie
+As described above, one of the main assets of the DRT framework is its
+treatment of anaphora, which crucially depends on a systematic definition of
+context accessibility and binding of referents. The addition of pointers and
+labels to PDRSs affects these definitions non-trivially, since projected
+content now appears \textit{in situ}, but still keeps the binding properties
+from its interpretation site. To see this, consider the following example:
 
+\ex. It is not the case that John is a vegetarian, he's a vegan.\\\hspace*{-0.3cm}{
+  \pdrs{1}{}{
+    $1\gets\neg$\pdrs{2}{$3\gets x$}{
+      $3\gets$John($x$)\\ $2\gets$vegetarian($x$)
+        }{$2 \leq 3$}\\
+      $1\gets$vegan($x$)
+  }{$1\leq 3$}
+}
 
+In this PDRS, the variable $x$ in the predicate \textit{vegan} is bound by
+the discourse referent introduced by `John', despite the fact that it occurs
+in the universe of an embedded (non-accessible) PDRS. Since the referent is
+associated with a free pointer, indicating a presupposition, it can bind
+variables that occur in PDRSs that are not accessible from the PDRS in which
+it occurs; the only requirement is that the context indicated by the pointer
+of the referent is accessible from the context indicated by the pointer of
+the predicate in which the variable occurs. Again, the set of MAPs can be
+used to make this requirement explicit; $1\leq 3$ here indicates that
+context $3$ should be accessible from the PDRS labelled $1$, which happens
+to be the context to which the referent introduced by `John' projects.  In
+the next section, we will formalize these accessibility constraints for DRT
+and PDRT, after providing a formal definition of DRSs and PDRSs. Based on
+these definitions, we can then formally describe the compositional and
+interpretational properties of (Projective) Discourse Representation
+Structures.
+
+\subsection{Terminology and Notation}
+
+Before going into a description of the formal definitions for DRT and PDRT,
+let us provide some basic handles for the terminology and notation used
+throughout this paper. 
+
+[...]
+%%XXX
