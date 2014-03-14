@@ -1,5 +1,13 @@
-\section{Building Projective Discourse Representation Structures}
+\section{Syntax, subordination and binding}
 \label{sec:building}
+
+In this section, we describe the basic properties of (Projective) Discourse
+Representation Structures in terms of their syntax and accessibility
+relations. In this section and throughout the rest of the paper, we will
+describe the formal properties of DRSs \citeaffixed[and references described
+therein]{kamp1993discourse,bos2003implementing,kamp2011discourse}{variations
+of which can also be found in, e.g.,}, and accordingly we derive these same
+properties and definitions for PDRSs.
 
 %syntax, subordination & accessibility, variable binding
 
@@ -9,14 +17,20 @@ The box representations shown in Section~\ref{sec:introduction} are an
 intuitive way to look at DRSs and PDRSs, but less useful for formal
 reasoning about these structures. For this, we adhere to the set-theoretical
 underpinnings of the formalism as described by
-\citeasnoun{kamp1993discourse}, without their duplex conditions in order to
-allow for a direct translation to first-order logic (see
-Section~\ref{sec:translations}). This definition basically follows the one
-proposed by \citeasnoun{bos2003implementing}, with the exception that
-equality between variables (i.e., $x_1=x_2$) is not a separate DRS
+\citeasnoun{kamp1993discourse}, without their `duplex conditions', which do
+not allow for a direct translation to first-order logic (which we will
+provide in Section~\ref{sec:translating}). This definition basically follows
+the one proposed by \citeasnoun{bos2003implementing}, with the exception
+that equality between variables (i.e., $x_1=x_2$) is not a separate DRS
 condition, but is treated as a variant of a 2-place predicate (i.e.,
-$R(x_1,x_2)$, where $R$ equals $=$). The definition of a basic DRS then
-looks as follows:
+$R(x_1,x_2)$, where $R$ equals $=$).  Besides the standard logical operators
+for negation ($\neg$), disjunction ($\vee$) and implication ($\Rightarrow$),
+this definition also includes modal operators for necessary DRSs ($\Box$),
+and possible DRSs ($\Diamond$), as well as a propositional condition
+associating a variable ranging over possible worlds with a DRS, which can be
+used to represent sentential complements
+\citeaffixed{bos2003implementing}{cf.}.
+
 
 \begin{definition}[Basic DRS] \label{def:bDRS}~\\
 A Basic DRS is a tuple $\langle \{x_1 ... x_n\},\{\gamma_1 ... \gamma_m\} 
@@ -40,26 +54,26 @@ A Basic DRS is a tuple $\langle \{x_1 ... x_n\},\{\gamma_1 ... \gamma_m\}
 \noindent The variables in a DRS are also called \textit{DRS referents} or
 \textit{discourse referents}, and the set of referents is called the
 \textit{universe} of the DRS.  There are several representations that can be
-used to represent a DRS besides its set-theoretical representation. The most
-widely used representation is the box representation already illustrated in
-Section~\ref{sec:introduction}, but for reasons of space we will also
-sometimes use the linear box representation. Example~\Next shows the three
-different representations for one sentence:
+used to represent a DRS besides its set-theoretical representation. The box
+representation shown in examples \ref{ex:donkey}-\Last is the most widely
+used representation, but in some cases a linear representation is used in
+order to save space. Example~\Next shows the three different
+representations for a single sentence:
 
-\ex. John is a vegetarian.
-\a. $\langle \{x, y\},\{$John$(x),$vegetarian$(y), =(x,y)\}\rangle$
-\b. \drs{$x~~y$}{John($x$)\\ vegetarian($y$)\\ $x=y$}
-\c. \flatdrs{$x, y$}{John($x$), vegetarian($y$), $x=y$}
+\ex. John is a vegan.
+\a. $\langle \{x, y\},\{$John$(x),$vegan$(y), =(x,y)\}\rangle$
+\b. \drs{$x~~y$}{John($x$)\\ vegan($y$)\\ $x=y$}
+\c. \flatdrs{$x, y$}{John($x$), vegan($y$), $x=y$}
 
-Moving to the theory of PDRT, the main difference between a basic DRS and
-a basic PDRS is that in PDRT all structures introduce a label, which can
-accordingly bind the pointers associated with the PDRS referents and
-conditions.  Moreover, the contexts referred to by the pointers may
-introduce various dependencies, which is reflected in a set of minimally
-accessible projection contexts, or \MAPs~for short. Thus, in set-theoretic
-terms, a basic PDRS is a quadruple that consists of a label, a set of \MAPs,
-a set of projected referents (i.e., DRS referents associated with
-a pointer), and a set of projected conditions.  This is formalized below:
+Moving to the theory of PDRT, the main difference from DRT is that a basic
+PDRS introduces a label and all referents and conditions are associated with
+a pointer, which may be bound by the label of an accessible PDRS. Pointers
+may also occur free, and they can introduce dependencies between contexts,
+which are represented in the set of Minimally Accessible Projection
+contexts, or MAPs for short. Thus, in set-theoretic terms, a basic PDRS is
+a quadruple that consists of a label, a set of MAPs, a set of projected
+referents (i.e., DRS referents associated with a pointer), and a set of
+projected conditions. This is formalized as follows:
 
 \begin{definition}[Basic PDRS] \label{def:bPDRS}~\\
 A Basic PDRS is a quadruple $\langle l, \{\mu_1 ... \mu_n\}, 
@@ -92,7 +106,7 @@ A Basic PDRS is a quadruple $\langle l, \{\mu_1 ... \mu_n\},
 \ref{def:bDRS}(\ref{def:bDRS:Rel}-\ref{def:bDRS:Prop}); the only difference
 is that complex PDRS conditions contain subordinated PDRSs, and complex DRS
 conditions contain subordinated DRSs.  The definition of projected referents
-and projected conditions as tuples allows us to talk about the two elements
+and projected conditions as tuples allows us to address the two elements
 of the tuples separately; we refer to the first element of all projected
 referents and projected conditions as the \textit{pointer}, and the second
 elements are called the \textit{PDRS referent} and \textit{PDRS condition},
@@ -102,18 +116,20 @@ refer to one of the elements of the tuple. Similarly, we refer to the first
 element of the quadruple representing a PDRS, as the \textit{label} of the
 PDRS (formally, the label of a PDRS $P_i$ is represented as $lab(P_i)$).
 We will refer to labels and pointers together as \textit{projection
-variables}.  Again, we can represent PDRSs using the same representations as
-defined for DRSs: the set-theoretic representation, the box representation
-and the linear representation, illustrated in \Next.
+variables}.
 
-\ex. John is a vegetarian.
-\a. $\langle 2,\{\langle 1, x\rangle, \langle 2, y\rangle\},\{\langle1, 
-      $John$(x)\rangle,\langle2, $vegetarian$(y)\rangle, \langle 2, =(x,y)
-      \rangle\},\{\langle 2,1\rangle\}\rangle$
+Just like in DRT, we can represent PDRSs using three different kinds of
+representations: a set-theoretic representation, a box representation
+and a linear representation, as illustrated in \Next.
+
+\ex. John is a vegan.
+\a. $\langle 2, \{\langle 2,1\rangle\}, \{\langle 1, x\rangle, 
+      \langle 2, y\rangle\},\{\langle1, $John$(x)\rangle,\langle2, 
+      $vegan$(y)\rangle, \langle 2, =(x,y)\rangle\}\rangle$
 \b. \pdrs{$2$}{$1\gets x~~2\gets y$}{$1\gets$John($x$)\\ 
-      $2\gets$vegetarian($y$)\\ $2\gets x=y$}{$2\leq 1$}
+      $2\gets$vegan($y$)\\ $2\gets x=y$}{$2\leq 1$}
 \c. \flatpdrs{$2$}{$1\gets x, 2\gets y$}{$1\gets$John($x$), 
-      $2\gets$vegetarian($y$), $2\gets x=y$}{$2\leq 1$}
+      $2\gets$vegan($y$), $2\gets x=y$}{$2\leq 1$}
 
 
 \subsection{Subordination and Accessibility}
@@ -121,51 +137,55 @@ and the linear representation, illustrated in \Next.
 One of the central notions in DRT is the notion of accessibility between
 DRSs. Accessibility determines which DRS universes are accessible from a DRS
 condition in order to bind its referents. This is crucial for determining
-for example which properties hold for some given referent.  Accessibility
-between DRSs is standardly defined based on a subordination relation
-($\leq$) between DRSs, i.e., DRS $K_1$ is accessible from DRS $K_2$
-\textit{iff} $K_2\leq K_1$, where subordination is recursively defined as
-follows:
+which conditions hold for some given referent.  Accessibility between DRSs
+is standardly defined based on a subordination relation between DRSs: DRS
+$K_1$ is accessible from DRS $K_2$ ($K_2 \leq K_1$) \textit{iff} $K_2
+= K_1$, or $K_2 < K_1$. In other words, a DRS is always accessible to
+itself, and to any DRS that directly, or indirectly subordinates it. Thus,
+the subordination relation $<$ is defined as follows:
 
 \begin{definition}[DRS Subordination]\label{def:DRSsub}~\\
-DRS $K_1$ subordinates DRS $K_2$ ($K_2 \leq K_1$) iff:
+DRS $K_1$ is subordinated by DRS $K_2$ ($K_1 < K_2$) iff:
   \begin{itemize}
-    \item $K_1 = K_2$;
-    \item $K_1$ directly subordinates $K_2$ ($K_2 <!~K_1$);
-    \item There is a DRS $K_{1'}$, such that $K_{1'} \leq K_1$ and 
-      $K_2 \leq K_{1'}$.
+    \item $K_1 <!~K_2$ 
+      ($K_1$ is directly subordinated by $K_2$; see Definition~\ref{def:DRSdsub} below);
+    \item There is a DRS $K_{1'}$, such that $K_1 < K_{1'}$  and $K_{1'} < K_2$.
   \end{itemize}
 \end{definition}
 
-\begin{subdefinition}[DRS Direct Subordination]~\\
-DRS $K_i$ directly subordinates DRS $K_j$ ($K_j <!~K_i$) iff:
+\noindent Direct subordination between two DRSs $K_i$ and $K_j$ ($K_i <!
+K_j$) means that $K_i$ either occurs in a condition in $K_j$, or that $K_j$
+serves as the antecedent of $K_i$ in an implication:
+
+\begin{subdefinition}[DRS Direct Subordination]\label{def:DRSdsub}~\\
+DRS $K_i$ is directly subordinated by DRS $K_j$ ($K_i <!~K_j$) iff:
   \begin{itemize}
-    \item $\neg K_j$, $\Box K_j$ or $\Diamond K_j$ is a DRS condition in
-      $K_i$;
-    \item $x:K_j$ is a DRS condition in $K_i$ for some $x$;
-    \item $K_j \Rightarrow K_k$, $K_k \Rightarrow K_j$, $K_j \vee K_k$, or 
-      $K_k \vee K_j$ is a DRS condition in $K_i$ for some DRS $K_k$;
-    \item There is a DRS $K_k$, such that $K_i \Rightarrow K_j$
+    \item $\neg K_i$, $\Box K_i$ or $\Diamond K_i$ is a DRS condition of
+      $K_j$;
+    \item $x:K_i$ is a DRS condition of $K_j$ for some $x$;
+    \item $K_i \Rightarrow K_k$, $K_k \Rightarrow K_i$, $K_i \vee K_k$, or 
+      $K_k \vee K_i$ is a DRS condition in $K_j$ for some DRS $K_k$;
+    \item There is a DRS $K_k$, such that $K_j \Rightarrow K_i$
       is a DRS condition in $K_k$.
   \end{itemize}
 \end{subdefinition}
 
-\noindent Thus, a DRS is always subordinated by itself, and by any DRS that
-directly, or indirectly subordinates it. Direct subordination between two
-DRSs $K_1$ and $K_2$ means that $K_2$ is either part of a condition in
-$K_1$, or that $K_1$ serves as its antecedent in an implication.
+%%%XXX HIER BEN IK
 
 For the accessibility relations in PDRT we need to take into account the
-contexts introduced by the projection pointers.  In case a pointer occurs
-free, it introduces a projected context. Since the interpretation site of
-some linguistic content should always be accessible from its introduction
-site, the projected context is necessarily accessible from the introduction
-context. Moreover, additional constraints on accessibility may be determined
-by the \MAPs~in the PDRSs from which the projected contexts are accessible.
-So, since we need to consider both sub-PDRSs and projected contexts, we
-define accessibility over \textit{PDRS-contexts} instead of PDRSs.
-A PDRS-context may refer to a PDRS (via its label), or to a projected
-context created by a pointer. PDRS subordination is then defined as follows:
+contexts introduced by the projection pointers.  In case a pointer occurs as
+a free variable, it introduces a projected context. Since the interpretation
+site of some linguistic content should always be accessible from its
+introduction site, the projected context is necessarily accessible from the
+introduction context. Moreover, additional constraints on accessibility may
+be determined by the MAPs in the PDRSs from which the projected contexts
+are accessible.
+%%XXX mention graph here?
+So, since we need to consider both sub-PDRSs and projected
+contexts, we define accessibility over \textit{PDRS-contexts} instead of
+PDRSs.  A PDRS-context may refer to a PDRS via its label, or to
+a projected context created by a pointer. PDRS subordination is then defined
+as follows:
 
 \begin{definition}[PDRS-context Subordination]\label{def:PDRSsub}~\\
 PDRS-context $\pi_1$ subordinates PDRS-context $\pi_2$ ($\pi_2 \leq \pi_1$)

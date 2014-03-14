@@ -1,4 +1,4 @@
-\section{Translating PDRSs}\label{sec:translating}
+\section{Translation and interpretation}\label{sec:translating}
 
 \subsection{Projection Table}
 
@@ -77,13 +77,11 @@ the \textsc{free-contexts} need to be translated into the labels from the
 \textsc{sub-pdrss} or the \textsc{outer-label}. For this, we can use the
 \MAPs, which are available in the projection table as empty PDRS content.
 
-\subsection{PDRS to DRS}
+\subsection{PDRS to DRS and FOL}
 
 Step 1: convert PDRS $P$ into a proper, resolved, (simple) and plain PDRS $P'$ (directly, or via projection table)\\
 
 \noindent Step 2: remove all projection variables from $P'$
-
-\subsection{DRS to FOL}
 
 %isFOLDRS :: DRS -> Bool
 %Returns whether DRS d can be translated into a FOLForm.
@@ -100,4 +98,4 @@ Step 1: convert PDRS $P$ into a proper, resolved, (simple) and plain PDRS $P'$ (
 \end{definition}
 
 
-
+\subsection{Model-theoretic interpretation}
