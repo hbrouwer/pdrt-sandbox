@@ -132,117 +132,138 @@ and a linear representation, as illustrated in \Next.
       $2\gets$vegan($y$), $2\gets x=y$}{$2\leq 1$}
 
 
-\subsection{Subordination and Accessibility}
+\subsection{Accessibility of Contexts}
 
 One of the central notions in DRT is the notion of accessibility between
 DRSs. Accessibility determines which DRS universes are accessible from a DRS
 condition in order to bind its referents. This is crucial for determining
 which conditions hold for some given referent.  Accessibility between DRSs
-is standardly defined based on a subordination relation between DRSs: DRS
-$K_1$ is accessible from DRS $K_2$ ($K_2 \leq K_1$) \textit{iff} $K_2
-= K_1$, or $K_2 < K_1$. In other words, a DRS is always accessible to
-itself, and to any DRS that directly, or indirectly subordinates it. Thus,
-the subordination relation $<$ is defined as follows:
+is standardly defined based on a subordination relation between DRSs: 
 
-\begin{definition}[DRS Subordination]\label{def:DRSsub}~\\
+\begin{definition}[DRS Accessibility]~\\
+DRS $K_j$ is accessible from DRS $K_i$ ($K_i \leq K_j$) iff
+  \begin{itemize}
+    \item $K_i = K_j$;
+    \item $K_i < K_j$ ($K_i$ is subordinated by $K_j$; see Definition~\ref{def:DRSsub}).
+  \end{itemize}
+\end{definition}
+
+\noindent Where subordination is recursively defined as follows:
+
+\begin{subdefinition}[DRS Subordination]\label{def:DRSsub}~\\
 DRS $K_1$ is subordinated by DRS $K_2$ ($K_1 < K_2$) iff:
   \begin{itemize}
     \item $K_1 <!~K_2$ 
-      ($K_1$ is directly subordinated by $K_2$; see Definition~\ref{def:DRSdsub} below);
-    \item There is a DRS $K_{1'}$, such that $K_1 < K_{1'}$  and $K_{1'} < K_2$.
+      ($K_1$ is directly subordinated by $K_2$; see Definition~\ref{def:DRSdsub});
+    \item There is a DRS $K_3$, such that $K_1 < K_3$  and $K_3 < K_2$.
   \end{itemize}
-\end{definition}
+\end{subdefinition}
 
-\noindent Direct subordination between two DRSs $K_i$ and $K_j$ ($K_i <!
-K_j$) means that $K_i$ either occurs in a condition in $K_j$, or that $K_j$
-serves as the antecedent of $K_i$ in an implication:
+\noindent In other words, a DRS is always accessible to itself, and to any
+DRS that directly, or indirectly subordinates it.  Direct subordination
+between two DRSs $K_1$ and $K_2$ ($K_1 <!~K_2$) means that $K_1$ either
+occurs in a condition in $K_2$, or that $K_2$ serves as the antecedent of
+$K_1$ in an implication:
 
 \begin{subdefinition}[DRS Direct Subordination]\label{def:DRSdsub}~\\
-DRS $K_i$ is directly subordinated by DRS $K_j$ ($K_i <!~K_j$) iff:
+DRS $K_1$ is directly subordinated by DRS $K_2$ ($K_1 <!~K_2$) iff:
   \begin{itemize}
-    \item $\neg K_i$, $\Box K_i$ or $\Diamond K_i$ is a DRS condition of
-      $K_j$;
-    \item $x:K_i$ is a DRS condition of $K_j$ for some $x$;
-    \item $K_i \Rightarrow K_k$, $K_k \Rightarrow K_i$, $K_i \vee K_k$, or 
-      $K_k \vee K_i$ is a DRS condition in $K_j$ for some DRS $K_k$;
-    \item There is a DRS $K_k$, such that $K_j \Rightarrow K_i$
-      is a DRS condition in $K_k$.
+    \item $\neg K_1$, $\Box K_1$ or $\Diamond K_1$ is a DRS condition of
+      $K_2$;
+    \item $x:K_1$ is a DRS condition of $K_2$ for some $x$;
+    \item $K_1 \Rightarrow K_3$, $K_3 \Rightarrow K_1$, $K_1 \vee K_3$, or 
+      $K_3 \vee K_1$ is a DRS condition in $K_2$ for some DRS $K_3$;
+    \item There is a DRS $K_3$, such that $K_2 \Rightarrow K_1$
+      is a DRS condition in $K_3$.
   \end{itemize}
 \end{subdefinition}
-
-%%%XXX HIER BEN IK
 
 For the accessibility relations in PDRT we need to take into account the
-contexts introduced by the projection pointers.  In case a pointer occurs as
-a free variable, it introduces a projected context. Since the interpretation
-site of some linguistic content should always be accessible from its
-introduction site, the projected context is necessarily accessible from the
-introduction context. Moreover, additional constraints on accessibility may
-be determined by the MAPs in the PDRSs from which the projected contexts
-are accessible.
+contexts introduced by the projection pointers. In the case a pointer occurs
+as a free variable, it introduces a \textit{projected context}, which means
+that the context is yet to be determined, based on the constraint that it is
+accessible from the (current) context of introduction.  Moreover, additional
+constraints on accessibility may be determined by the MAPs in the PDRSs from
+which the projected context is accessible.
 %%XXX mention graph here?
-So, since we need to consider both sub-PDRSs and projected
-contexts, we define accessibility over \textit{PDRS-contexts} instead of
-PDRSs.  A PDRS-context may refer to a PDRS via its label, or to
-a projected context created by a pointer. PDRS subordination is then defined
-as follows:
+Therefore, we define accessibility over \textit{PDRS-contexts}, which
+include those contexts referred to by the label of (accessible) PDRSs, as
+well as the projected contexts created by freely occurring pointers.  In
+line with DRT accessibility, accessibility between PDRS-contexts is defined
+on the basis of subordination, with the addition of the accessibility
+relations contributed by the minimally accessible contexts (MAPs):
 
-\begin{definition}[PDRS-context Subordination]\label{def:PDRSsub}~\\
-PDRS-context $\pi_1$ subordinates PDRS-context $\pi_2$ ($\pi_2 \leq \pi_1$)
-iff:
-\begin{itemize}
-  \item $\pi_1 = \pi_2$;
-  \item $\pi_1$ directly subordinates $\pi_2$ ($\pi_2 <!~\pi_1$);
-  \item $\pi_1$ is a minimally accessible context with respect to $\pi_2$
-    ($\pi_2 \preceq \pi_1$);    
-  \item There is a PDRS-context $\pi_{1'}$, such that $\pi_1$ subordinates
-    $\pi_{1'}$ and $\pi_{1'}$ subordinates $\pi_2$.
-\end{itemize}
+\begin{definition}[PDRS-context Accessibility]~\\
+PDRS-context $\pi_j$ is accessible from PDRS-context $\pi_i$ 
+($\pi_i \leq \pi_j$) iff
+  \begin{itemize}
+    \item $\pi_i = \pi_j$;
+    \item $\pi_i < \pi_j$ ($\pi_i$ is subordinated by $\pi_j$; see
+      Definition~\ref{def:PDRSsub});
+    \item $\langle \pi_1,\pi_2 \rangle$ is an element of the set of
+     MAPs of some PDRS $P_k$;
+  \end{itemize}
 \end{definition}
 
-\begin{subdefinition}[PDRS-context Direct Subordination]~\\
-PDRS-context $\pi_i$ directly subordinates PDRS-context $\pi_j$ 
-($\pi_j <!~\pi_i$) iff:
+\noindent Subordination is again defined recursively, directly corresponding
+to Definition~\ref{def:DRSsub}.
+
+\begin{subdefinition}[PDRS-context Subordination]\label{def:PDRSsub}~\\
+PDRS-context $\pi_1$ is subordinated by PDRS-context $\pi_2$
+($\pi_1 < \pi_2$) iff:
+\begin{itemize}
+   \item $\pi_1 <!~\pi_2$ ($\pi_1$ is directly subordinated by $\pi_2$; 
+     see Definition~\ref{def:PDRSdsub});
+   %\item $\pi_1 \prec \pi_2$ ($\pi_2$ is a minimally accessible context
+   %  with respect to $\pi_1$; see Definition~\ref{def:PDRSmac});
+   \item There is a PDRS-context $\pi_3$, such that $\pi_1 < \pi_3$ and $\pi_3 < \pi_2$.
+\end{itemize}
+\end{subdefinition}
+
+\noindent In PDRT, direct subordination is not determined by the context in
+which a condition containing a sub-PDRS occurs (as in the case of DRT; see
+Definition~\ref{def:DRSdsub}), but by the context in which the condition is
+interpreted, i.e., the pointer associated with the condition. Therefore,
+direct subordination for PDRS-contexts is defined over projected conditions:
+
+\begin{subdefinition}[PDRS-context Direct Subordination]~\label{def:PDRSdsub}\\
+PDRS-context $\pi_1$ is directly subordinated by PDRS-context $\pi_2$ 
+($\pi_1 <!~\pi_2$) iff:
   \begin{itemize}
-    \item $\langle\pi_i,\neg P_j\rangle$,
-      $\langle\pi_i,\Box P_j\rangle$,
-      or $\langle\pi_i,\Diamond P_j\rangle$ is a projected condition in
-      some PDRS $P_k$, and $lab(P_j) = \pi_j$;
-    \item $\langle\pi_i,x:P_j\rangle$ is a projected condition in some
-      PDRS $P_k$, for some $x$, and $lab(P_j) = \pi_j$;
-    \item  $\langle\pi_i,P_j \Rightarrow P_{j'}\rangle$ or
-      $\langle\pi_i,P_j \vee P_{j'}\rangle$ is a projected condition in
-      some PDRS $P_k$, and $lab(P_j) = \pi_j$ or $lab(P_{j'}) = \pi_j$;
-    \item There is a PDRS $P_k$, such that $P_i \Rightarrow P_j$ is a PDRS
-      condition in $P_k$, and $lab(P_i) = \pi_i$ and $lab(P_j) = \pi_j$.
-    %NB this is about PDRS condition instead of projected condition
+    \item $\langle\pi_2,\neg P_i\rangle$,
+      $\langle\pi_2,\Box P_i\rangle$,
+      or $\langle\pi_2,\Diamond P_i\rangle$ is a projected condition in
+      some PDRS $P_k$, s.t. $lab(P_i) = \pi_1$;
+    \item $\langle\pi_2,x:P_i\rangle$ is a projected condition in some
+      PDRS $P_k$, for some $x$, such that $lab(P_i) = \pi_1$;
+    \item  $\langle\pi_2,P_i \Rightarrow P_j\rangle$ or
+      $\langle\pi_2,P_i \vee P_j\rangle$ is a projected condition in
+      some PDRS $P_k$, such that $lab(P_i) = \pi_1$ or $lab(P_j) = \pi_1$;
+    \item $\langle \pi_3, P_i \Rightarrow P_j \rangle$ is a projected condition
+      in some PDRS $P_k$, for some $\pi_3$, such that $lab(P_i) = \pi_2$ and 
+      $lab(P_j) = \pi_1$.
   \end{itemize}
 \end{subdefinition}
 
-\begin{subdefinition}[Minimally Accessible PDRS-Contexts]~\\
-PDRS-context $\pi_i$ is a minimally accessible PDRS-context with
-respect to $\pi_j$ ($\pi_j \preceq \pi_i$) iff:
-  \begin{itemize}
-    \item $\pi_j = \pi_i$;
-    \item There is some PDRS $P_k$, such that $\pi_i$ is introduced in $P_k$
-      and $lab(P_k)=\pi_j$;
-    \item $\langle \pi_j,\pi_i\rangle$ is an element of the set of
-      \MAPs~of some PDRS $P_k$;
-      %Moet dit nog gekwalificeerd worden? Ziets als:
-      %, such that $lab(P_k) \leq \pi_j$, and either
-      %$lab(P_k) \leq \pi_i$, or $\pi_i$ occurs free. % check this def!
-    \item There exists a $\pi_k$, such that $\pi_j \preceq \pi_k$ and $\pi_k \preceq \pi_i$.
-      % identity and transitive closure now duplicate in subordination
-      % definition, but necessary for using this sub-definition separately.
-  \end{itemize}
-\end{subdefinition}
+%\begin{subdefinition}[Minimally Accessible PDRS-Contexts]~\label{def:PDRSmac}\\
+%PDRS-context $\pi_i$ is a minimally accessible PDRS-context with
+%respect to $\pi_j$ ($\pi_j \prec \pi_i$) iff:
+%  \begin{itemize}
+%    \item There is some PDRS $P_k$, such that $\pi_i$ is introduced in $P_k$
+%      and $lab(P_k)=\pi_j$;
+%    \item $\langle \pi_j,\pi_i\rangle$ is an element of the set of
+%      \MAPs~of some PDRS $P_k$;
+%      %Moet dit nog gekwalificeerd worden? Ziets als:
+%      %, such that $lab(P_k) \leq \pi_j$, and either
+%      %$lab(P_k) \leq \pi_i$, or $\pi_i$ occurs free. % check this def!
+%  \end{itemize}
+%\end{subdefinition}
 
-%XXX
-
-The $\leq$-relation creates a partial order over all PDRS-contexts. This
-results in a directed graph, called the \textit{Accessibility Graph}, over
-all PDRS-contexts in a given PDRS. We will call a PDRS whose accessibility
-graph is weakly connected, a \emph{connected} PDRS:
+The accessibility relation ($\leq$) creates a partial order over all
+---projected and non-projected--- PDRS-contexts. This results in a directed
+graph, called the \textit{Accessibility Graph}, over all PDRS-contexts in
+a given PDRS. We will call a PDRS whose accessibility graph is weakly
+connected, a \emph{connected} PDRS:
 
 \begin{definition}[Connectedness]~\\
   A PDRS $P$ is connected iff:
@@ -254,7 +275,7 @@ graph is weakly connected, a \emph{connected} PDRS:
   \end{itemize}
 \end{definition}
 
-\noindent All basic PDRSs are connected PDRss, because projection variables
+\noindent All basic PDRSs are connected PDRSs, because projection variables
 either occur free (in which case they are accessible from their introduction
 site), or are bound by some sub-PDRS, which is necessarily accessible from
 the global PDRS. We will see that unresolved structures, introduced below,
@@ -274,37 +295,54 @@ formalisms, which means that the meaning structures simultaneously provide
 semantic content and serve as a context for novel information. That is, the
 referents introduced in a (P)DRS may serve as antecedents for later
 introduced anaphoric expressions. In DRT, a referent is bound in case it is
-introduced in the universe of some accessible DRS, as formally defined below
-(here, $U(K_i)$ indicates the set of referents in the universe of $K_i$).
+introduced in the universe of some accessible DRS, as formally defined below.
 
-\begin{definition}[DRS bound variable]~\\
+\begin{definition}[DRS Variable Binding]~\\
 DRS variable $x$, introduced in DRS $K_i$, is bound in global DRS $K$ iff:
 \begin{quote}
 There exists a DRS $K_j \leq K$, such that
 \begin{enumerate}[i.]
   \item $K_i \leq K_j$;
-  \item $x\in U(K_j)$. %, where $U(K_2)$ refers to the universe of $K_2$.
+  \item $x\in U(K_j)$, where $U(K_j)$ refers to the universe of DRS $K_j$.
 \end{enumerate}
 \end{quote}
 \end{definition}
 
-\begin{definition}[DRS Free variables]~ %cf. K,vG&R(2005)
+\noindent All DRS variables that do not meet this requirement are free
+variables. In the DRT literature it is common to provide a function over
+DRSs that collects all free variables systematically from the available
+variables in a DRS
+\citeaffixed{kamp1993discourse,bos2003implementing,kamp2011discourse}{see,
+e.g.,}. The idea is that the set of free variables of a DRS can be described
+as the set of all variables occurring in the body of a DRS (in a DRS
+predicate or a propositional condition) minus the variables that occur in an
+---accessible--- DRS universe. Since accessibility in DRT is defined
+hierarchically, it suffices to collect all variables from the conditions of
+a DRS in a bottum-up fashion, and accordingly subtract the variables
+occurring in the universe of the DRS.
+
+\begin{definition}[Free DRS Variables]~\label{def:fdrsvs} 
   \begin{enumerate}[i.]
-    \item $FV(\langle U, C \rangle) = (\bigcup_{c\in C} FV(c)) - U$
-    \item $FV(R(x_1,...,x_n)) = \{x_1,...,x_n\}$
-    \item $FV(\neg K) = FV(\Diamond K) = FV(\Box K) = FV(K)$
-    \item $FV(K_1 \Rightarrow K_2) = FV(K_1) \cup (FV(K_2) - U(K_1)$
-    \item $FV(K_1 \Rightarrow K_2) = FV(K_1) \cup FV(K_2)$
-    \item $FV(x:K) = \{x\} \cup FV(K)$
+    \item $FV(\langle U, C \rangle) = (\bigcup_{c\in C} FV(c)) - U$;
+    \item $FV(R(x_1,...,x_n)) = \{x_1,...,x_n\}$;
+    \item $FV(\neg K) = FV(\Diamond K) = FV(\Box K) = FV(K)$;
+    \item $FV(K_1 \Rightarrow K_2) = FV(K_1) \cup (FV(K_2) - U(K_1))$;
+    \item $FV(K_1 \vee K_2) = FV(K_1) \cup FV(K_2)$;
+    \item $FV(x:K) = \{x\} \cup FV(K)$.
   \end{enumerate}
 \end{definition}
 
+\noindent Note that the different accessibility constraints for implication
+and disjunction here become explicit, since the variables in the universe of
+the antecedent of an implication can bind the free variables in its
+consequent, while this does not hold for the two disjuncts of a disjunction.
 
-Free and bound projection variables in PDRT are defined in the same way as
-referents in DRT, except that the antecedent variable is required to
-function as the label of some accessible PDRS:
+In PDRT, we need to define binding over both projection variables and
+projected referents. The binding of projection variables can be defined in
+the same way as the binding of referents in DRT, with the labels of
+accessible PDRSs serving as possible antecedents:
 
-\begin{definition}[PDRS bound projection variable]~\\
+\begin{definition}[Projection Variable Binding]~\\
 Projection variable $v$, introduced in PDRS $P_i$, is bound iff:
 \begin{quote}
 There exists a PDRS $P_j$, such that
@@ -315,7 +353,13 @@ There exists a PDRS $P_j$, such that
 \end{quote}
 \end{definition}
 
-\begin{definition}[PDRS Free projection variables]~
+\noindent Following Definition~\ref{def:fdrsvs}, we can define a function
+for collecting free projection variables. Here, the set of free projection
+variables is defined as the set of all projection variables available in the
+set of MAPs, the set of projected referents and the set of projected
+conditions, minus those occurring as a label in an accessible PDRS.
+
+\begin{definition}[Free Projection Variables]~
   \begin{enumerate}[i.]
     \item $FPV(\langle l, M, U, C \rangle) 
       = (\bigcup_{m\in M} FPV(m) \cup \bigcup_{u\in U} FPV(u) 
@@ -333,22 +377,25 @@ There exists a PDRS $P_j$, such that
   \end{enumerate}
 \end{definition}
 
+%%%XXX HIER BEN IK
 
-In PDRT, the interpretation site of the semantic content, indicated by the
-pointer, determines whether some referent is bound. Again, a referent is
-bound if it occurs in some universe as an accessible antecedent. However,
-since in PDRT all referents and conditions are associated with a pointer,
-and may therefore be projected, the accessibility of antecedents should not
-be determined on the basis of the PDRS in which a referent is introduced,
-but by where it is interpreted. Thus, a projected referent is bound in case
-there exists some referent pointing to an accessible context in any universe
-in the global PDRS. Since by definition the interpretation context of some
-semantic content is accessible from its context of introduction, it follows
-from this definition that the projection context of the antecedent is also
-accessible from the introduction site of the projected referent ($lab(P_i)
-\leq \pi_j$). 
+For the binding of referents in PDRT, we again need to define whether the
+referent occurs in an accessible universe. Since accessibility in PDRT is
+defined over PDRS-contexts indicated via projection variables, the binding
+of referents should also be defined based on PDRS-contexts. This means that
+we need to define binding over \textit{projected referents}, consisting of
+a pointer and a referent. The pointer determines the interpretation site of
+the projected referent, thus binding should be defined relative to this
+pointer.  More specifically, a projected referent $\langle p, r \rangle$ is
+bound in case there exists a referent $\langle p',r'\rangle$ in some
+universe, such that $p'$ is accessible from $p$, and $r'=r$.
+%Thus, a projected referent is bound in case there exists some referent
+%pointing to an accessible context in any universe in the global PDRS. 
+This is formalized in the following definition. Here, the set
+\textit{PVars(P)} represents the set of all projection variables (labels and
+pointers) that occur in PDRS $P$.
 
-\begin{definition}[PDRS bound projected referent]~\\
+\begin{definition}[Projected Referent Binding]~\\
 Projected referent $\langle p,r\rangle$, introduced in PDRS $P_i$, is bound
 in global PDRS $P$ iff:
 \begin{quote}
@@ -358,14 +405,16 @@ There exists a PDRS-context $\pi_j \in PVars(P)$, such that
 %  \item $lab(P_i) \leq \pi_j$; 
     %XXX is this by definition true, since $lab(P_i) \leq p$ (given a
     %connected PDRS)?
-  \item There exists some PDRS $P_j$, such that 
+  \item There exists some PDRS $P_j \leq P$, such that 
     $\langle \pi_j,r\rangle \in U(P_j)$.
 \end{enumerate}
 \end{quote}
 \end{definition}
 
-\noindent In this definition, the set \textit{PVars(P)} represents the set
-of all projection variables (labels and pointers) that occur in PDRS $P$.
+\noindent Since by definition the interpretation context of some semantic content is
+accessible from its context of introduction, it follows from this definition
+that the projection context of the antecedent is also accessible from the
+introduction site of the projected referent ($lab(P_i) \leq \pi_j$). 
 
 %%XXX
 
@@ -443,6 +492,7 @@ these into account for creating possible bound projection referents.
       where: $R' = R \cup U$;
              $A' = A \cup M$;
              $Acc(C) = \{\langle p, c'\rangle \in C~|~ p \preceq l\}$
+             %%%XXX NB I removed def for \preceq!!
     \item $\mathcal{B}(\langle p, R(...)\rangle,R,A) = \emptyset$
     \item $\mathcal{B}(\langle p,\neg K\rangle,R,A)
       = \mathcal{B}(\langle p,\Diamond K\rangle,R,A)
