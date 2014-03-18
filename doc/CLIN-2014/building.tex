@@ -65,6 +65,14 @@ representations for a single sentence:
 \b. \drs{$x~~y$}{John($x$)\\ vegan($y$)\\ $x=y$}
 \c. \flatdrs{$x, y$}{John($x$), vegan($y$), $x=y$}
 
+Note that, for reasons of clarity, we here use a different convention for
+representing the attributive use of indefinite noun phrases than in the
+PDRS in Example~\ref{ex:binding} above; while the indefinite here introduces
+a new discourse referent, which is equated with the variable introduced by
+subject, in Example~\ref{ex:binding} this equation is eliminated, resulting
+in a representation with only one discourse variable.  These representations
+are truth-conditionally equivalent.
+
 Moving to the theory of PDRT, the main difference from DRT is that a basic
 PDRS introduces a label and all referents and conditions are associated with
 a pointer, which may be bound by the label of an accessible PDRS. Pointers
@@ -80,7 +88,7 @@ A Basic PDRS is a quadruple $\langle l, \{\mu_1 ... \mu_n\},
 \{\delta_1 ... \delta_m\}, \{\chi_1 ... \chi_k\}\rangle$, where:
   \begin{enumerate}[i.]
     \item $l$ is a projection variable;
-    \item $\{\mu_1 ... \mu_n\}$ is a finite set of \MAPs, with $\mu_i=\langle
+    \item $\{\mu_1 ... \mu_n\}$ is a finite set of MAPs, with $\mu_i=\langle
       v_1,v_2\rangle$, and  $v_1$ and $v_2$ are projection variables;
     \item $\{\delta_1 ... \delta_m\}$ is a finite set of projected
       referents, with $\delta_j=\langle v_j, x_j\rangle$, such that $v_j$ is
@@ -144,7 +152,8 @@ is standardly defined based on a subordination relation between DRSs:
 DRS $K_j$ is accessible from DRS $K_i$ ($K_i \leq K_j$) iff
   \begin{itemize}
     \item $K_i = K_j$;
-    \item $K_i < K_j$ ($K_i$ is subordinated by $K_j$; see Definition~\ref{def:DRSsub}).
+    \item $K_i < K_j$ ($K_i$ is subordinated by $K_j$; 
+      see Definition~\ref{def:DRSsub}).
   \end{itemize}
 \end{definition}
 
@@ -154,7 +163,8 @@ DRS $K_j$ is accessible from DRS $K_i$ ($K_i \leq K_j$) iff
 DRS $K_1$ is subordinated by DRS $K_2$ ($K_1 < K_2$) iff:
   \begin{itemize}
     \item $K_1 <!~K_2$ 
-      ($K_1$ is directly subordinated by $K_2$; see Definition~\ref{def:DRSdsub});
+      ($K_1$ is directly subordinated by $K_2$; 
+      see Definition~\ref{def:DRSdsub});
     \item There is a DRS $K_3$, such that $K_1 < K_3$  and $K_3 < K_2$.
   \end{itemize}
 \end{subdefinition}
@@ -216,7 +226,8 @@ PDRS-context $\pi_1$ is subordinated by PDRS-context $\pi_2$
      see Definition~\ref{def:PDRSdsub});
    %\item $\pi_1 \prec \pi_2$ ($\pi_2$ is a minimally accessible context
    %  with respect to $\pi_1$; see Definition~\ref{def:PDRSmac});
-   \item There is a PDRS-context $\pi_3$, such that $\pi_1 < \pi_3$ and $\pi_3 < \pi_2$.
+   \item There is a PDRS-context $\pi_3$, such that $\pi_1 < \pi_3$ and
+     $\pi_3 < \pi_2$.
 \end{itemize}
 \end{subdefinition}
 
@@ -226,7 +237,7 @@ Definition~\ref{def:DRSdsub}), but by the context in which the condition is
 interpreted, i.e., the pointer associated with the condition. Therefore,
 direct subordination for PDRS-contexts is defined over projected conditions:
 
-\begin{subdefinition}[PDRS-context Direct Subordination]~\label{def:PDRSdsub}\\
+\begin{subdefinition}[PDRS-context Direct Subordination]\label{def:PDRSdsub}~\\
 PDRS-context $\pi_1$ is directly subordinated by PDRS-context $\pi_2$ 
 ($\pi_1 <!~\pi_2$) iff:
   \begin{itemize}
@@ -323,12 +334,18 @@ occurring in the universe of the DRS.
 
 \begin{definition}[Free DRS Variables]~\label{def:fdrsvs} 
   \begin{enumerate}[i.]
-    \item $FV(\langle U, C \rangle) = (\bigcup_{c\in C} FV(c)) - U$;
-    \item $FV(R(x_1,...,x_n)) = \{x_1,...,x_n\}$;
-    \item $FV(\neg K) = FV(\Diamond K) = FV(\Box K) = FV(K)$;
-    \item $FV(K_1 \Rightarrow K_2) = FV(K_1) \cup (FV(K_2) - U(K_1))$;
-    \item $FV(K_1 \vee K_2) = FV(K_1) \cup FV(K_2)$;
-    \item $FV(x:K) = \{x\} \cup FV(K)$.
+    \item $\mathcal{F}(\langle U, C \rangle)
+          = (\bigcup_{c\in C} \mathcal{F}(c)) - U$;
+    \item $\mathcal{F}(R(x_1,...,x_n)) = \{x_1,...,x_n\}$;
+    \item $\mathcal{F}(\neg K) 
+          = \mathcal{F}(\Diamond K) 
+          = \mathcal{F}(\Box K)
+          = \mathcal{F}(K)$;
+    \item $\mathcal{F}(K_1 \Rightarrow K_2)
+          = \mathcal{F}(K_1) \cup (\mathcal{F}(K_2) - U(K_1))$;
+    \item $\mathcal{F}(K_1 \vee K_2)
+          = \mathcal{F}(K_1) \cup \mathcal{F}(K_2)$;
+    \item $\mathcal{F}(x:K) = \{x\} \cup \mathcal{F}(K)$.
   \end{enumerate}
 \end{definition}
 
@@ -359,41 +376,63 @@ variables is defined as the set of all projection variables available in the
 set of MAPs, the set of projected referents and the set of projected
 conditions, minus those occurring as a label in an accessible PDRS.
 
-\begin{definition}[Free Projection Variables]~
+\begin{definition}[Free Projection Variables]\label{def:def:fpvs}~
   \begin{enumerate}[i.]
-    \item $FPV(\langle l, M, U, C \rangle) 
-      = (\bigcup_{m\in M} FPV(m) \cup \bigcup_{u\in U} FPV(u) 
-      \cup \bigcup_{c\in C} FPV(c)) - \{l\}$
-    \item $FPV(\langle p_1, p_2\rangle) = \{p_1, p_2\}$
-    \item $FPV(\langle p, r\rangle) = \{p\}$
-    \item $FPV(\langle p, R(...)\rangle) = \{p\}$
-    \item $FPV(\langle p,\neg K\rangle) = FPV(\langle p,\Diamond K\rangle)
-      = FPV(\langle p,\Box K\rangle) = FPV(\langle p,x:K\rangle) 
-      = \{p\} \cup FPV(K)$
-    \item $FPV(\langle p,K_1 \Rightarrow K_2\rangle) 
-      = \{p\}\cup FPV(K_1) \cup (FPV(K_2) - lab(K_1))$
-    \item $FPV(\langle p,K_1 \vee K_2\rangle) 
-      = \{p\}\cup FPV(K_1) \cup FPV(K_2)$
+    \item $\mathcal{FP}(\langle l, M, U, C \rangle) 
+          = (\bigcup_{m\in M} \mathcal{FP}(m)
+            \cup \bigcup_{u\in U} \mathcal{FP}(u) 
+            \cup \bigcup_{c\in C} \mathcal{FP}(c)) - \{l\}$
+    \item $\mathcal{FP}(\langle p_1, p_2\rangle) = \{p_1, p_2\}$
+    \item $\mathcal{FP}(\langle p, r\rangle) = \{p\}$
+    \item $\mathcal{FP}(\langle p, R(...)\rangle) = \{p\}$
+    \item $\mathcal{FP}(\langle p,\neg K\rangle)
+          = \mathcal{FP}(\langle p,\Diamond K\rangle)
+          = \mathcal{FP}(\langle p,\Box K\rangle)
+          = \mathcal{FP}(\langle p,x:K\rangle) 
+          = \{p\} \cup \mathcal{FP}(K)$
+    \item $\mathcal{FP}(\langle p,K_1 \Rightarrow K_2\rangle) 
+          = \{p\}\cup \mathcal{FP}(K_1)
+            \cup (\mathcal{FP}(K_2) - lab(K_1))$
+    \item $\mathcal{FP}(\langle p,K_1 \vee K_2\rangle) 
+          = \{p\}\cup \mathcal{FP}(K_1) \cup \mathcal{FP}(K_2)$
   \end{enumerate}
 \end{definition}
 
-%%%XXX HIER BEN IK
-
 For the binding of referents in PDRT, we again need to define whether the
-referent occurs in an accessible universe. Since accessibility in PDRT is
-defined over PDRS-contexts indicated via projection variables, the binding
-of referents should also be defined based on PDRS-contexts. This means that
-we need to define binding over \textit{projected referents}, consisting of
-a pointer and a referent. The pointer determines the interpretation site of
-the projected referent, thus binding should be defined relative to this
-pointer.  More specifically, a projected referent $\langle p, r \rangle$ is
-bound in case there exists a referent $\langle p',r'\rangle$ in some
-universe, such that $p'$ is accessible from $p$, and $r'=r$.
-%Thus, a projected referent is bound in case there exists some referent
-%pointing to an accessible context in any universe in the global PDRS. 
-This is formalized in the following definition. Here, the set
-\textit{PVars(P)} represents the set of all projection variables (labels and
-pointers) that occur in PDRS $P$.
+referent occurs in an accessible universe.  However, as illustrated in
+example~\ref{ex:binding}, here repeated as \Next, the binding of referents
+in PDRT is non-hierarchical in the sense that referents may be bound by
+antecedents introduced in a PDRS that is not accessible.
+
+\ex. It is not the case that John is a vegetarian, he's a vegan.\\
+\label{ex:binding_rep}
+\hspace*{-0.3cm}{
+  \pdrs{1}{}{
+    $1\gets\neg$\pdrs{2}{$3\gets x$}{
+      $3\gets$John($x$)\\ $2\gets$vegetarian($x$)
+        }{$2 \leq 3$}\\
+      $1\gets$vegan($x$)
+  }{$1\leq 3$}
+}
+
+In this example, the MAPs describing the accessible PDRS-contexts determine
+that the variable $x$ in the predicate \textit{vegan} is bound by the
+projected referent introduced in the universe of the PDRS labelled $2$,
+despite the fact that $2$ is not an accessible context from PDRS $1$.  So,
+since accessibility in PDRT is defined over PDRS-contexts indicated via
+projection variables, the binding of referents should also be defined based
+on PDRS-contexts. This means that we need to define binding over
+\textit{projected referents}, consisting of a pointer and a referent (in the
+example above, we thus need to determine whether the projected referent
+$\langle 1, x\rangle$ is bound). The pointer determines the interpretation
+site of the projected referent, so the accessibility requirement for the
+antecedent of a projected referent should hold between the pointer of the
+referent and the pointer of its antecedent.  More specifically, a projected
+referent $\langle p, r \rangle$ is bound in case there exists a projected
+referent $\langle p',r'\rangle$ in some universe, such that $r'=r$ and $p'$
+is accessible from $p$.  This is formalized in the following definition.
+Here, the set \textit{PVars(P)} represents the set of all projection
+variables (labels and pointers) that occur in PDRS $P$.
 
 \begin{definition}[Projected Referent Binding]~\\
 Projected referent $\langle p,r\rangle$, introduced in PDRS $P_i$, is bound
@@ -411,114 +450,140 @@ There exists a PDRS-context $\pi_j \in PVars(P)$, such that
 \end{quote}
 \end{definition}
 
-\noindent Since by definition the interpretation context of some semantic content is
-accessible from its context of introduction, it follows from this definition
-that the projection context of the antecedent is also accessible from the
-introduction site of the projected referent ($lab(P_i) \leq \pi_j$). 
+\noindent In other words, a projected referent is bound in case there exists
+some referent pointing to an accessible context in any universe in the
+global PDRS.  Since by definition the interpretation context of some
+semantic content is accessible from its context of introduction, it follows
+from this definition that the projection context of the antecedent is also
+accessible from the introduction site of the projected referent ($lab(P_i)
+\leq \pi_j$). 
 
-%%XXX
-
-The set of \textit{free projected referents} of a PDRS $P$ are defined as the
-difference between the \textit{possibly free projected referents} ($\mathcal{F}$) of
-$P$ and the \textit{possibly bound projected referents} ($\mathcal{B}$) of $P$, based
-on an empty set of projected referents and an empty set of \MAPs, thus:
+In order to collect the free projected referents of a PDRS in the same
+systematic way as the Definitions~\ref{def:fdrsvs} and \ref{def:fpvs}
+describe for DRS referents and PDRS projection variables, respectively, we
+need to find a way to account for the non-hierarchical binding illustrated
+in example~\Last.  Therefore, we define the set of \textit{free projected
+referents} of a PDRS $P$ is defined as the difference between the set of
+\textit{all projected referents} ($\mathcal{A}$) of $P$ and the set of
+\textit{bound projected referent candidates} ($\mathcal{B}$) of $P$, which
+are the projected referents that occur in some universe in $P$, plus those
+created by associating each referent with the projection variables of all
+contexts accessible from its interpretation site.
+%%XXX probably need to explain this better
 
 \begin{definition}[PDRS Free Projected Referents]~
   \begin{itemize}
-    \item $FPR(P) = \mathcal{F}(P) - \mathcal{B}(P,\emptyset,\emptyset)$.
+    \item $\mathcal{FR}(P) = \mathcal{A}(P) - \mathcal{B}(P)$.
   \end{itemize}
 \end{definition}
 
-We define the \textit{possibly free projected referents} of a PDRS $P$ on the
-basis of the conditions of $P$: those referents that occur in a predicate or
-a propositional are, together with the pointer of their respective
-conditions, candidates to be free projected referents. The collection of
-these referents can be described as follows:
+\noindent The collection of all projected referents of a PDRS is
+straightforward: for each (embedded) PDRS, we take the union of the universe
+of that PDRS and the referents that occur in a predicate or a propositional
+condition together with the pointer of their respective conditions. This is
+formally described as follows:
 
-\begin{subdefinition}[Possibly Free Projected Referents]~
+\begin{subdefinition}[All Projected Referents]~
   \begin{enumerate}[i.]
-    \item $\mathcal{F}(\langle l, M, U, C \rangle)
-      = (\bigcup_{c\in C} \mathcal{F}(c))$
-    \item $\mathcal{F}(\langle p, R(x_1,...,x_n)\rangle)
+    \item $\mathcal{A}(\langle l, M, U, C \rangle)
+      = U \cup (\bigcup_{c\in C} \mathcal{A}(c))$
+    \item $\mathcal{A}(\langle p, R(x_1,...,x_n)\rangle)
       = \{\langle p, x_1\rangle, ..., \langle p, x_n\rangle\}$
-    \item $\mathcal{F}(\langle p,\neg K\rangle) 
-      = \mathcal{F}(\langle p,\Diamond K\rangle) 
-      = \mathcal{F}(\langle p,\Box K\rangle)
-      = \mathcal{F}(K)$
-    \item $\mathcal{F}(\langle p,K_1 \Rightarrow K_2\rangle)
-      = \mathcal{F}(\langle p,K_1 \vee K_2\rangle)
-      = \mathcal{F}(K_1) \cup \mathcal{F}(K_2)$
-    \item $\mathcal{F}(\langle p,x:K\rangle)
-      = \{\langle p,x \rangle\} \cup \mathcal{F}(K)$
+    \item $\mathcal{A}(\langle p,\neg K\rangle) 
+      = \mathcal{A}(\langle p,\Diamond K\rangle) 
+      = \mathcal{A}(\langle p,\Box K\rangle)
+      = \mathcal{A}(K)$
+    \item $\mathcal{A}(\langle p,K_1 \Rightarrow K_2\rangle)
+      = \mathcal{A}(\langle p,K_1 \vee K_2\rangle)
+      = \mathcal{A}(K_1) \cup \mathcal{A}(K_2)$
+    \item $\mathcal{A}(\langle p,x:K\rangle)
+      = \{\langle p,x \rangle\} \cup \mathcal{A}(K)$
   \end{enumerate}
 \end{subdefinition}
 
-In order to determine the set of \textit{possibly bound referents} of PDRS
-$P$, that may bind the possibly free projected referents, it is not enough
-to just take the union of all universes in a PDRS. This is of course because
-projected referents may bind other referents in any context from which their
-projection site is accessible. In order to account for all these
-hypothetical bindings, we collect not only the projected referents actually
-occurring in the universe of $P$, but also the combinations of the referents
-with all contexts from which their projection context is accessible. Since
-the availability of accessible contexts is not hierarchical (i.e., the
-projection context that binds a referent may be introduced in some embedded
-PDRS), we need to keep track of the entire accessibility graph in order to
-create all possible bindings; we can do this by keeping track of the
-\MAPs~of all superordinate PDRSs and create possible bindings based on these
-accessibilities. The collection and generation of possible bound referents
-is shown below.  Informally, the algorithm works as follows: all previously
-found referents, plus the universe of the current PDRS are collected, and
-these are enhanced with hypothetical antecedents created on the basis of the
-current label, and the current set of \MAPs~(by adding new projected
-referents for those referents whose pointer occurs as the second element of
-a \textsc{map}). In addition, all universes and hypothetical referents of
-the PDRSs embedded in the conditions are collected, based on the referents
-universes and \MAPs~obtained so far. Note that projected conditions (i.e.,
-those conditions $c$ for which it holds that $c \notin Acc(C)$) are not
-accessible to the bound referents obtained so far, and therefore do not take
-these into account for creating possible bound projection referents.
+As decribed above, in order to determine the set of \textit{bound projected
+referent candidates} of PDRS $P$, we collect not only the projected
+referents actually occurring in the universe of $P$, but also the
+combinations of the referents with all contexts from which their projection
+context is accessible. Since the availability of accessible contexts is not
+hierarchical (i.e., the projection context that binds a referent may be
+introduced in some embedded PDRS), we need to keep track of the entire
+accessibility graph in order to create all possible bindings; we can do this
+by keeping track of the MAPs of all superordinate PDRSs and create possible
+bindings based on these accessibilities. The collection and generation of
+bound projected referent candidates is shown below. 
 
-\begin{subdefinition}[Possibly Bound Projected Referents]~\\
+\begin{subdefinition}[Bound Projected Referent Candidates]\label{def:bprcs}~\\
   The possibly bound projected referents are determined on the basis of a
-  set of projected referents ($R$), and a set of \MAPs~representing
+  set of projected referents ($R$), and a set of MAPs representing
   accessibility between contexts ($A$).
   \begin{enumerate}[i.]
-    \item $\mathcal{B}(\langle l, M, U, C \rangle,R,A) 
-      = R' \cup (\bigcup_{\langle p, r\rangle\in R'} \langle l, r\rangle)
-      \cup (\bigcup_{\langle p_1,p_2\rangle\in A'} R'[p_2\backslash p_1])
-      \cup (\bigcup_{c\in Acc(C)} \mathcal{B}(c,R',A'))
-      \cup (\bigcup_{c\notin Acc(C)} \mathcal{B}(c,\emptyset,\emptyset))$\\
-      where: $R' = R \cup U$;
-             $A' = A \cup M$;
-             $Acc(C) = \{\langle p, c'\rangle \in C~|~ p \preceq l\}$
-             %%%XXX NB I removed def for \preceq!!
-    \item $\mathcal{B}(\langle p, R(...)\rangle,R,A) = \emptyset$
-    \item $\mathcal{B}(\langle p,\neg K\rangle,R,A)
-      = \mathcal{B}(\langle p,\Diamond K\rangle,R,A)
-      = \mathcal{B}(\langle p,\Box K\rangle,R,A)
-      = \mathcal{B}(\langle p,x:K\rangle,R,A)
-      = \mathcal{B}(K,R,A)$
-    \item $\mathcal{B}(\langle p,K_1 \Rightarrow K_2\rangle,R,A)
-      = \mathcal{B}(K_2,\mathcal{B}(K_1,R,A,),A\cup \MAPs(K_1))$
-    \item $\mathcal{B}(\langle p,K_1 \vee K_2\rangle,R,A)
-      = \mathcal{B}(K_1,R,A) \cup \mathcal{B}(K_2,R,A)$
+    \item $\mathcal{B}(\langle l, M, U, C \rangle) 
+      = \mathcal{B'}(\langle l, M, U, C \rangle,\emptyset,\emptyset)$
+    %\item $\mathcal{B'}(\langle l, M, U, C \rangle,R,A) 
+    %  = R' \cup (\bigcup_{\langle p, r\rangle\in R'} \langle l, r\rangle)
+    %  \cup (\bigcup_{\langle p_1,p_2\rangle\in A'} R'[p_2\backslash p_1])
+    %  \cup (\bigcup_{c\in Acc(C)} \mathcal{B'}(c,R',A'))
+    %  \cup (\bigcup_{c\notin Acc(C)} \mathcal{B'}(c,\emptyset,\emptyset))$\\
+    %  where: $R' = R \cup U$;
+    %         $A' = A \cup M$;
+    %         $Acc(C) = \{\langle p, c'\rangle \in C~|~ p \leq l\}$
+    \item $\mathcal{B'}(\langle l, M, U, C \rangle,R,A) = 
+          R'
+          \cup \mathcal{B'}(l,R',A)
+          \cup \mathcal{B'}(M,R',A)
+          \cup \mathcal{B'}(C,R',A\cup M)$\\
+      where: $R' = R\cup U$
+    \item $\mathcal{B'}(l,R,A) 
+      = \bigcup_{\langle \_, r\rangle\in R} \langle l, r\rangle$
+    \item $\mathcal{B'}(M,R,A)
+      = \bigcup_{\langle p_1,p_2\rangle\in M\cup A} R[p_2\backslash p_1]$
+    \item $\mathcal{B'}(C,R,A)
+      = (\bigcup_{c\in Acc(C)} \mathcal{B'}(c,R,A))
+      \cup (\bigcup_{c\notin Acc(C)} \mathcal{B'}(c,\emptyset,\emptyset))$\\
+      where: $Acc(C) = \{\langle p, \_\rangle \in C~|~ p \leq l\}$
+    \item $\mathcal{B'}(\langle p, R(...)\rangle,R,A) = \emptyset$
+    \item $\mathcal{B'}(\langle p,\neg K\rangle,R,A)
+      = \mathcal{B'}(\langle p,\Diamond K\rangle,R,A)
+      = \mathcal{B'}(\langle p,\Box K\rangle,R,A)
+      = \mathcal{B'}(\langle p,x:K\rangle,R,A)
+      = \mathcal{B'}(K,R,A)$
+    \item $\mathcal{B'}(\langle p,K_1 \Rightarrow K_2\rangle,R,A)
+      = \mathcal{B'}(K_2,\mathcal{B'}(K_1,R,A),A\cup \MAPs(K_1))$
+    \item $\mathcal{B'}(\langle p,K_1 \vee K_2\rangle,R,A)
+      = \mathcal{B'}(K_1,R,A) \cup \mathcal{B'}(K_2,R,A)$
       \end{enumerate}
 \end{subdefinition}
 
-Based on the definitions of free and bound variables, we can define several
-properties of DRSs and PDRSs. Firstly, a (P)DRS without any free discourse
-referents is called a \textit{proper} (P)DRS. In general, a (P)DRS
-representing a complete sentence or preposition will be proper, meaning that
-none of the referents remain underspecified. As we will see in
+\noindent Informally, the algorithm described in Definition~\ref{def:bprcs}
+works as follows: all previously found referents, plus the universe of the
+current PDRS are collected, and these are enhanced with hypothetical
+antecedents created on the basis of the current label, and the current set
+of MAPs (by adding new projected referents for those referents whose pointer
+occurs as the second element of a MAP). In addition, all universes and
+hypothetical referents of the PDRSs embedded in the conditions are
+collected, based on the referents in the universes and the MAPs obtained so
+far. Note that projected conditions (i.e., those conditions $c$ for which it
+holds that $c \notin Acc(C)$) are not accessible to the bound referents
+obtained so far, and therefore do not take these into account for creating
+possible bound projection referents.
+
+\subsection{Properties of DRSs and PDRSs}
+
+Based on the definitions of free and bound variables in DRT and PDRT, we can
+define several properties of DRSs and PDRSs. Firstly, a (P)DRS without any
+free discourse referents is called a \textit{proper} (P)DRS. In general,
+a (P)DRS representing a complete sentence or preposition will be proper,
+meaning that none of the referents remain underspecified. As we will see in
 Section~\ref{sec:unresolved}, unresolved structures representing lexical
-items may contain (P)DRSs that are not (yet) proper, thus containing free
+items may contain (P)DRSs that are not (yet) proper, and thus contain free
 referents.
 
 \begin{definition}[Properness]~\\
 A DRS $K$/PDRS $P$ is proper iff:
 \begin{itemize}
-  \item $K$/$P$ does not contain any free referents: $FV(K) = \emptyset$ / $FPR(P) = \emptyset$.
+  \item $K$/$P$ does not contain any free referents: 
+    $\mathcal{F}(K) = \emptyset$ / $\mathcal{FR}(P) = \emptyset$.
 \end{itemize}
 \end{definition}
 
@@ -531,44 +596,49 @@ which we will call a \textit{non-presuppositional} or \textit{simple} PDRS.
 \begin{definition}[Simpleness]~\\
 A PDRS $P$ is simple iff
 \begin{itemize}
-  \item $P$ does not contain any free pointers: $FPV(P) = \emptyset$.
+  \item $P$ does not contain any free pointers: $\mathcal{FP}(P) = \emptyset$.
 \end{itemize}
 \end{definition}
 
 \noindent Note that in a simple PDRS not all content needs to be asserted;
 some pointers may be bound by labels of accessible contexts. Thus, we can
 also define a property that describes PDRSs with only asserted content, we
-will call these  \textit{projectionless}, or \textit{plain} PDRSs.
+will call these PDRSs \textit{projectionless}, or \textit{plain}.
 %or: settled
 
 \begin{definition}[Plainness]
 A PDRS $P$ is plain iff
 \begin{itemize}
-  \item All projection variables in $P$ are locally accommodated.
+  \item All projection variables in $P$ are locally accommodated, i.e.,
+    $\forall P' \leq P: \mathcal{FP}(P') = \emptyset$.
 \end{itemize}
 \end{definition}
 
 \noindent Following these definitions, all plain PDRSs are simple PDRSs, but
 not all simple PDRSs are plain. Simple, non-plain PDRSs are those PDRSs in
 which some content is accommodated at a higher level, but not presupposed
-(also referred to as \textit{intermediate accommodation}).%illustrate?
+(also referred to as \textit{intermediate accommodation}).
+%XXX illustrate?
 
 Finally, the property of \emph{purity} refers to the occurrence of duplicate
 uses of variables. In DRT, if a variable occurs as DRS referent in multiple
-accessible universes, this may result in ambiguous bindings. %%%
+accessible universes, this may result in ambiguous bindings; the same holds
+for duplicate usages of projection variables as labels in PDRT.
 
 \begin{definition}[Purity]~\\
 A DRS $K$/PDRS $P$ is pure iff:
 \begin{itemize}
-  \item $K$/$P$ does not contain any otiose declarations of (projection) variables
-    (i.e., $K$/$P$ does not contain any unbound, duplicate uses of variables).
+  \item $K$/$P$ does not contain any otiose declarations of (projection)
+    variables (i.e., $K$/$P$ does not contain any unbound, duplicate uses
+    of variables).
     \begin{itemize}
-      \item For all $K_1$, $K_2$, such that $K_2 \leq K_1 \leq K$: 
-        $U(K_2) \cap (U(K_1) \cup FV(K)) = \emptyset$
-      \item For all $P_1$, $P_2$, such that $P_2 \leq P_1 \leq K$: 
-        $\{lab(P_2)\} \cap (\{lab(P_1)\} \cup FPR(P)) = \emptyset$
+      \item For all $K_1$, $K_2$, such that $K_1 < K_2 \leq K$ it holds that:
+        $U(K_1) \cap (U(K_2) \cup \mathcal{F}(K)) = \emptyset$
+      \item For all $P_1$, $P_2$, such that $P_1 < P_2 \leq P$ it holds that: 
+        $\{lab(P_1)\} \cap (\{lab(P_2)\} \cup \mathcal{FP}(P)) = \emptyset$
     \end{itemize}
 \end{itemize}
 \end{definition}
 
-
+%%%XXX something about why duplicate uses of (projected) referents in PDRT is
+%not a problem.
