@@ -19,7 +19,7 @@ module Data.DRS.Input.Boxer
 ) where
 
 import Data.Char (isNumber, isPunctuation, toUpper)
-import Data.List (partition)
+import Data.List (partition, isPrefixOf)
 import Data.DRS.DataType
 import Data.DRS.Input.String
 
@@ -148,6 +148,5 @@ parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Squar
 ---------------------------------------------------------------------------
 toDRSRef :: String -> DRSRef
 toDRSRef r
-  | take 7 r == "lambda(" = LambdaDRSRef ((takeWhile (/= ':') (drop 7 r),[]),read (dropWhile (/= ':') r) :: Int)
-  | otherwise             = DRSRef r
-
+  | "lambda(" `isPrefixOf` r = LambdaDRSRef ((takeWhile (/= ':') (drop 7 r),[]),read (dropWhile (/= ':') r) :: Int)
+  | otherwise                = DRSRef r

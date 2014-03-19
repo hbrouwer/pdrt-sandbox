@@ -16,6 +16,7 @@ module Data.PDRS.Input.Boxer
 ) where
 
 import Data.Char (isNumber, isPunctuation, toUpper)
+import Data.List (isPrefixOf)
 import Data.DRS.Input.Boxer
 import Data.DRS.Input.String
 import Data.PDRS.DataType
@@ -104,6 +105,5 @@ parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Squar
 ---------------------------------------------------------------------------
 toPDRSRef :: String -> PDRSRef
 toPDRSRef r
-  | take 7 r == "lambda(" = LambdaPDRSRef ((takeWhile (/= ':') (drop 7 r),[]),read (dropWhile (/= ':') r) :: Int)
-  | otherwise             = PDRSRef r
-
+  | "lambda(" `isPrefixOf` r = LambdaPDRSRef ((takeWhile (/= ':') (drop 7 r),[]),read (dropWhile (/= ':') r) :: Int)
+  | otherwise                = PDRSRef r

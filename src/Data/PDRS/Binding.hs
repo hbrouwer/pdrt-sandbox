@@ -185,7 +185,7 @@ pdrsFreePRefs2 p = filter (`notElem` posBound [] [] p) (posFree p)
         posFree (PMerge p1 p2)    = posFree p1 `union` posFree p2
         posFree lp@(PDRS _ _ _ c) = concatMap free c
           where free :: PCon -> [PRef]
-                free (PCon p (Rel _ d))    = (map (PRef p) d)
+                free (PCon p (Rel _ d))    = map (PRef p) d
                 free (PCon _ (Neg p1))     = posFree p1
                 free (PCon _ (Imp p1 p2))  = posFree p1 `union` posFree p2
                 free (PCon _ (Or p1 p2))   = posFree p1 `union` posFree p2
@@ -203,13 +203,13 @@ pdrsFreePRefs2 p = filter (`notElem` posBound [] [] p) (posFree p)
                 boundm :: [PRef] -> MAP -> [PRef]
                 boundm [] m   = []
                 boundm (PRef p r:rs) m'@(p1,p2)
-                  | p == p2   = (PRef p1 r):boundm rs m'
+                  | p == p2   = PRef p1 r : boundm rs m'
                   | otherwise = boundm rs m'
                 cprs = concatMap (boundc prs' mps') (fst accs) `union` concatMap (boundc [] mps') (snd accs)
                 accs = partition (\(PCon p _) -> p == l || acc p l mps') c
                   where acc :: PVar -> PVar -> [MAP] -> Bool
                         acc p p' t = any ((==p') . snd) pts || any (\p'' -> acc p'' p' t) (map snd pts)
-                          where pts = (filter ((==p) . fst) t)
+                          where pts = filter ((==p) . fst) t
                 boundc :: [PRef] -> [MAP] -> PCon -> [PRef]
                 boundc _  _  (PCon _ (Rel _ _))    = []
                 boundc rs ms (PCon _ (Neg p1))     = posBound rs ms p1

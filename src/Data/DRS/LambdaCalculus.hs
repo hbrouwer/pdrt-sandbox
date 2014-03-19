@@ -55,7 +55,6 @@ renameVar v ((cv,cv'):cvs)
   | v == cv   = cv'
   | otherwise = renameVar v cvs
 
-
 ---------------------------------------------------------------------------
 -- ** Beta Reduction
 ---------------------------------------------------------------------------
@@ -160,7 +159,7 @@ renameCons ld@(DRS _ c) gd rs = map convertCon c
         convertCon (Neg d1)     = Neg     (renameSubDRS d1 gd rs)
         convertCon (Imp d1 d2)  = Imp     (renameSubDRS d1 gd rs) (renameSubDRS d2 gd rs)
         convertCon (Or d1 d2)   = Or      (renameSubDRS d1 gd rs) (renameSubDRS d2 gd rs)
-        convertCon (Prop r d1)  = Prop    (convertRef r)                (renameSubDRS d1 gd rs)
+        convertCon (Prop r d1)  = Prop    (convertRef r)          (renameSubDRS d1 gd rs)
         convertCon (Diamond d1) = Diamond (renameSubDRS d1 gd rs)
         convertCon (Box d1)     = Box     (renameSubDRS d1 gd rs)
         convertRef :: DRSRef -> DRSRef
