@@ -219,7 +219,7 @@ pdrsFreePRefs2 p = filter (`notElem` posBound [] [] p) (posFree p)
                 boundc rs ms (PCon _ (Diamond p1)) = posBound rs ms p1
                 boundc rs ms (PCon _ (Box p1))     = posBound rs ms p1
 
--- move to variables?
+-- XXX: move to variables?
 getMAPs :: PDRS -> [MAP]
 getMAPs (LambdaPDRS _) = []
 getMAPs (AMerge p1 p2) = getMAPs p1 `union` getMAPs p2
@@ -233,4 +233,3 @@ getMAPs (PDRS _ m _ c) = m `union` concatMap maps c
         maps (PCon _ (Prop _ p1))  = getMAPs p1
         maps (PCon _ (Diamond p1)) = getMAPs p1
         maps (PCon _ (Box p1))     = getMAPs p1
-

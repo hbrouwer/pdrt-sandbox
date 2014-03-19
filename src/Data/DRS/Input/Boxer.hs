@@ -69,7 +69,7 @@ convertPrologVars s@(h:t) cl
           | last v == ':' = (np, (init v,np) : ocl) -- for projection variables
           | otherwise     = (nr, (init v,nr) : ocl)
           where np        = show (1 + maximum (0 : map (\i -> read i :: Int) ops))
-                nr        = 'x':show (1 + maximum (0 : map (\i -> read i :: Int) suffixes))
+                nr        = 'x' : show (1 + maximum (0 : map (\i -> read i :: Int) suffixes))
                 suffixes  = filter (not . null) (map (reverse . takeWhile isNumber. reverse) ors)
                 (ops,ors) = partition (all isNumber) (map snd ocl)
         convert v (n:ns) ocl
@@ -121,19 +121,19 @@ parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Squar
         parse (':':cs)   = parse cs
         parse cs@('[':_) = parse (dropUpToMatchingBracket Square cs)
         parse cs
-          | pfx == "not"   = Neg     (plDRSToDRS c)                                                     : etc
-          | pfx == "imp"   = Imp     (plDRSToDRS c) (plDRSToDRS c')                                     : etc
-          | pfx == "or"    = Or      (plDRSToDRS c) (plDRSToDRS c')                                     : etc
-          | pfx == "pos"   = Diamond (plDRSToDRS c)                                                     : etc
-          | pfx == "nec"   = Box     (plDRSToDRS c)                                                     : etc
-          | pfx == "prop"  = Prop (toDRSRef (takeWhile (/= ',') c)) (plDRSToDRS (dropWhile (/= ',') c)) : etc
-          | pfx == "pred"  = Rel  (DRSRel (ct !! 1))                [toDRSRef (head ct)]                : etc
-          | pfx == "rel"   = Rel  (DRSRel (ct !! 2))                (map toDRSRef (take 2 ct))          : etc
-          | pfx == "role"  = Rel  (DRSRel (capitalize (ct !! 2)))   (map toDRSRef (take 2 ct))          : etc
-          | pfx == "named" = Rel  (DRSRel (capitalize (ct !! 1)))   [toDRSRef (head ct)]                : etc
-          | pfx == "timex" = Rel  (DRSRel (ct !! 1))                [toDRSRef (head ct)]                : etc
-          | pfx == "card"  = Rel  (DRSRel ((ct !! 2) ++ (ct !! 1))) [toDRSRef (head ct)]                : etc
-          | pfx == "eq"    = Rel  (DRSRel "=")                      (map toDRSRef ct)                   : etc
+          | pfx == "not"   = Neg     (plDRSToDRS c)                                                        : etc
+          | pfx == "imp"   = Imp     (plDRSToDRS c) (plDRSToDRS c')                                        : etc
+          | pfx == "or"    = Or      (plDRSToDRS c) (plDRSToDRS c')                                        : etc
+          | pfx == "pos"   = Diamond (plDRSToDRS c)                                                        : etc
+          | pfx == "nec"   = Box     (plDRSToDRS c)                                                        : etc
+          | pfx == "prop"  = Prop    (toDRSRef (takeWhile (/= ',') c)) (plDRSToDRS (dropWhile (/= ',') c)) : etc
+          | pfx == "pred"  = Rel     (DRSRel (ct !! 1))                [toDRSRef (head ct)]                : etc
+          | pfx == "rel"   = Rel     (DRSRel (ct !! 2))                (map toDRSRef (take 2 ct))          : etc
+          | pfx == "role"  = Rel     (DRSRel (capitalize (ct !! 2)))   (map toDRSRef (take 2 ct))          : etc
+          | pfx == "named" = Rel     (DRSRel (capitalize (ct !! 1)))   [toDRSRef (head ct)]                : etc
+          | pfx == "timex" = Rel     (DRSRel (ct !! 1))                [toDRSRef (head ct)]                : etc
+          | pfx == "card"  = Rel     (DRSRel ((ct !! 2) ++ (ct !! 1))) [toDRSRef (head ct)]                : etc
+          | pfx == "eq"    = Rel     (DRSRel "=")                      (map toDRSRef ct)                   : etc
           | otherwise      = error "not a valid condition"
           where pfx = takeWhile (/= '(') cs
                 c   = dropOuterBrackets $ takeUpToMatchingBracket Parentheses (drop (length pfx) cs) 

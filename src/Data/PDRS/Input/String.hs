@@ -20,7 +20,6 @@ import Data.DRS.Input.String
 import Data.List (intercalate)
 import Data.PDRS.DataType
 
-
 ---------------------------------------------------------------------------
 -- * Exported
 ---------------------------------------------------------------------------
@@ -28,7 +27,6 @@ import Data.PDRS.DataType
 ---------------------------------------------------------------------------
 -- | Transforms a 'String' representation of a PDRS into a 'PDRS'.
 ---------------------------------------------------------------------------
-
 stringToPDRS :: String -> PDRS
 stringToPDRS s
   | felicitousBracketing s' = parsePDRS (filter (not . isSpace) s')

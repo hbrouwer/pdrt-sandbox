@@ -209,4 +209,3 @@ parseCons s@('{':_) = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly 
                 d1   = takeUpToMatchingBracket Angle (dropWhile (/= '<') s)
                 d2   = takeUpToMatchingBracket Angle (drop (length ifx) (dropUpToMatchingBracket Angle (dropWhile (/= '<') s)))
                 refs = splitOn ',' (dropOuterBrackets (takeUpToMatchingBracket Parentheses (dropWhile (/= '(') s)))
-

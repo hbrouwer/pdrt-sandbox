@@ -67,4 +67,3 @@ drsFreeRefs ld@(DRS _ c)  gd = free c
         free (Prop r d1:cs)  = snd (partition (flip (`drsBoundRef` ld) gd) [r]) `union` drsFreeRefs d1 gd `union` free cs
         free (Diamond d1:cs) = drsFreeRefs d1 gd `union` free cs
         free (Box d1:cs)     = drsFreeRefs d1 gd `union` free cs
-

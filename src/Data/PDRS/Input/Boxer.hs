@@ -77,19 +77,19 @@ parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Squar
         parse [] = []
         parse (',':cs) = parse cs
         parse cs
-          | pfx == "not"   = PCon lab (Neg     (plPDRSToPDRS c))                                                      : etc
-          | pfx == "imp"   = PCon lab (Imp     (plPDRSToPDRS c) (plPDRSToPDRS c'))                                    : etc
-          | pfx == "or"    = PCon lab (Or      (plPDRSToPDRS c) (plPDRSToPDRS c'))                                    : etc
-          | pfx == "pos"   = PCon lab (Diamond (plPDRSToPDRS c))                                                      : etc
-          | pfx == "nec"   = PCon lab (Box     (plPDRSToPDRS c))                                                      : etc
-          | pfx == "prop"  = PCon lab (Prop (toPDRSRef (takeWhile (/= ',') c)) (plPDRSToPDRS (dropWhile (/= ',') c))) : etc
-          | pfx == "pred"  = PCon lab (Rel  (PDRSRel (ct !! 1))                [toPDRSRef (head ct)])                 : etc
-          | pfx == "rel"   = PCon lab (Rel  (PDRSRel (ct !! 2))                (map toPDRSRef (take 2 ct)))           : etc
-          | pfx == "role"  = PCon lab (Rel  (PDRSRel (capitalize (ct !! 2)))   (map toPDRSRef (take 2 ct)))           : etc
-          | pfx == "named" = PCon lab (Rel  (PDRSRel (capitalize (ct !! 1)))   [toPDRSRef (head ct)])                 : etc
-          | pfx == "timex" = PCon lab (Rel  (PDRSRel (ct !! 1))                [toPDRSRef (head ct)])                 : etc
-          | pfx == "card"  = PCon lab (Rel  (PDRSRel ((ct !! 2) ++ (ct !! 1))) [toPDRSRef (head ct)])                 : etc
-          | pfx == "eq"    = PCon lab (Rel  (PDRSRel "=")                      (map toPDRSRef ct))                    : etc
+          | pfx == "not"   = PCon lab (Neg     (plPDRSToPDRS c))                                                         : etc
+          | pfx == "imp"   = PCon lab (Imp     (plPDRSToPDRS c) (plPDRSToPDRS c'))                                       : etc
+          | pfx == "or"    = PCon lab (Or      (plPDRSToPDRS c) (plPDRSToPDRS c'))                                       : etc
+          | pfx == "pos"   = PCon lab (Diamond (plPDRSToPDRS c))                                                         : etc
+          | pfx == "nec"   = PCon lab (Box     (plPDRSToPDRS c))                                                         : etc
+          | pfx == "prop"  = PCon lab (Prop    (toPDRSRef (takeWhile (/= ',') c)) (plPDRSToPDRS (dropWhile (/= ',') c))) : etc
+          | pfx == "pred"  = PCon lab (Rel     (PDRSRel (ct !! 1))                [toPDRSRef (head ct)])                 : etc
+          | pfx == "rel"   = PCon lab (Rel     (PDRSRel (ct !! 2))                (map toPDRSRef (take 2 ct)))           : etc
+          | pfx == "role"  = PCon lab (Rel     (PDRSRel (capitalize (ct !! 2)))   (map toPDRSRef (take 2 ct)))           : etc
+          | pfx == "named" = PCon lab (Rel     (PDRSRel (capitalize (ct !! 1)))   [toPDRSRef (head ct)])                 : etc
+          | pfx == "timex" = PCon lab (Rel     (PDRSRel (ct !! 1))                [toPDRSRef (head ct)])                 : etc
+          | pfx == "card"  = PCon lab (Rel     (PDRSRel ((ct !! 2) ++ (ct !! 1))) [toPDRSRef (head ct)])                 : etc
+          | pfx == "eq"    = PCon lab (Rel     (PDRSRel "=")                      (map toPDRSRef ct))                    : etc
           | otherwise      = error "not a valid condition"
           where pfx = (reverse . takeWhile (/= ':'). reverse . takeWhile (/= '(')) cs
                 lab = read ((filter isNumber . takeWhile (/= ':')) cs) :: Int
