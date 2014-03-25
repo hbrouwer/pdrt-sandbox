@@ -1,24 +1,25 @@
-\documentclass[a4paper,10pt,twoside]{article}
-
-\usepackage{clin}        % Stylefile for CLIN Journal
-\usepackage{harvard}
-% Harvard:
-% \cite{Covington}             (Covington 1994)
-% \citeasnoun{Covington}       Covington (1994)
-% \citeyear{Covington}         (1994)
+\documentclass[10pt,a4paper]{article}
 
 \usepackage{amssymb}
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{subdefinition}{Definition}[definition]
+\renewcommand{\thesubdefinition}{\thedefinition\alph{subdefinition}}
 \usepackage{arydshln}
 \usepackage{enumerate}
 \usepackage{linguex}
 \renewcommand\firstrefdash{}
 \usepackage{multicol}
+\usepackage{harvard}
+\usepackage{relsize}
 \usepackage{verbatim}%for comment command
 
-\newtheorem{subdefinition}{Definition}[theorem]
-\renewcommand{\thesubdefinition}{\thedefinition\alph{subdefinition}}
-
 %%%%% Macro's %%%%%
+
+\renewcommand{\ast}{~\mathlarger{\mathlarger{*}}~}
+\newcommand{\plus}{+}
+
 
 \newcommand{\drs}[2]
 {\small\hspace{-3pt}\begin{tabular}{c}
@@ -32,7 +33,7 @@
   \end{tabular}
   \smallskip
 \end{tabular}\hspace{-10pt}
-}
+\normalsize}
 
 \newcommand{\flatdrs}[2]
 {
@@ -53,7 +54,7 @@
   \end{tabular}
   \smallskip
 \end{tabular}\hspace{-10pt}
-}
+\normalsize}
 
 \newcommand{\flatpdrs}[4]
 {
@@ -62,24 +63,19 @@
 
 \newcommand{\MAPs}{\textsc{map}s}
 
-\pagestyle{empty}
+\title{Harnessing projection: implementing Projective Discourse Representation Theory}
+
+\author{
+  Noortje J. Venhuizen \and
+  Johan Bos \and
+  Petra Hendriks \and
+  Harm Brouwer
+}
 
 %%%% Begin Document %%%%
 \begin{document}
 
-\title{Harnessing projection: implementing
-  Projective\\ Discourse Representation Theory}
-
-\author{Noortje J. Venhuizen$^*$ \email{n.j.venhuizen@rug.nl}\\
-{\normalsize \bf Johan Bos}$^*$ \email{johan.bos@rug.nl}\\
-{\normalsize \bf Petra Hendriks}$^*$ \email{p.hendriks@rug.nl}\\
-{\normalsize \bf Harm Brouwer}$^{*,**}$ \email{harm.brouwer@rug.nl}\\
-\AND \addr{$^*$CLCG, University of Groningen, Groningen, The Netherlands}
-\AND \addr{$^{**}$BCN, University of Groningen, Groningen, The Netherlands}
-}
-
 \maketitle
-\thispagestyle{empty}
 
 \begin{abstract} 
   [placeholder]
