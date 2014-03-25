@@ -60,8 +60,11 @@ pdrsAMerge p1@(PDRS{}) p2@(PDRS{}) = pdrsPurify $ amerge p1 (pdrsDisjoin p2' p1'
         amerge :: PDRS -> PDRS -> PDRS
         -- | Make sure all asserted content in 'PDRS' @p@ remains
         -- asserted by renaming global label to @l@ before merging.
-        amerge p (PDRS l m u c) = PDRS l (m' `union` m) (u' `union` u) (c' `union` c)
-          where (PDRS l' m' u' c') = pdrsAlphaConvert p [(pdrsLabel p,l)] []
+        amerge p@(PDRS l1 _ _ _) (PDRS l2 m2 u2 c2) = PDRS l2 (m1 `union` m2') (u1 `union` u2') (c1 `union` c2')
+          where (PDRS _ m1 u1 c1)    = pdrsAlphaConvert p [(l1,l2)] []
+                (PDRS _ m2' u2' c2') = pdrsAlphaConvert (PDRS l1 m2 u2 c2) [(l1,l2)] [] 
+                -- ^ in order to make sure that projected variables can
+                -- become bound by means of assertive merge
 
 -- | Infix notation for 'pdrsAMerge'
 (<<+>>) :: PDRS -> PDRS -> PDRS
@@ -98,7 +101,7 @@ pdrsPMerge p1@(PDRS{}) p2@(PDRS{}) = pdrsPurify $ pmerge p1' (pdrsDisjoin p2' p1
         -- | Content of 'PDRS' @p@ is added to 'PDRS' @p'@ without
         -- replacing pointers, resulting in the content of @p@ becoming
         -- projected in the resulting 'PDRS'.
-        pmerge (PDRS l m u c) (PDRS l' m' u' c') = PDRS l' ((l',l):m `union` m') (u `union` u') (c `union` c')
+        pmerge (PDRS l m u c) (PDRS l' m' u' c') = PDRS l' ([(l',l)] `union` m `union` m') (u `union` u') (c `union` c')
 
 -- | Infix notation for 'pdrsPMerge'
 (<<*>>) :: PDRS -> PDRS -> PDRS
