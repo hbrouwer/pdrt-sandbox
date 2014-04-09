@@ -15,25 +15,25 @@
 %============================== macros ===============================
 
 \newcommand{\drs}[2]
-{\begin{tabular}{c}
+{\footnotesize\begin{tabular}{c}
   \noalign{\smallskip}
   \begin{tabular}{|l|}
     \hline #1\\ \hline #2\\ \hline
   \end{tabular}
   \smallskip
 \end{tabular}
-}
+\normalsize}
 
 \newcommand{\pdrs}[4]
-{\begin{tabular}{c}
+{\footnotesize\begin{tabular}{c}
   \noalign{\smallskip}
-  $#1:$
+  $#1$\\
   \begin{tabular}{|l|}
-    \hline #2\\ \hline #3\\ \hline \small #4 \\ \hline
+    \hline #2\\ \hline #3\\ \hline #4 \\ \hline
   \end{tabular}
   \smallskip
 \end{tabular}
-}
+\normalsize}
 
 %=====================================================================
 %========================= preamble material =========================
@@ -98,7 +98,7 @@
 
 \input{analysis}
 
-\input{pdrt}
+\input{beyond}
 
 \input{discussion}
 
@@ -121,6 +121,7 @@
 
 %=====================================================================
 
+\newpage %%XXX comment out in final version
 \bibliography{../../presupposition}
 
 %=====================================================================

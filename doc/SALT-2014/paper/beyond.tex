@@ -1,0 +1,148 @@
+\section{Beyond supplements}
+
+\subsection{Speaker-orientedness in PDRT}
+
+Following the traditional model-theoretic interpretation of DRT \citep[see,
+e.g.]{kamp1981theory,kamp1993discourse,kamp2011discourse}, a Discourse
+Representation Structure (DRS) is thought of as a \textit{partial model}
+representing the information conveyed by some utterance, which needs to be
+embedded in a \textit{total model} to determine its interpretation. This
+embedding is done via an \textit{embedding function} from the set of
+discourse referents in the universe of the DRS $K$ into elements in the
+domain of the total model $M$, in such a way that all conditions of $K$ are
+verified in $M$ (with respect to some world $w$).
+
+To implement speaker-orientation, we can assume that each speaker $S$ has
+its own model $M_S$ describing the current state of affairs of the world.
+These models may or may not coincide with the model representing the
+\textit{actual} state of affairs, which is represented by the `Truth Model'
+$M_T$. The idea is that the interpretation a PDRS condition may be
+restricted to some (subjective) model, meaning that it only needs to hold in
+the designated model. Since in PDRT the information about the interpretation
+of linguistic content is explicitly available (in the form of
+\textit{pointers}), an interpretational restriction with respect to some
+model may also be incorporated as part of the pointer, e.g. via a subscript.
+This thus means that for some condition with a pointer of the form `$p_S$',
+it holds that this condition is only required to hold with respect to the
+model of speaker $S$. Thus, when determining the truth of some utterance
+containing some subjective content (i.e., with respect to the Truth Model
+$M_T$), the subjective content has to be fulfilled only with respect to the
+subjective model $M_S$; in case this holds, the entire utterance will come
+out true (provided, of course, that all other conditions are verified with
+respect to $M_T$). Note that this places a constraint on the domains of
+$M_S$ and $M_T$ insofar that they must overlap with respect to the
+referent(s) mentioned in the subjective condition.
+
+\subsection{Other types of CIs}
+\subsubsection{Expressives}
+
+We focus on supplemental CIs since these are the most common and
+well-studied type of CI.  However, a case can be made for a similar account
+of expressives \citep[including expressive attributive adjectives, epithets,
+honorifics, and tense-variations such as the German `Konjunktiv I';
+cf.][]{potts2005logic}. The status of expressives has been open to some
+debate \citep[...]{potts2004japanese,geurts2007fucking}.  But like
+supplemental CIs, expressives in general require some antecedent (or:
+anchor) to express some opinion about.
+%%examples (see, e.g. Amaral et al. p. 711)
+However,
+the notion of speaker-orientedness is especially important in this context,
+so a framework is required that can incorporate speaker attitudes.
+[...]
+%Q: Do expressives require a projecting anchor?
+
+\noindent\parbox[b]{\textwidth}{\paragraph{Expressive attributive adjectives}
+\ex. Sue's dog is \underline{fucking} mean.\\
+a.~~~\pdrs{1}{$2\gets$x~~$3\gets$y}{$2\gets$Sue(x)\\ $3\gets$dog(y)\\
+  $3\gets$of(y,x)\\ $1\gets$mean(y)\\ $4_S\gets$fucking\_mean(y)}{
+  $1<2$~~$1<3$~~$1<4$~~$4=3$}
+~~~b.~~~\pdrs{1}{$2\gets$x~~$3\gets$y~~$1\gets$e}{$2\gets$Sue(x)\\ $3\gets$dog(y)\\
+  $3\gets$of(y,x)\\ $1\gets$mean(e)\\ $1\gets$Topic(e,y)\\
+  $1_S\gets$fucking(e)}{$1<2$~~$1<3$}
+
+}
+
+\noindent In PDRS \Last[a], the anchor of the CI is ``Sue's dog'', which
+projects.  However, the representation is not completely satisfactory, since
+the adjective ``mean'' is duplicated: it occurs once as part of the asserted
+content, and once as part of the expressive CI content. Moreover, the
+contraction of ``fucking'' and ``mean'' serving as one predicate goes
+against the compositional idea in (P)DRT. In \Last[b], this tension is
+resolved by using a neo-Davidsonian event-structure for the adjectival
+construction; by letting the adjective ``mean'' introduce an event, which is
+related to the subject using VerbNet roles \citep{kipper2008large}, the
+expressive adjective ``fucking'' can manipulate the event itself, instead of
+the subject. This provides a more intuitive distinction between the asserted
+content and the expressive content of this utterance. However, the direct
+correspondence to supplemental CIs, which require a projecting anchor, seems
+to be obfuscated with this representation.
+
+\noindent\parbox[b]{\textwidth}{\paragraph{Epithets}
+\ex. Every democrat advocating a proposal for reform says 
+  \underline{the stupid thing} is worthwhile.\\
+a.~~\pdrs{1}{}{$1\gets$\pdrs{2}{$2\gets$x~~$2\gets$y}{$2\gets$Democrat(x)\\ 
+  $2\gets$proposal\_for\_reform(y)\\ $2\gets$advocate(x,y)}{}$\Rightarrow
+  $\pdrs{3}{$3\gets$p}{$3\gets$says(x,p)\\ 
+  $3\gets$p:\pdrs{4}{$4,5_S\gets$z}{$5_S\gets$stupid\_thing(z)\\ $4,5_S\gets$z=y\\
+  $4\gets$worthwhile(z)}{$4<5$~~$5=2$}}{$3<2$}}{}
+b.~~\pdrs{1}{}{$1\gets$\pdrs{2}{$2\gets$x~~$5\gets$y}{$2\gets$Democrat(x)\\ 
+  $5\gets$proposal\_for\_reform(y)\\ $2\gets$advocate(x,y)}{
+  $2<5$}$\Rightarrow$\pdrs{3}{$3\gets$p}{$3\gets$says(x,p)\\ 
+  $3\gets$p:\pdrs{4}{}{$6_S\gets$stupid\_thing(y)\\ 
+  $4\gets$worthwhile(y)}{$4<6$~~$6=5$}}{$3<2$}}{}
+
+}
+
+\noindent The epithet ``the stupid thing'' is interpreted in \Last[a] as
+contributing both an asserted, anaphoric referent for the adjective
+``worthwhile'', and a subjective condition on this referent. By making use
+of multiple pointers (which in terms of interpretation comes down to
+duplicating the declaration of the referent and the condition), the  dual
+role of the expressive noun phrase becomes explicit: it both provides an
+antecedent for the asserted statement, and conveys the meaning of the
+speaker about this antecedent. Note that the antecedent (``a proposal for
+reform'') is itself not a projecting referent, but since the epithet serves
+as an anaphor, the object of expression is projected, just as in the case of
+supplemental CIs. 
+%%explain better
+The representation in \Last[b] (where the referent equality is eliminated)
+represents the specific reading of the indefinite noun phrase ``a proposal
+for reform''. It may be argued that the use of an expressive requires
+(presupposes) a projecting anchor, since it only makes sense to express
+feelings about some uniquely identifiable object. 
+
+\noindent\parbox[b]{\textwidth}{\paragraph{Honorifics}
+\ex. Ame~~ga~~~furi-\underline{mashi}-ta.\\
+\textit{rain} \textsc{subj} \textit{fall}-\textsc{hon}-past\\
+`It rained.' (\textit{performative honorific})\\
+\pdrs{1}{$2\gets$e}{$2\gets$rain(e)\\ $1\gets$fell(e)\\
+  $3_S\gets$\textsc{hon}(e)}{$1<2$~~$1<3$~~$3=2$}
+
+}
+
+\noindent The requirement for a projecting anchor is even clearer in the
+case of honorifics, since they always serve as definite descriptions that
+refer to a specific referent \citep[cf.][]{potts2004japanese}. Therefore,
+the `raining event' in \Last is interpreted as a presupposition (referring
+to the general concept of rain), so that the performative honorific can be
+correctly interpreted by means of projection (again, the referential
+equality is resolved).
+
+\noindent\parbox[b]{\textwidth}{\paragraph{German Konjunktiv I} (lack of speaker commitment)
+\ex. Sheila behauptet dass sie krank \underline{sei}.\\
+\textit{Sheila maintains that she sick~~~be}-\textsc{konj}\\
+`Sheila maintains/claims that she is sick.'\\
+\pdrs{1}{$4\gets$x~~$1\gets$p}{$4\gets$Sheila(x)\\ $1\gets$behauptet(x,p)\\
+  $1\gets$p:\pdrs{2}{}{$2\gets$krank(x)}{$2<4$}\\ 
+  $5_S\gets\neg$\pdrs{3}{}{$3\gets$krank(x)}{$3<4$}}{$1<4$~~$1<5$~~$5=4$}
+
+}
+
+\subsubsection{Supplemental Adverbs}
+
+
+Utterance level modifiers (e.g., ``Frankly, I don't like him'', ``In case
+you're hungry, I'm going to the grocery.'') behave differently than other
+supplemental CIs \cite[cf.][pp.725-729]{amaral2007review}.
+
+

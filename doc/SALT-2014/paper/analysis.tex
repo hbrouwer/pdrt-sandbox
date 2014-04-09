@@ -1,13 +1,104 @@
-\section{Explaining the projection behaviour of CIs}
+\section{An analysis of supplemental CIs}
 
-\subsection{CIs, presuppositions and anaphora}
+One of the most prominent accounts of presuppositions is the one by
+\citet{sandt1992presupposition}, who treats presupposition projection as
+anaphora resolution.
+%%explain more.
 
-\citet{sandt1992presupposition}
+CIs share their projection behaviour with other projection phenomena, so this
+requires a unified analysis of their behaviour.
 
-\citep{potts2013presupposition}
+%\citet{potts2005logic} describes the following properties of CIs:
+%
+%\begin{itemize}
+%  \item CIs tend to project globally (scopelessness)
+%  \item CIs are non-cancellable
+%  \item CIs are non-restrictive
+%  \item Speaker-orientedness
+% \end{itemize}
 
-\subsection{Projection via anchoring}
+We will argue that all these properties can be described in terms of
+a species of indexicality \citep[cf.][]{amaral2007review}, which in the case
+of supplemental CIs comes down to indexicality to the projection site of the
+anchor.
 
-CIs are projection-anaphoric to their anchor.
+\subsection{Projection as anchoring}
+
+\subsubsection{CIs are `piggybacking' on their anchor}
+
+* CIs always occur with an anchor\\
+* CIs always project as far as their anchor\\
+* Similarity to E-type pronouns
+
+\subsubsection{CIs require their anchor to project}
+
+Infelicitous with non-specific indefinites, quantificational constructions
+
+The information structure of CIs (i.e., their subordinatedness) signals
+projection; this is why we can distinguish between RRCs and NRRCs --- by
+means of the comma in this case. Non-restrictiveness requires projection.
+This is because a non-projecting anchor requires the introduction of a new
+entity, which by definition lacks a complete description, so any new
+information will contribute to the description of the referent and will
+therefore be restrictive. On the other hand, in case the anchor projects,
+this means that the referent has been established, in the sense that it can
+be identified in the common ground, so providing new information does not
+affect the choice of referent, so it works non-restrictively.
+
+* example with indefinite anchor -> only specific reading
+
+* example with pronominal anchor -> only felicitous if referent can be
+  determined unambiguously.
 
 
+%Something about generics? and inclusion and attribution as a contrast to
+%identification with anchor? \cite[see][]{heringa2012appositional}
+
+
+\subsection{Projective Discourse Representation Theory}
+
+[short introduction]
+
+\subsection{Projection-anaphoricity}
+
+\subsubsection{Enhancing PDRSs with information structure}
+
+* Adding MAPs to PDRSs. \\
+* Projection as \textit{strict} subordination
+
+\subsubsection{Representing the projection behaviour of CIs}
+
+\noindent 
+\parbox[b]{\textwidth}{\textbf{Appositive}:
+\ex. Sheila believes that Chuck\underline{, a psychopath,} is fit to watch the kids.\\
+\pdrs{1}{$3\gets$x~~$1\gets$p}{$3\gets$Sheila(x)\\ $1\gets$believes(x,p)\\
+$1\gets$p:\pdrs{2}{$4\gets$y~~$5\gets$z}{$4\gets$Chuck(y)\\ $5\gets$psychopath(z)\\
+$5\gets$x=y\\ $2\gets$fit-to-watch-kids(y)}{$2<4$~~$2<5$~~$5=4$}}{$1< 3$}
+
+}
+
+\noindent\parbox[b]{\textwidth}{\textbf{NRRC}:
+\ex. Ames\underline{, who stole from the FBI,} is behind bars.\\
+\pdrs{1}{$3\gets$x~~$4\gets$y}{$3\gets$Ames(x)\\ $4\gets$FBI(y)\\ $5\gets$stole\_from(x,y)\\
+$1\gets$behind\_bars(x)}{$1<3$~~$1<5$~~$5<4$~~$5=3$}
+
+}
+
+\noindent\parbox[b]{\textwidth}{\textbf{\textit{As}-parenthetical}:
+\ex. It is not the case that Ames\underline{, as the press reported,} is a spy.\\
+\textit{cf.} Ames, of whom the press reported he is a spy, is not (a spy).\\
+\pdrs{1}{}{$1\gets\neg$\pdrs{2}{$3\gets$x~~$4\gets$y~~$5\gets$p}{$3\gets$Ames(x)\\ $4\gets$press(y)\\
+$5\gets$p:\pdrs{6}{}{$6\gets$spy(x)}{$6<3$}\\ $5\gets$reported(y,p)\\ $2\gets$spy(x)}{$2<3$~~$2<5$~~$5<4$~~$5=3$}}{}
+
+}
+%[..]
+%
+%
+%Note that \citet{potts2005logic} also introduces a \textsc{comma} operator, although
+%he uses it to add supplemented content to the CI dimension.
+%\citet{amaral2007review} argue against the use of a \textsc{comma} operator by
+%adhering to both its overinterpretation (not all comma's are indicators of
+%CIs -- not even all comma's that introduce a subordinate clause to a noun),
+%and underinterpretation (since not all CIs are triggered by a comma
+%\citep[cf. the `malheureusement' example by][]{bonami2004adverb}, and
+%because of type-matching).
