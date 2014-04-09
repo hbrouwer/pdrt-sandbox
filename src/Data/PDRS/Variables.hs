@@ -23,7 +23,6 @@ module Data.PDRS.Variables
 , newPDRSRefs
 , newPRefs
 -- * Variable Collections
-, pdrsUniverses
 , pdrsVariables
 , pdrsPVars
 , pdrsLambdas
@@ -112,24 +111,6 @@ newPRefs prs ers = packPRefs ps (newPDRSRefs rs ers)
 ---------------------------------------------------------------------------
 -- ** Variable Collections
 ---------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- | Returns the list of projected referents in all universes of a 'PDRS'.
----------------------------------------------------------------------------
-pdrsUniverses :: PDRS -> [PRef]
-pdrsUniverses (LambdaPDRS _) = []
-pdrsUniverses (AMerge p1 p2) = pdrsUniverses p1 `union` pdrsUniverses p2
-pdrsUniverses (PMerge p1 p2) = pdrsUniverses p1 `union` pdrsUniverses p2
-pdrsUniverses (PDRS _ _ u c) = u `union` universes c
-  where universes :: [PCon] -> [PRef]
-        universes []                       = []
-        universes (PCon _ (Rel _ _):cs)    = universes cs
-        universes (PCon _ (Neg p1):cs)     = pdrsUniverses p1 `union` universes cs
-        universes (PCon _ (Imp p1 p2):cs)  = pdrsUniverses p1 `union` pdrsUniverses p2 `union` universes cs
-        universes (PCon _ (Or p1 p2):cs)   = pdrsUniverses p1 `union` pdrsUniverses p2 `union` universes cs
-        universes (PCon _ (Prop _ p1):cs)  = pdrsUniverses p1 `union` universes cs
-        universes (PCon _ (Diamond p1):cs) = pdrsUniverses p1 `union` universes cs
-        universes (PCon _ (Box p1):cs)     = pdrsUniverses p1 `union` universes cs
 
 ---------------------------------------------------------------------------
 -- | Returns the list of all variables in a 'PDRS'
