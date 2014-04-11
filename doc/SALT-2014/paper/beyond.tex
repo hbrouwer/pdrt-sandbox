@@ -3,7 +3,7 @@
 \subsection{Speaker-orientedness in PDRT}
 
 Following the traditional model-theoretic interpretation of DRT \citep[see,
-e.g.]{kamp1981theory,kamp1993discourse,kamp2011discourse}, a Discourse
+e.g.][]{kamp1981theory,kamp1993discourse,kamp2011discourse}, a Discourse
 Representation Structure (DRS) is thought of as a \textit{partial model}
 representing the information conveyed by some utterance, which needs to be
 embedded in a \textit{total model} to determine its interpretation. This
@@ -51,7 +51,11 @@ so a framework is required that can incorporate speaker attitudes.
 [...]
 %Q: Do expressives require a projecting anchor?
 
-\noindent\parbox[b]{\textwidth}{\paragraph{Expressive attributive adjectives}
+\paragraph{Expressive attributive adjectives.} The class of expressive
+attributive adjectives conveys the speaker's attitude toward someone of
+something via the use of certain adjectives.
+
+\noindent\parbox[b]{\textwidth}{
 \ex. Sue's dog is \underline{fucking} mean.\\
 a.~~~\pdrs{1}{$2\gets$x~~$3\gets$y}{$2\gets$Sue(x)\\ $3\gets$dog(y)\\
   $3\gets$of(y,x)\\ $1\gets$mean(y)\\ $4_S\gets$fucking\_mean(y)}{
@@ -77,7 +81,10 @@ content and the expressive content of this utterance. However, the direct
 correspondence to supplemental CIs, which require a projecting anchor, seems
 to be obfuscated with this representation.
 
-\noindent\parbox[b]{\textwidth}{\paragraph{Epithets}
+\paragraph{Epithets.} An epithet is a referential noun phrase that conveys
+an additional subjective mood of the speaker toward the object of reference.
+
+\noindent\parbox[b]{\textwidth}{
 \ex. Every democrat advocating a proposal for reform says 
   \underline{the stupid thing} is worthwhile.\\
 a.~~\pdrs{1}{}{$1\gets$\pdrs{2}{$2\gets$x~~$2\gets$y}{$2\gets$Democrat(x)\\ 
@@ -111,7 +118,10 @@ for reform''. It may be argued that the use of an expressive requires
 (presupposes) a projecting anchor, since it only makes sense to express
 feelings about some uniquely identifiable object. 
 
-\noindent\parbox[b]{\textwidth}{\paragraph{Honorifics}
+\paragraph{Honorifics.} Honorifics (as in Japanese) are morphemes that
+express the social status of the addressee relative to the speaker.
+
+\noindent\parbox[b]{\textwidth}{
 \ex. Ame~~ga~~~furi-\underline{mashi}-ta.\\
 \textit{rain} \textsc{subj} \textit{fall}-\textsc{hon}-past\\
 `It rained.' (\textit{performative honorific})\\
@@ -128,7 +138,12 @@ to the general concept of rain), so that the performative honorific can be
 correctly interpreted by means of projection (again, the referential
 equality is resolved).
 
-\noindent\parbox[b]{\textwidth}{\paragraph{German Konjunktiv I} (lack of speaker commitment)
+\paragraph{German Konjunktiv I.} The German language has a special
+subjunctive mood that expresses lack of speaker commitment. Thus, in the
+example below, the speaker of the sentence is not convinced that Sheila is
+actually sick.
+
+\noindent\parbox[b]{\textwidth}{
 \ex. Sheila behauptet dass sie krank \underline{sei}.\\
 \textit{Sheila maintains that she sick~~~be}-\textsc{konj}\\
 `Sheila maintains/claims that she is sick.'\\
@@ -138,11 +153,19 @@ equality is resolved).
 
 }
 
+\noindent In order to represent both the asserted content and the expressive
+contribution of this example, the content modified by the subjunctive mood
+needs to be duplicated (similar to the case of the
+\textit{As}-parentheticals). 
+
 \subsubsection{Supplemental Adverbs}
 
+\paragraph{Topic/Speaker-oriented Adverbs.}
 
-Utterance level modifiers (e.g., ``Frankly, I don't like him'', ``In case
-you're hungry, I'm going to the grocery.'') behave differently than other
-supplemental CIs \cite[cf.][pp.725-729]{amaral2007review}.
+
+\paragraph{Utterance level modifiers.} (e.g., ``Frankly, I don't like him'',
+``In case you're hungry, I'm going to the grocery.'', etc.) Following
+\citet[pp.725-729]{amaral2007review}, these modifiers behave differently
+than other CIs, both on the theoretical and the implementational level.
 
 

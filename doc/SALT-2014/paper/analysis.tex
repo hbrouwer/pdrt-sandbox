@@ -27,8 +27,10 @@ anchor.
 \subsubsection{CIs are `piggybacking' on their anchor}
 
 * CIs always occur with an anchor\\
-* CIs always project as far as their anchor\\
-* Similarity to E-type pronouns
+* Similarity to E-type pronouns\\
+* CIs always project as far as their anchor
+%* CIs provide novel information to the context of their anchor
+
 
 \subsubsection{CIs require their anchor to project}
 
@@ -45,21 +47,41 @@ this means that the referent has been established, in the sense that it can
 be identified in the common ground, so providing new information does not
 affect the choice of referent, so it works non-restrictively.
 
-* example with indefinite anchor -> only specific reading
+\ex. example with indefinite anchor -> only specific reading
 
-* example with pronominal anchor -> only felicitous if referent can be
+\ex. example with pronominal anchor -> only felicitous if referent can be
   determined unambiguously.
 
+Because of the requirement for a specific anchor, CIs are often attached to
+presuppositional anchors, which explains their tendency to project to the
+global discourse context. However, there are also examples of CIs that do
+not project to the global discourse level, as in \Next \citep[example
+from][]{amaral2007review}.
+
+\ex. Joan is crazy. She's hallucinating that some geniuses in Silicon Valley
+have invented a new brain chip that's been installed in her left temporal
+lobe [\ldots]. Joan believes that her chip\underline{, which she has
+installed last month,} has a twelve year guarantee.
+
+In this example, the CI triggered by the underlined NRRC does not project to
+the global discourse context, since it is clear that the speaker does not
+want to convey that Joan actually had the chip installed last month. Note,
+however, that the direct anchor of the CI content (``her chip''), is
+a possessive construction --- a presupposition that in the current context
+binds to the introduction of ``a new brain chip'' in the sentence before
+\citep[following][]{sandt1992presupposition}.  Thus, the anchor is not
+accommodated to the global discourse level, and therefore the CI attached to
+the anchor isn't either. Yet, the fact that the anchor projects allows it to
+felicitously occur with a (restrictive) CI.
 
 %Something about generics? and inclusion and attribution as a contrast to
 %identification with anchor? \cite[see][]{heringa2012appositional}
 
+\subsection{Formalizing projection-anaphoricity}
 
-\subsection{Projective Discourse Representation Theory}
+\subsubsection{Projective Discourse Representation Theory}
 
 [short introduction]
-
-\subsection{Projection-anaphoricity}
 
 \subsubsection{Enhancing PDRSs with information structure}
 
@@ -68,37 +90,48 @@ affect the choice of referent, so it works non-restrictively.
 
 \subsubsection{Representing the projection behaviour of CIs}
 
-\noindent 
-\parbox[b]{\textwidth}{\textbf{Appositive}:
-\ex. Sheila believes that Chuck\underline{, a psychopath,} is fit to watch the kids.\\
+\paragraph{Appositives.}~
+
+\noindent \parbox[b]{\textwidth}{
+\ex. Sheila believes that Chuck\underline{, a psychopath,} is fit to watch
+the kids.\\
 \pdrs{1}{$3\gets$x~~$1\gets$p}{$3\gets$Sheila(x)\\ $1\gets$believes(x,p)\\
-$1\gets$p:\pdrs{2}{$4\gets$y~~$5\gets$z}{$4\gets$Chuck(y)\\ $5\gets$psychopath(z)\\
-$5\gets$x=y\\ $2\gets$fit-to-watch-kids(y)}{$2<4$~~$2<5$~~$5=4$}}{$1< 3$}
+$1\gets$p:\pdrs{2}{$4\gets$y~~$5\gets$z}{$4\gets$Chuck(y)\\ 
+$5\gets$psychopath(z)\\ $5\gets$z=y\\ $2\gets$fit-to-watch-kids(y)}{$2<4$
+~~$2<5$~~$5=4$}}{$1< 3$}
 
 }
 
-\noindent\parbox[b]{\textwidth}{\textbf{NRRC}:
+\paragraph{NRRCs.}~
+
+\noindent\parbox[b]{\textwidth}{
 \ex. Ames\underline{, who stole from the FBI,} is behind bars.\\
-\pdrs{1}{$3\gets$x~~$4\gets$y}{$3\gets$Ames(x)\\ $4\gets$FBI(y)\\ $5\gets$stole\_from(x,y)\\
-$1\gets$behind\_bars(x)}{$1<3$~~$1<5$~~$5<4$~~$5=3$}
+\pdrs{1}{$3\gets$x~~$4\gets$y}{$3\gets$Ames(x)\\ $4\gets$FBI(y)\\ 
+$5\gets$stole\_from(x,y)\\ $1\gets$behind\_bars(x)}{$1<3$~~$1<5$~~$5<4$
+~~$5=3$}
 
 }
 
-\noindent\parbox[b]{\textwidth}{\textbf{\textit{As}-parenthetical}:
-\ex. It is not the case that Ames\underline{, as the press reported,} is a spy.\\
+\paragraph{\textit{As}-parentheticals.}~
+
+\noindent\parbox[b]{\textwidth}{
+\ex. It is not the case that Ames\underline{, as the press reported,} is
+a spy.\\
 \textit{cf.} Ames, of whom the press reported he is a spy, is not (a spy).\\
-\pdrs{1}{}{$1\gets\neg$\pdrs{2}{$3\gets$x~~$4\gets$y~~$5\gets$p}{$3\gets$Ames(x)\\ $4\gets$press(y)\\
-$5\gets$p:\pdrs{6}{}{$6\gets$spy(x)}{$6<3$}\\ $5\gets$reported(y,p)\\ $2\gets$spy(x)}{$2<3$~~$2<5$~~$5<4$~~$5=3$}}{}
+\pdrs{1}{}{$1\gets\neg$\pdrs{2}{$3\gets$x~~$4\gets$y~~$5\gets$p}{
+$3\gets$Ames(x)\\ $4\gets$press(y)\\ $5\gets$p:\pdrs{6}{}{$6\gets$spy(x)}{
+$6<3$}\\ $5\gets$reported(y,p)\\ $2\gets$spy(x)}{$2<3$~~$2<5$~~$5<4$
+~~$5=3$}}{}
 
 }
 %[..]
 %
 %
-%Note that \citet{potts2005logic} also introduces a \textsc{comma} operator, although
-%he uses it to add supplemented content to the CI dimension.
-%\citet{amaral2007review} argue against the use of a \textsc{comma} operator by
-%adhering to both its overinterpretation (not all comma's are indicators of
-%CIs -- not even all comma's that introduce a subordinate clause to a noun),
-%and underinterpretation (since not all CIs are triggered by a comma
-%\citep[cf. the `malheureusement' example by][]{bonami2004adverb}, and
-%because of type-matching).
+%Note that \citet{potts2005logic} also introduces a \textsc{comma} operator,
+%although he uses it to add supplemented content to the CI dimension.
+%\citet{amaral2007review} argue against the use of a \textsc{comma} operator
+%by adhering to both its overinterpretation (not all comma's are indicators
+%of CIs -- not even all comma's that introduce a subordinate clause to
+%a noun), and underinterpretation (since not all CIs are triggered by
+%a comma \citep[cf. the `malheureusement' example by][]{bonami2004adverb},
+%and because of type-matching).
