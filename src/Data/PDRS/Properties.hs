@@ -108,8 +108,8 @@ isPlainPDRS (PDRS l _ u c) = all (\(PRef p _) -> p==l) u && all plain c
 ---------------------------------------------------------------------------
 pdrsIsDifferentNP :: ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS) -> (PDRSRef -> PDRS) -> PDRS
 pdrsIsDifferentNP n1 n2 = pdrsUnresolve (pdrsDisjoin n1' n2') i
-  where n1' = n1 (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),i))
-        n2' = n2 (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),0))
+  where n1' = pdrsResolveMerges (n1 (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),i)))
+        n2' = pdrsResolveMerges (n2 (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),0)))
         i   = maximum (map snd (pdrsLambdas (n1 (\x -> LambdaPDRS (("t",[]),0))))) + 1
 
 ---------------------------------------------------------------------------
@@ -118,8 +118,8 @@ pdrsIsDifferentNP n1 n2 = pdrsUnresolve (pdrsDisjoin n1' n2') i
 ---------------------------------------------------------------------------
 pdrsIsSameNP :: ((PDRSRef -> PDRS) -> PDRS) -> ((PDRSRef -> PDRS) -> PDRS) -> (PDRSRef -> PDRS) -> PDRS
 pdrsIsSameNP n1 n2 = pdrsUnresolve (pdrsAlphaConvert n1' [(pdrsLabel n1',pdrsLabel n2')] [(npHead n1,npHead n2)]) i
-  where n1' = n1 (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),i))
-        n2' = n2 (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),0))
+  where n1' = pdrsResolveMerges (n1 (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),i)))
+        n2' = pdrsResolveMerges (n2 (\x -> LambdaPDRS (("t",[pdrsRefToDRSVar x]),0)))
         i   = maximum (map snd (pdrsLambdas (n1 (\x -> LambdaPDRS (("t",[]),0)))) `union` map snd (pdrsLambdas n2')) + 1
 
 ---------------------------------------------------------------------------
