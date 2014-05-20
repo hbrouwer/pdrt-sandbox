@@ -1,44 +1,45 @@
 \section{Introduction}\label{Introduction}
 
-In the literature on projection, presuppositions have received the most
-attention in terms of describing and explaining their projection behaviour.
-However, since Potts' redefinition of the class of conventional implicatures
-\citep{potts2003logic,potts2005logic}, the interest has shifted toward the
-broader class of phenomena that exhibit the property of projection.
+Presuppositions have a long history in the semantics literature, in
+particular focusing on explaining their `projection behaviour'; what
+distinguishes presuppositions from other semantic content is their
+indifference to semantic operators like negation, implication, but also
+questions, which has been referred to as `projecting' their content to
+outside the syntactic scope of embedding operators.  Presuppositions have
+generally been considered the most paradigmatic cases of projection
+phenomena, but since Potts' redefinition of the class of conventional
+implicatures \citep[CIs;][]{potts2003logic,potts2005logic}, the interest has
+shifted toward the broader class of phenomena that exhibit the property of
+projection \citep[see, e.g.,][]{simons2010projects}.
 
-%XXX 
-\bigskip
-\noindent
-\begin{tabular}{p{0.2\textwidth} p{0.75\textwidth}}
-          \textbf{Goal:} & A unified account of projection phenomena.\\
-   \textbf{Challenge I:} & CIs provide \textit{new} information, but they
-                           project as if providing \textit{old} information
-                           (like presuppositions).\\
-   \textbf{Observation:} & Supplemental CIs occur with a projecting anchor,
-                           and always project as far as their anchor.\\
-    \textbf{Solution I:} & CIs provide \textit{new} information to the
-                           (projecting) context created by a presupposition,
-                           namely the one provided by its anchor.\\
-\textbf{Implementation:} & CIs are projection-anaphoric in the sense that
-                           they inherit their projection context from their
-                           (projecting) anchor. This is formalized in PDRT
-                           \citep{venhuizen2013iwcs} by introducing a
-                           dependency at the lexical level between the
-                           projection site of the CI and the projection site
-                           of the anchor.\\
-     \textbf{Next Step:} & Other CIs: expressives and supplemental adverbs.\\
-  \textbf{Challenge II:} & Incorporating subject-orientedness in (P)DRT.\\
-   \textbf{Solution II:} & Subjective PDRT: using pointers to restrict speaker
-                           models.\\
-    \textbf{Discussion:} & Are CIs a homogeneous class? What is their relation
-                           to presuppositions and anaphora?\\
-\end{tabular}\\
+%XXX examples of presuppositions and CIs
 
-References: \citep{delgobbo2003appositives,potts2005logic,amaral2007review,
-  nouwen2007appositives,harris2009perspective,heringa2012appositional,
-  schlenker2013supplements,nouwen2014note,potts2013presupposition}
+%XXX something about previous approaches (delgobbo, potts, amaral et al,
+%nouwen, schlenker, and van der Sandt)
 
+Presuppositions and conventional implicatures share the property of
+projection but exhibit clear differences in terms of information structure;
+while presuppositions signal established, or \textit{old} information (from
+the speaker's perspective), conventional implicatures signal \textit{novel}
+information, in the sense that by using a conventional implicature the
+speaker communicates to the hearer that he is introducing some additional,
+not \textit{at-issue} information that may be new to the hearer.  The
+challenge for a formal account of projection phenomena therefore is to
+describe the projection behaviour of presuppositions and conventional
+implicatures in a unified way, while appreciating their difference in
+information structure.
 
-
-
-
+In this paper, we describe such a unified account of projection phenomena,
+using the framework of Projective Discourse Representation Theory
+\citep[PDRT;][]{venhuizen2013iwcs}. PDRT is an extension of Discourse
+Representation Theory \citep[DRT;][]{kamp1981theory,kamp1993discourse},
+a wide coverage semantic formalism that has been shown to be able to account
+for a variety of phenomena, including (discourse) anaphora and tense
+\citep{kamp1981theory}, quantification and plurality
+\citep{kamp1993discourse}, attitude reports
+\citep{asher1986belief,asher1989belief,zeevat1996neoclassical,maier2009presupposing}
+discourse structure \citep{asher2003logics}, and presupposition
+\citep{sandt1992presupposition,krahmer1998presupposition,geurts1999presuppositions}.
+Projective DRT extends standard DRT with an explicit distinction between the
+introduction- and interpretation site of semantic content.
+%XXX

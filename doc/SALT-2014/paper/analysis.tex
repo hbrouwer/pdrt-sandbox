@@ -1,12 +1,38 @@
-\section{An analysis of supplemental CIs}
+\section{The projection behaviour of presuppositions and CIs}
+
+
+\subsection{Toward a formal account of projection}
 
 One of the most prominent accounts of presuppositions is the one by
 \citet{sandt1992presupposition}, who treats presupposition projection as
 anaphora resolution.
-%%explain more.
+%XXX explain more.
 
-CIs share their projection behaviour with other projection phenomena, so this
-requires a unified analysis of their behaviour.
+\subsubsection{Presupposition projection in PDRT}
+
+[short introduction PDRT]
+
+\subsubsection{Enhancing PDRSs with information structure}
+
+* Adding MAPs to PDRSs. \\
+* \textit{weak} subordination ($\leq$) versus \textit{strict} subordination ($<$).
+
+
+
+\subsection{CI projection as anchoring}
+
+Supplemental CIs.
+
+%\subsubsection{CIs are `piggybacking' on their anchor}
+
+* CIs always occur with an anchor\\
+* Similarity to E-type pronouns\\
+* CIs always project as far as their anchor
+%* CIs provide novel information to the context of their anchor
+
+
+%\subsubsection{CIs require their anchor to project}
+
 
 %\citet{potts2005logic} describes the following properties of CIs:
 %
@@ -17,22 +43,11 @@ requires a unified analysis of their behaviour.
 %  \item Speaker-orientedness
 % \end{itemize}
 
-We will argue that all these properties can be described in terms of
-a species of indexicality \citep[cf.][]{amaral2007review}, which in the case
-of supplemental CIs comes down to indexicality to the projection site of the
-anchor.
+%We will argue that all these properties can be described in terms of
+%a species of indexicality \citep[cf.][]{amaral2007review}, which in the case
+%of supplemental CIs comes down to indexicality to the projection site of the
+%anchor.
 
-\subsection{Projection as anchoring}
-
-\subsubsection{CIs are `piggybacking' on their anchor}
-
-* CIs always occur with an anchor\\
-* Similarity to E-type pronouns\\
-* CIs always project as far as their anchor
-%* CIs provide novel information to the context of their anchor
-
-
-\subsubsection{CIs require their anchor to project}
 
 Infelicitous with non-specific indefinites, quantificational constructions
 
@@ -77,19 +92,7 @@ felicitously occur with a (restrictive) CI.
 %Something about generics? and inclusion and attribution as a contrast to
 %identification with anchor? \cite[see][]{heringa2012appositional}
 
-\subsection{Formalizing projection-anaphoricity}
-
-\subsubsection{Projective Discourse Representation Theory}
-
-[short introduction]
-
-\subsubsection{Enhancing PDRSs with information structure}
-
-* Adding MAPs to PDRSs. \\
-* Projection as \textit{strict} subordination
-
-
-\subsection{Representing the projection behaviour of CIs}
+\subsection{Representing the projection behaviour of supplemental CIs}
 
 \subsubsection{Supplemental clauses}
 
@@ -100,8 +103,13 @@ felicitously occur with a (restrictive) CI.
 the kids.\\
 \pdrs{1}{$3\gets$x~~$1\gets$p}{$3\gets$Sheila(x)\\ $1\gets$believes(x,p)\\
 $1\gets$p:\pdrs{2}{$4\gets$y~~$5\gets$z}{$4\gets$Chuck(y)\\ 
-$5\gets$psychopath(z)\\ $5\gets$z=y\\ $2\gets$fit-to-watch-kids(y)}{$2<4$
-~~$2<5$~~$5=4$}}{$1< 3$}
+$5\gets$psychopath(z)\\ $5\gets$z=y\\ $2\gets$fit-to-watch-kids(y)}{$2 \leq 4$
+~~$2<5$~~$5=4$}}{$1 \leq 3$}
+\pdrs{1}{$3\gets$x~~$1\gets$p}{$3\gets$Sheila(x)\\ $1\gets$believes(x,p)\\
+$1\gets$p:\pdrs{2}{$4\gets$y}{$4\gets$Chuck(y)\\ 
+$4\gets$psychopath(y)\\ $2\gets$fit-to-watch-kids(y)}{$2<4$}}{$1 \leq 3$}
+
+
 
 }
 
@@ -110,8 +118,8 @@ $5\gets$psychopath(z)\\ $5\gets$z=y\\ $2\gets$fit-to-watch-kids(y)}{$2<4$
 \noindent\parbox[b]{\textwidth}{
 \ex. Ames\underline{, who stole from the FBI,} is behind bars.\\
 \pdrs{1}{$3\gets$x~~$4\gets$y}{$3\gets$Ames(x)\\ $4\gets$FBI(y)\\ 
-$5\gets$stole\_from(x,y)\\ $1\gets$behind\_bars(x)}{$1<3$~~$1<5$~~$5<4$
-~~$5=3$}
+$5\gets$stole\_from(x,y)\\ $1\gets$behind\_bars(x)}{
+$1 \leq 3$~~$1<5$~~$5 \leq 4$~~$5=3$}
 
 }
 
@@ -122,9 +130,8 @@ $5\gets$stole\_from(x,y)\\ $1\gets$behind\_bars(x)}{$1<3$~~$1<5$~~$5<4$
 a spy.\\
 \textit{cf.} Ames, of whom the press reported he is a spy, is not (a spy).\\
 \pdrs{1}{}{$1\gets\neg$\pdrs{2}{$3\gets$x~~$4\gets$y~~$5\gets$p}{
-$3\gets$Ames(x)\\ $4\gets$press(y)\\ $5\gets$p:\pdrs{6}{}{$6\gets$spy(x)}{
-$6<3$}\\ $5\gets$reported(y,p)\\ $2\gets$spy(x)}{$2<3$~~$2<5$~~$5<4$
-~~$5=3$}}{}
+$3\gets$Ames(x)\\ $4\gets$press(y)\\ $5\gets$p:\pdrs{6}{}{$6\gets$spy(x)}{}\\
+$5\gets$reported(y,p)\\ $2\gets$spy(x)}{$2 \leq 3$~~$2<5$~~$5 \leq 4$~~$5=3$}}{}
 
 }
 %[..]
