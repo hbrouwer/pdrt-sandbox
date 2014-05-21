@@ -330,7 +330,8 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
         -- | Returns whether 'PRef' @pr@ is /duplicate/ wrt a list of 'PRef's.
         dup :: PRef -> [PRef] -> Bool
         dup _ []                                       = False
-        dup pr@(PRef _ r) (pr'@(PRef _ r'):prs)
+        dup pr@(PRef p r) (pr'@(PRef _ r'):prs)
+          | not(pdrsBoundPVar p lp gp)                 = False -- ^ free pointers may be bound later on.
           | r == r' && independentPRefs pr [pr'] lp gp = True
           | otherwise                                  = dup pr prs
         -- | Returns a tuple of existing 'PRef's @eps'@ and duplicate
@@ -371,19 +372,26 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
 -- | Returns whether a 'PRef' @pr@ is /independent/ based on a list of
 -- 'PRef's @prs@, where:
 --
--- [@pr = ('PRef' p r)@ is independent w.r.t. @prs@ /iff/]
+-- [@pr = ('PRef' p r)@ is /not/ independent w.r.t. @prs@ /iff/]
 --
--- (1) @pr@ is not bound by any 'PRef' in @prs@; and
+-- (1) @pr@ is bound by any 'PRef' in @prs@; and
 --
--- 2. it is not the case that @pr@ occurs free and there is some
---    element of @prs@ that is accessible from @pr@. (NB. this only
---    holds if both @pr@ and @pr'@ occur free in accessible contexts,
---    in which case they are not independent).
+-- 2. @pr@ occurs free and there is some element of @prs@ that is accessible
+--    from @pr@. (NB. this only holds if both @pr@ and @pr'@ occur free in
+--    accessible contexts, in which case they are not independent).
+--
+-- 3. @pr@ occurs free and there is some element of @prs@ that may become
+--    accessible from @pr@ at some later point, because its projection site
+--    is undetermined with respect to the projection site of @pr@. This is
+--    the case if the projection site occurs free (i.e., has no path to the
+--    global context).
 ---------------------------------------------------------------------------
 independentPRefs :: PRef -> [PRef] -> PDRS -> PDRS -> Bool
-independentPRefs _ [] _ _                                          = True
+independentPRefs _ [] _ _                                = True
 independentPRefs pr@(PRef p r) prs lp gp
-  | any (flip (pdrsPRefBoundByPRef pr lp) gp) prs                  = False
-  | not(pdrsBoundPRef pr lp gp) 
-    && any (\(PRef p' _) -> (pdrsIsAccessibleContext p p' gp)) prs = False
-  | otherwise                                                      = True
+  | any (flip (pdrsPRefBoundByPRef pr lp) gp) prs        = False
+  | not(pdrsBoundPRef pr lp gp) && any (\(PRef p' _) ->
+    (pdrsIsAccessibleContext p p' gp)) prs               = False
+  | not(pdrsBoundPRef pr lp gp) && any (\(PRef p' _) ->
+    (not (pdrsIsFreePVar p' gp))) prs                    = False
+  | otherwise                                            = True
