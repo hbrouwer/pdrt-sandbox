@@ -188,8 +188,9 @@ renamePDRSRef pv r lp gp rs
 ---------------------------------------------------------------------------
 renamePVar :: PVar -> PDRS -> PDRS -> [(PVar,PVar)] -> PVar
 renamePVar pv lp gp ps
-  | not (pdrsBoundPVar pv lp gp) = pv
-  | otherwise                    = renameVar pv ps
+  | not (pdrsBoundPVar (abs pv) lp gp) = pv
+  | pv < 0                             = -(renameVar (abs pv) ps)
+  | otherwise                          = renameVar pv ps
 
 ---------------------------------------------------------------------------
 -- ** Purifying PVars
