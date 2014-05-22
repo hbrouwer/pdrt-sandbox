@@ -4,12 +4,40 @@
 name:                pdrt-sandbox
 version:             0.1.0.0
 synopsis:            (Projective) Discourse Representation Theory
--- description:         
+description:         This is an implementation of the formal framework of 
+                     Projective Discourse Representation Theory (Venhuizen et
+                     al. 2013; 2014), which is an extension of standard 
+                     Discourse Representation Theory (Kamp 1981; Kamp & Reyle
+                     1993) with projection pointers. 
+                     
+                     The implementation includes a translation from PDRT to
+                     DRT and First-order Logic, composition via different
+                     types of merge, and unresolved structures based on
+                     Montague Semantics, defined as Haskell functions.
+
+                     [References]
+
+                     * H.Kamp. /"A theory of truth and semantic
+                     representation"/, 1981;
+
+                     * H. Kamp and U. Reyle. /"From discourse to logic:
+                     Introduction to model-theoretic semantics of natural
+                     language, formal logic and Discourse Representation
+                     Theory"/, 1993;
+
+                     * N.J. Venhuizen, J. Bos and H. Brouwer. /"Parsimonious
+                     semantic representations with projection pointers"/,
+                     2013;
+                     
+                     * N.J. Venhuizen, J. Bos, P. Hendriks and H. Brouwer.
+                     /"How and why conventional implicatures project"/,
+                     2014.
 license:             Apache-2.0
 license-file:        LICENSE
 author:              Harm Brouwer and Noortje Venhuizen
 maintainer:          me@hbrouwer.eu, n.j.venhuizen@rug.nl
--- copyright:           
+homepage:            http://hbrouwer.github.io/pdrt-sandbox
+copyright:           (c) 2014-2015 Harm Brouwer and Noortje Venhuizen
 category:            Natural Language Processing
 build-type:          Simple
 cabal-version:       >=1.8
