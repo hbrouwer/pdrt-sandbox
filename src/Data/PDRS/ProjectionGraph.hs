@@ -37,7 +37,7 @@ type PGraph = Graph
 -- | Derives a 'PGraph' for 'PDRS' @p@
 ---------------------------------------------------------------------------
 projectionGraph :: PDRS -> PGraph
-projectionGraph p = buildG (minimum ps, maximum ps) es
+projectionGraph p = buildG (-(maximum $ map abs ps), maximum ps) es
   where es = edges p
         ps = map fst es `union` map snd es
 

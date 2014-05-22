@@ -223,10 +223,16 @@ modEquals :: String
 modEquals  = "\x003D"; 
 
 ---------------------------------------------------------------------------
--- | Subordination symbol.
+-- | Weak subordination symbol.
 ---------------------------------------------------------------------------
-modSubord :: String
-modSubord  = "\x2264"; 
+modWeakSubord :: String
+modWeakSubord  = "\x2264";
+
+---------------------------------------------------------------------------
+-- | Weak subordination symbol.
+---------------------------------------------------------------------------
+modStrictSubord :: String
+modStrictSubord  = "\x003C";
 
 ---------------------------------------------------------------------------
 -- ** Notations for showing PDRSs
@@ -399,9 +405,10 @@ showMAPs m = showUnique m []
   where showUnique :: [MAP] -> [MAP] -> String
         showUnique [] _ = " "
         showUnique (m@(pv1,pv2):ms) sms
-          | swap m `elem` ms  = showUnique ms (m:sms)
-          | swap m `elem` sms = show pv1 ++ " " ++ modEquals ++ " " ++ show pv2 ++ "  " ++ showUnique ms (m:sms)
-          | otherwise         = show pv1 ++ " " ++ modSubord ++ " " ++ show pv2 ++ "  " ++ showUnique ms (m:sms)
+          | pv2 < 0                                  = show (abs pv2) ++ " " ++ modStrictSubord ++ " " ++ show pv1 ++ "  " ++ showUnique ms ((abs pv2,abs pv1):sms)
+          | swap m `elem` ms || (pv2,-pv1) `elem` ms = showUnique ms (m:sms)
+          | swap m `elem` sms                        = show pv1       ++ " " ++ modEquals       ++ " " ++ show pv2 ++ "  " ++ showUnique ms (m:sms)
+          | otherwise                                = show pv1       ++ " " ++ modWeakSubord   ++ " " ++ show pv2 ++ "  " ++ showUnique ms (m:sms)
 
 ---------------------------------------------------------------------------
 -- | Shows the 'MAP's @m@ of a 'PDRS' as tuples.
