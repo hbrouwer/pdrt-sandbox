@@ -44,7 +44,20 @@ cabal-version:       >=1.8
 data-files:          Makefile, README.markdown
 
 library
-  exposed-modules:     Data.DRS, Data.FOL, Data.PDRS, Data.DRS.Binding, Data.DRS.DataType, Data.DRS.Input, Data.DRS.Input.Boxer, Data.DRS.Input.String, Data.DRS.LambdaCalculus, Data.DRS.Merge, Data.DRS.Properties, Data.DRS.Show, Data.DRS.Structure, Data.DRS.Translate, Data.DRS.Variables, Data.FOL.Formula, Data.FOL.Show, Data.PDRS.Binding, Data.PDRS.DataType, Data.PDRS.Input, Data.PDRS.Input.Boxer, Data.PDRS.Input.String, Data.PDRS.LambdaCalculus, Data.PDRS.Merge, Data.PDRS.ProjectionGraph, Data.PDRS.ProjectionTable, Data.PDRS.Properties, Data.PDRS.Show, Data.PDRS.Structure, Data.PDRS.Translate, Data.PDRS.Variables
+  exposed-modules:     Data.DRS, Data.FOL, Data.PDRS, Data.DRS.Binding,
+                       Data.DRS.DataType, Data.DRS.Input,
+                       Data.DRS.Input.Boxer, Data.DRS.Input.String,
+                       Data.DRS.LambdaCalculus, Data.DRS.Merge,
+                       Data.DRS.Properties, Data.DRS.Show, Data.DRS.Structure,
+                       Data.DRS.Translate, Data.DRS.Variables,
+                       Data.FOL.Formula, Data.FOL.Show, Data.PDRS.Binding,
+                       Data.PDRS.DataType, Data.PDRS.Input,
+                       Data.PDRS.Input.Boxer, Data.PDRS.Input.String,
+                       Data.PDRS.LambdaCalculus, Data.PDRS.Merge,
+                       Data.PDRS.ProjectionGraph, Data.PDRS.ProjectionTable,
+                       Data.PDRS.Properties, Data.PDRS.Show,
+                       Data.PDRS.Structure, Data.PDRS.Translate,
+                       Data.PDRS.Variables
   -- other-modules:
   build-depends:       base ==4.6.*, containers ==0.5.*
   hs-source-dirs:      src

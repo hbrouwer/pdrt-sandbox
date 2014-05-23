@@ -38,7 +38,7 @@ showFOLForm f = '\n' : showFormula f ++ "\n"
   where showFormula :: FOLForm -> String
         showFormula (Exists v f) = opExists ++ v ++ showFormula f
         showFormula (ForAll v f) = opForAll ++ v ++ showFormula f
-        showFormula (And f1 f2)  = "(" ++ showFormula f1 ++ " "  ++ opAnd ++ " " ++ showFormula f2 ++ ")"
+        showFormula (And f1 f2)  = "(" ++ showFormula f1 ++ " "  ++ opAnd ++ " "  ++ showFormula f2 ++ ")"
         showFormula (Or f1 f2)   = "(" ++ showFormula f1 ++ ") " ++ opOr  ++ " (" ++ showFormula f2 ++ ")"
         showFormula (Imp f1 f2)  = "(" ++ showFormula f1 ++ ") " ++ opImp ++ " (" ++ showFormula f2 ++ ")"
         showFormula (Neg f)      = opNeg ++ showFormula f
@@ -86,5 +86,4 @@ opTop    = "\x22A4"
 
 -- | Bottom/false constant symbol
 opBottom :: String
-opBottom = "\x22A5" 
-
+opBottom = "\x22A5"
