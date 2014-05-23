@@ -17,7 +17,7 @@ description:         This is an implementation of the formal framework of
 
                      [References]
 
-                     * H.Kamp. /"A theory of truth and semantic
+                     * H. Kamp. /"A theory of truth and semantic
                      representation"/, 1981;
 
                      * H. Kamp and U. Reyle. /"From discourse to logic:
@@ -25,11 +25,11 @@ description:         This is an implementation of the formal framework of
                      language, formal logic and Discourse Representation
                      Theory"/, 1993;
 
-                     * N.J. Venhuizen, J. Bos and H. Brouwer. /"Parsimonious
+                     * N. J. Venhuizen, J. Bos and H. Brouwer. /"Parsimonious
                      semantic representations with projection pointers"/,
                      2013;
                      
-                     * N.J. Venhuizen, J. Bos, P. Hendriks and H. Brouwer.
+                     * N. J. Venhuizen, J. Bos, P. Hendriks and H. Brouwer.
                      /"How and why conventional implicatures project"/,
                      2014.
 license:             Apache-2.0
