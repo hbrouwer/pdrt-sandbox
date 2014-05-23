@@ -57,23 +57,23 @@ stringToDRS s
 ---------------------------------------------------------------------------
 
 -- | Negation operators (case insensitive): @!, not, neg@.
-opNegString :: [[Char]]
+opNegString :: [String]
 opNegString     = ["!", "not", "neg"]
 
 -- | Implication operators (case insensitive): @imp, ->, =>, then@.
-opImpString :: [[Char]]
+opImpString :: [String]
 opImpString     = ["imp", "->", "=>", "then"]
 
 -- | Disjuction operators (case insensitive): @v, or@.
-opOrString :: [[Char]]
+opOrString :: [String]
 opOrString      = ["v", "or"]
 
 -- | Box operators (case insensitive): @b, box, necessary@.
-opBoxString :: [[Char]]
+opBoxString :: [String]
 opBoxString     = ["b", "box", "necessary"]
 
 -- | Diamond operators (case insensitive): @d, diamond, maybe@.
-opDiamondString :: [[Char]]
+opDiamondString :: [String]
 opDiamondString = ["d", "diamond", "maybe"]
 
 ---------------------------------------------------------------------------
