@@ -18,15 +18,13 @@ module Data.PDRS.Binding
 , pdrsPBoundPRef
 , pdrsIsFreePVar
 , pdrsFreePRefs
-, pdrsFreePRefs2
 , pdrsFreePVars
 ) where
 
 import Data.PDRS.DataType
 import Data.PDRS.ProjectionGraph
 import Data.PDRS.Structure
-import Data.PDRS.Variables
-import Data.List ((\\), delete, partition, union)
+import Data.List (delete, partition, union)
 
 ---------------------------------------------------------------------------
 -- * Exported
@@ -117,10 +115,10 @@ pdrsIsFreePVar pv p
 --Note the correspondence to drsBoundRef.
 ---------------------------------------------------------------------------
 pdrsBoundPVar :: PVar -> PDRS -> PDRS -> Bool
-pdrsBoundPVar _ _ (LambdaPDRS _)      = False
-pdrsBoundPVar pv lp (AMerge p1 p2)    = pdrsBoundPVar pv lp p1 || pdrsBoundPVar pv lp p2
-pdrsBoundPVar pv lp (PMerge p1 p2)    = pdrsBoundPVar pv lp p1 || pdrsBoundPVar pv lp p2
-pdrsBoundPVar pv lp gp@(PDRS l _ _ c) = pv == pdrsLabel lp || pv == l || any bound c
+pdrsBoundPVar _ _ (LambdaPDRS _)   = False
+pdrsBoundPVar pv lp (AMerge p1 p2) = pdrsBoundPVar pv lp p1 || pdrsBoundPVar pv lp p2
+pdrsBoundPVar pv lp (PMerge p1 p2) = pdrsBoundPVar pv lp p1 || pdrsBoundPVar pv lp p2
+pdrsBoundPVar pv lp (PDRS l _ _ c) = pv == pdrsLabel lp || pv == l || any bound c
   where bound :: PCon -> Bool
         bound (PCon _ (Rel _ _))    = False
         bound (PCon _ (Neg p1))     = isSubPDRS lp p1 && pdrsBoundPVar pv lp p1
@@ -140,7 +138,7 @@ pdrsFreePRefs :: PDRS -> PDRS -> [PRef]
 pdrsFreePRefs (LambdaPDRS _) _     = []
 pdrsFreePRefs (AMerge p1 p2) gp    = pdrsFreePRefs p1 gp `union` pdrsFreePRefs p2 gp
 pdrsFreePRefs (PMerge p1 p2) gp    = pdrsFreePRefs p1 gp `union` pdrsFreePRefs p2 gp
-pdrsFreePRefs lp@(PDRS _ _ u c) gp = free c
+pdrsFreePRefs lp@(PDRS _ _ _ c) gp = free c
   where freePRefs :: [PRef] -> [PRef]
         freePRefs prs = snd (partition (flip (`pdrsBoundPRef` lp) gp) prs)
         free :: [PCon] -> [PRef]
@@ -173,63 +171,3 @@ pdrsFreePVars lp@(PDRS _ m u c) gp = freePVars (concatMap (\(x,y) -> [x,y]) m) `
         free (PCon p (Prop _ p1):cs)  = freePVars [p] `union` pdrsFreePVars p1 gp `union` free cs
         free (PCon p (Diamond p1):cs) = freePVars [p] `union` pdrsFreePVars p1 gp `union` free cs
         free (PCon p (Box p1):cs)     = freePVars [p] `union` pdrsFreePVars p1 gp `union` free cs
-
----------------------------------------------------------------------------
--- | XXX Playing around
----------------------------------------------------------------------------
-pdrsFreePRefs2 :: PDRS -> [PRef]
-pdrsFreePRefs2 p = filter (`notElem` posBound [] [] p) (posFree p)
-  where posFree :: PDRS -> [PRef]
-        posFree (LambdaPDRS _)    = []
-        posFree (AMerge p1 p2)    = posFree p1 `union` posFree p2
-        posFree (PMerge p1 p2)    = posFree p1 `union` posFree p2
-        posFree lp@(PDRS _ _ _ c) = concatMap free c
-          where free :: PCon -> [PRef]
-                free (PCon p (Rel _ d))    = map (PRef p) d
-                free (PCon _ (Neg p1))     = posFree p1
-                free (PCon _ (Imp p1 p2))  = posFree p1 `union` posFree p2
-                free (PCon _ (Or p1 p2))   = posFree p1 `union` posFree p2
-                free (PCon p (Prop r p1))  = [PRef p r] `union` posFree p1
-                free (PCon _ (Diamond p1)) = posFree p1
-                free (PCon _ (Box p1))     = posFree p1
-        posBound :: [PRef] -> [MAP]-> PDRS -> [PRef]
-        posBound prs _ (LambdaPDRS _)   = prs
-        posBound prs mps (AMerge p1 p2) = posBound prs mps p1 `union` posBound prs mps p2
-        posBound prs mps (PMerge p1 p2) = posBound prs mps p1 `union` posBound prs mps p2
-        posBound prs mps (PDRS l m u c) = prs' `union` lprs `union` concatMap (boundm prs') mps' `union` cprs
-          where prs' = prs `union` u
-                mps' = mps `union` m
-                lprs = map (\(PRef _ r) ->  (PRef l r)) prs'
-                boundm :: [PRef] -> MAP -> [PRef]
-                boundm [] m   = []
-                boundm (PRef p r:rs) m'@(p1,p2)
-                  | p == p2   = PRef p1 r : boundm rs m'
-                  | otherwise = boundm rs m'
-                cprs = concatMap (boundc prs' mps') (fst accs) `union` concatMap (boundc [] mps') (snd accs)
-                accs = partition (\(PCon p _) -> p == l || acc p l mps') c
-                  where acc :: PVar -> PVar -> [MAP] -> Bool
-                        acc p p' t = any ((==p') . snd) pts || any (\p'' -> acc p'' p' t) (map snd pts)
-                          where pts = filter ((==p) . fst) t
-                boundc :: [PRef] -> [MAP] -> PCon -> [PRef]
-                boundc _  _  (PCon _ (Rel _ _))    = []
-                boundc rs ms (PCon _ (Neg p1))     = posBound rs ms p1
-                boundc rs ms (PCon _ (Imp p1 p2))  = posBound (posBound rs ms p1) (ms `union` getMAPs p1) p2
-                boundc rs ms (PCon _ (Or p1 p2))   = posBound rs ms p1 `union` posBound rs ms p2
-                boundc rs ms (PCon _ (Prop _ p1))  = posBound rs ms p1
-                boundc rs ms (PCon _ (Diamond p1)) = posBound rs ms p1
-                boundc rs ms (PCon _ (Box p1))     = posBound rs ms p1
-
--- XXX: move to variables?
-getMAPs :: PDRS -> [MAP]
-getMAPs (LambdaPDRS _) = []
-getMAPs (AMerge p1 p2) = getMAPs p1 `union` getMAPs p2
-getMAPs (PMerge p1 p2) = getMAPs p1 `union` getMAPs p2
-getMAPs (PDRS _ m _ c) = m `union` concatMap maps c
-  where maps :: PCon -> [MAP]
-        maps (PCon _ (Rel _ _))    = []
-        maps (PCon _ (Neg p1))     = getMAPs p1
-        maps (PCon _ (Imp p1 p2))  = getMAPs p1 `union` getMAPs p2
-        maps (PCon _ (Or p1 p2))   = getMAPs p1 `union` getMAPs p2
-        maps (PCon _ (Prop _ p1))  = getMAPs p1
-        maps (PCon _ (Diamond p1)) = getMAPs p1
-        maps (PCon _ (Box p1))     = getMAPs p1

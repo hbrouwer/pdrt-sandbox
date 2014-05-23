@@ -12,8 +12,7 @@ Discourse Representation Structure
 
 module Data.DRS 
 ( 
-  module Data.DRS
-, module DRS
+  module DRS
 , showFOLForm
 , printFOLForm
 ) where

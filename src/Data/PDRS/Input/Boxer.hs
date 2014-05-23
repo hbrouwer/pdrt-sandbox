@@ -15,7 +15,7 @@ module Data.PDRS.Input.Boxer
   boxerToPDRS
 ) where
 
-import Data.Char (isNumber, isPunctuation, toUpper)
+import Data.Char (isNumber, toUpper)
 import Data.List (isPrefixOf)
 import Data.DRS.Input.Boxer
 import Data.DRS.Input.String
@@ -29,8 +29,9 @@ import Data.PDRS.DataType
 -- | Converts Boxer's output into a 'DRS'.
 ---------------------------------------------------------------------------
 boxerToPDRS :: String -> PDRS
-boxerToPDRS s@('s':'e':'m':'(':_) = plPDRSToPDRS (replaceLambdas (convertPrologVars plpdrs []) 0)
-  where plpdrs = tail (dropUpToMatchingBracket Square (dropWhile (/= '[') s))
+boxerToPDRS s@('s':'e':'m':'(':_) = plPDRSToPDRS $ replaceLambdas (convertPrologVars plpdrs []) 0
+  where plpdrs = tail $ dropUpToMatchingBracket Square (dropWhile (/= '[') s)
+boxerToPDRS _                     = error "infelicitous input string"
 
 ---------------------------------------------------------------------------
 -- * Private
@@ -61,7 +62,9 @@ plPDRSToPDRS s
 ---------------------------------------------------------------------------
 parsePlRefs :: String -> [PRef]
 parsePlRefs [] = []
-parsePlRefs s@('[':_) = map parse (splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Square s))
+parsePlRefs s@(b:_)
+  | b == '['  = map parse (splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Square s))
+  | otherwise = error "infelicitous input string"
   where parse :: String -> PRef
         parse r = PRef lab (toPDRSRef r')
           where lab = read ((filter isNumber . takeWhile (/= ':')) r) :: Int
@@ -72,7 +75,9 @@ parsePlRefs s@('[':_) = map parse (splitOn ',' (dropOuterBrackets $ takeUpToMatc
 ---------------------------------------------------------------------------
 parsePlCons :: String -> [PCon]
 parsePlCons [] = []
-parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Square s)
+parsePlCons s@(b:_)
+  | b == '['  = parse (dropOuterBrackets $ takeUpToMatchingBracket Square s)
+  | otherwise = error "infelicitous input string"
   where parse :: String -> [PCon]
         parse [] = []
         parse (',':cs) = parse cs
@@ -98,6 +103,7 @@ parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Squar
                 c'  = tail $ dropUpToMatchingBracket Parentheses (dropWhile (/= '(') c)
                 ct  = splitOn ',' c
                 capitalize :: String -> String
+                capitalize []    = []
                 capitalize (h:t) = toUpper h:t
 
 ---------------------------------------------------------------------------

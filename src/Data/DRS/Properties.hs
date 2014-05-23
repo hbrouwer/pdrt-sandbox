@@ -46,7 +46,7 @@ isProperDRS d = isProperSubDRS d d
         isProperSubDRS (Merge d1 d2) gd = isProperSubDRS d1 gd && isProperSubDRS d2 gd
         isProperSubDRS sd@(DRS _ cs) gd = all properCon cs
           where properCon :: DRSCon -> Bool
-                properCon (Rel _ d)    = all (flip (`drsBoundRef` sd) gd) d
+                properCon (Rel _ d')   = all (flip (`drsBoundRef` sd) gd) d'
                 properCon (Neg d1)     = isProperSubDRS d1 gd
                 properCon (Imp d1 d2)  = isProperSubDRS d1 gd && isProperSubDRS d2 gd
                 properCon (Or d1 d2)   = isProperSubDRS d1 gd && isProperSubDRS d2 gd
@@ -80,5 +80,4 @@ isPureDRS gd = isPure gd []
                 pureCons (Diamond d1:cs) rs = isPure d1 rs    && pureCons cs (rs ++ drsVariables d1)
                 pureCons (Box d1:cs)     rs = isPure d1 rs    && pureCons cs (rs ++ drsVariables d1)
                 pureRefs :: [DRSRef] -> [DRSRef] -> Bool
-                pureRefs rs srs = all (\r -> drsBoundRef r ld gd || r `notElem` srs) rs
-
+                pureRefs rs srs' = all (\r -> drsBoundRef r ld gd || r `notElem` srs') rs

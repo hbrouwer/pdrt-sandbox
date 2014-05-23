@@ -26,7 +26,7 @@ import Data.PDRS.DataType
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 
-import Data.List ((\\), intersect, union)
+import Data.List (intersect, union)
 
 ---------------------------------------------------------------------------
 -- * Exported
@@ -39,20 +39,20 @@ pdrsAMerge :: PDRS -> PDRS -> PDRS
 pdrsAMerge p lp@(LambdaPDRS _) = AMerge p lp
 pdrsAMerge lp@(LambdaPDRS _) p = AMerge lp p
 pdrsAMerge p am@(AMerge k1 k2)
-  | isLambdaPDRS k1 = AMerge k1 (pdrsAMerge p k2) -- p + (lk1 + k2) = lk1 + (p + k2)
-  | isLambdaPDRS k2 = AMerge (pdrsAMerge p k1) k2 -- p + (k1 + lk2) = (p + k1) + lk2
+  | isLambdaPDRS k1 = AMerge k1 (pdrsAMerge p k2)                             -- p + (lk1 + k2) = lk1 + (p + k2)
+  | isLambdaPDRS k2 = AMerge (pdrsAMerge p k1) k2                             -- p + (k1 + lk2) = (p + k1) + lk2
   | otherwise       = pdrsAMerge p (pdrsResolveMerges am)
 pdrsAMerge am@(AMerge k1 k2) p
-  | isLambdaPDRS k1 = AMerge k1 (pdrsAMerge k2 p) -- (lk1 + k2) + p = lk1 + (k2 + p)
-  | isLambdaPDRS k2 = AMerge k2 (pdrsAMerge k1 p) -- (k1 + lk2) + p = lk2 + (k1 + p)
+  | isLambdaPDRS k1 = AMerge k1 (pdrsAMerge k2 p)                             -- (lk1 + k2) + p = lk1 + (k2 + p)
+  | isLambdaPDRS k2 = AMerge k2 (pdrsAMerge k1 p)                             -- (k1 + lk2) + p = lk2 + (k1 + p)
   | otherwise       = pdrsAMerge (pdrsResolveMerges am) p
 pdrsAMerge p pm@(PMerge k1 k2)
-  | isLambdaPDRS k1 = PMerge k1 (pdrsAMerge p k2) -- p + (lk1 * k2) = lk1 * (p + k2)
-  | isLambdaPDRS k2 = AMerge (pdrsPMerge k1 p) k2 -- p + (k1 * lk2) = (k1 * p) + lk2
+  | isLambdaPDRS k1 = PMerge k1 (pdrsAMerge p k2)                             -- p + (lk1 * k2) = lk1 * (p + k2)
+  | isLambdaPDRS k2 = AMerge (pdrsPMerge k1 p) k2                             -- p + (k1 * lk2) = (k1 * p) + lk2
   | otherwise       = pdrsAMerge p (pdrsResolveMerges pm)
 pdrsAMerge pm@(PMerge k1 k2) p
-  | isLambdaPDRS k1 = PMerge k1 (pdrsAMerge k2 p) -- (lk1 * k2) + p = lk1 * (k2 + p)
-  | isLambdaPDRS k2 = AMerge k2 (pdrsPMerge k1 p) -- (k1 * lk2) + p = lk2 + (k1 * p)
+  | isLambdaPDRS k1 = PMerge k1 (pdrsAMerge k2 p)                             -- (lk1 * k2) + p = lk1 * (k2 + p)
+  | isLambdaPDRS k2 = AMerge k2 (pdrsPMerge k1 p)                             -- (k1 * lk2) + p = lk2 + (k1 * p)
   | otherwise       = pdrsAMerge (pdrsResolveMerges pm) p
 pdrsAMerge p1@(PDRS{}) p2@(PDRS{}) = pdrsPurify $ amerge p1 (pdrsDisjoin p2' p1')
   where p1' = pdrsPurify $ pdrsResolveMerges p1
@@ -65,6 +65,7 @@ pdrsAMerge p1@(PDRS{}) p2@(PDRS{}) = pdrsPurify $ amerge p1 (pdrsDisjoin p2' p1'
                 (PDRS _ m2' u2' c2') = pdrsAlphaConvert (PDRS l1 m2 u2 c2) [(l1,l2)] [] 
                 -- ^ in order to make sure that projected variables can
                 -- become bound by means of assertive merge
+        amerge pdrs1 pdrs2                          = AMerge pdrs1 pdrs2
 
 -- | Infix notation for 'pdrsAMerge'
 (<<+>>) :: PDRS -> PDRS -> PDRS
@@ -77,22 +78,20 @@ pdrsPMerge :: PDRS -> PDRS -> PDRS
 pdrsPMerge p lp@(LambdaPDRS _) = PMerge p lp
 pdrsPMerge lp@(LambdaPDRS _) p = PMerge lp p
 pdrsPMerge p am@(AMerge k1 k2)
-  | isLambdaPDRS k1 = AMerge k1 (pdrsPMerge p k2) -- p * (lk1 + k2) = lk1 + (p * k2)
-  | isLambdaPDRS k2 = AMerge (pdrsPMerge p k1) k2 -- p * (k1 + lk2) = (p * k1) + lk2
+  | isLambdaPDRS k1 = AMerge k1 (pdrsPMerge p k2)                             -- p * (lk1 + k2) = lk1 + (p * k2)
+  | isLambdaPDRS k2 = AMerge (pdrsPMerge p k1) k2                             -- p * (k1 + lk2) = (p * k1) + lk2
   | otherwise       = pdrsPMerge p (pdrsResolveMerges am)
 pdrsPMerge am@(AMerge k1 k2) p
-  | isLambdaPDRS k1 = PMerge (pdrsAMerge k1 (emptyPDRS k2)) (pdrsPMerge k2 p) 
-  -- (lk1 + k2) * p = (lk1 + ek2) * (l2 * p)
-  | isLambdaPDRS k2 = PMerge (pdrsAMerge k2 (emptyPDRS k1)) (pdrsPMerge k1 p)
-  -- (k1 + lk2) * p = (lk2 + ek1) * (k1 * p)
+  | isLambdaPDRS k1 = PMerge (pdrsAMerge k1 (emptyPDRS k2)) (pdrsPMerge k2 p) -- (lk1 + k2) * p = (lk1 + ek2) * (l2 * p)
+  | isLambdaPDRS k2 = PMerge (pdrsAMerge k2 (emptyPDRS k1)) (pdrsPMerge k1 p) -- (k1 + lk2) * p = (lk2 + ek1) * (k1 * p)
   | otherwise       = pdrsPMerge (pdrsResolveMerges am) p
 pdrsPMerge p pm@(PMerge k1 k2)
-  | isLambdaPDRS k1 = PMerge k1 (pdrsPMerge p k2) -- p * (lk1 * k2) = lk1 * (p * k2)
-  | isLambdaPDRS k2 = PMerge (pdrsPMerge p k1) k2 -- p * (k1 * lk2) = (p * k1) * lk2 
+  | isLambdaPDRS k1 = PMerge k1 (pdrsPMerge p k2)                             -- p * (lk1 * k2) = lk1 * (p * k2)
+  | isLambdaPDRS k2 = PMerge (pdrsPMerge p k1) k2                             -- p * (k1 * lk2) = (p * k1) * lk2 
   | otherwise       = pdrsPMerge p (pdrsResolveMerges pm)
 pdrsPMerge pm@(PMerge k1 k2) p
-  | isLambdaPDRS k1 = PMerge k1 (pdrsPMerge k2 p) -- (lk1 * k2) * p = lk1 * (k2 * p)
-  | isLambdaPDRS k2 = PMerge k2 (pdrsPMerge k1 p) -- (k1 * lk2) * p = lk2 * (k1 * p)
+  | isLambdaPDRS k1 = PMerge k1 (pdrsPMerge k2 p)                             -- (lk1 * k2) * p = lk1 * (k2 * p)
+  | isLambdaPDRS k2 = PMerge k2 (pdrsPMerge k1 p)                             -- (k1 * lk2) * p = lk2 * (k1 * p)
   | otherwise       = pdrsPMerge (pdrsResolveMerges pm) p
 pdrsPMerge p1@(PDRS{}) p2@(PDRS{}) = pdrsPurify $ pmerge p1' (pdrsDisjoin p2' p1')
   where p1' = pdrsPurify $ pdrsResolveMerges p1
@@ -102,6 +101,7 @@ pdrsPMerge p1@(PDRS{}) p2@(PDRS{}) = pdrsPurify $ pmerge p1' (pdrsDisjoin p2' p1
         -- replacing pointers, resulting in the content of @p@ becoming
         -- projected in the resulting 'PDRS'.
         pmerge (PDRS l m u c) (PDRS l' m' u' c') = PDRS l' ([(l',l)] `union` m `union` m') (u `union` u') (c `union` c')
+        pmerge pdrs1 pdrs2                       = PMerge pdrs1 pdrs2
 
 -- | Infix notation for 'pdrsPMerge'
 (<<*>>) :: PDRS -> PDRS -> PDRS
@@ -148,4 +148,3 @@ pdrsDisjoin p p' = pdrsAlphaConvert p (zip ops nps) (zip ors nrs)
         nps = newPVars ops (pdrsPVars p `union` pdrsPVars p')
         ors = pdrsVariables p `intersect` pdrsVariables p'
         nrs = newPDRSRefs ors (pdrsVariables p `union` pdrsVariables p')
-

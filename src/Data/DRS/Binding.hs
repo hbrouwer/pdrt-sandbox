@@ -18,7 +18,6 @@ module Data.DRS.Binding
 
 import Data.DRS.DataType
 import Data.DRS.Structure
-import Data.DRS.Variables
 import Data.List (partition, union)
 
 ---------------------------------------------------------------------------
@@ -30,26 +29,28 @@ import Data.List (partition, union)
 -- global 'DRS' @gd@.
 ---------------------------------------------------------------------------
 drsBoundRef :: DRSRef -> DRS -> DRS -> Bool
+drsBoundRef _ (LambdaDRS _) _  = False
+drsBoundRef r (Merge d1 d2) gd = drsBoundRef r d1 gd || drsBoundRef r d2 gd
 drsBoundRef _ _ (LambdaDRS _)  = False
 drsBoundRef r ld (Merge d1 d2) = drsBoundRef r ld d1 || drsBoundRef r ld d2
-drsBoundRef r ld@(DRS lu _) gd@(DRS gu gc)
+drsBoundRef r ld@(DRS lu _) (DRS gu gc)
   | r `elem` lu           = True
   | r `elem` gu           = True
   | hasAntecedent r ld gc = True
   | otherwise             = False
   where hasAntecedent :: DRSRef -> DRS -> [DRSCon] -> Bool
-        hasAntecedent r ld = any antecedent
+        hasAntecedent r' ld' = any antecedent
           where antecedent :: DRSCon -> Bool
                 antecedent (Rel _ _)     = False
-                antecedent (Neg d1)      = isSubDRS ld d1 && drsBoundRef r ld d1
-                antecedent (Imp d1 d2)   = (r `elem` drsUniverse d1 && isSubDRS ld d2)
-                  || (isSubDRS ld d1 && drsBoundRef r ld d1)
-                  || (isSubDRS ld d2 && drsBoundRef r ld d2)
-                antecedent (Or d1 d2)    = (isSubDRS ld d1 && drsBoundRef r ld d1)
-                  || (isSubDRS ld d2 && drsBoundRef r ld d2)
-                antecedent (Prop _ d1)   = isSubDRS ld d1 && drsBoundRef r ld d1
-                antecedent (Diamond d1)  = isSubDRS ld d1 && drsBoundRef r ld d1
-                antecedent (Box d1)      = isSubDRS ld d1 && drsBoundRef r ld d1
+                antecedent (Neg d1)      = isSubDRS ld' d1 && drsBoundRef r' ld' d1
+                antecedent (Imp d1 d2)   = (r' `elem` drsUniverse d1 && isSubDRS ld' d2)
+                  || (isSubDRS ld' d1 && drsBoundRef r' ld' d1)
+                  || (isSubDRS ld' d2 && drsBoundRef r' ld' d2)
+                antecedent (Or d1 d2)    = (isSubDRS ld' d1 && drsBoundRef r' ld' d1)
+                  || (isSubDRS ld' d2 && drsBoundRef r ld' d2)
+                antecedent (Prop _ d1)   = isSubDRS ld' d1 && drsBoundRef r' ld' d1
+                antecedent (Diamond d1)  = isSubDRS ld' d1 && drsBoundRef r' ld' d1
+                antecedent (Box d1)      = isSubDRS ld' d1 && drsBoundRef r' ld' d1
 
 ---------------------------------------------------------------------------
 -- | Returns the list of all free 'DRSRef's in a 'DRS'.

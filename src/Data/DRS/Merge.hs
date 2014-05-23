@@ -21,7 +21,6 @@ module Data.DRS.Merge
 
 import Data.DRS.DataType
 import Data.DRS.LambdaCalculus
-import Data.DRS.Properties
 import Data.DRS.Structure
 import Data.DRS.Variables
 
@@ -38,12 +37,12 @@ drsMerge :: DRS -> DRS -> DRS
 drsMerge d ld@(LambdaDRS _) = Merge d ld
 drsMerge ld@(LambdaDRS _) d = Merge ld d
 drsMerge d md@(Merge d1 d2)
-  | isLambdaDRS d1 = Merge d1 (drsMerge d d2) -- d + (ld1 + d2) = ld1 + (d + d2)
-  | isLambdaDRS d2 = Merge (drsMerge d d1) d2 -- d + (d1 + ld2) = (d + d1) + ld2
+  | isLambdaDRS d1 = Merge d1 (drsMerge d d2)                                 -- d + (ld1 + d2) = ld1 + (d + d2)
+  | isLambdaDRS d2 = Merge (drsMerge d d1) d2                                 -- d + (d1 + ld2) = (d + d1) + ld2
   | otherwise      = drsMerge d (drsResolveMerges md)
 drsMerge md@(Merge d1 d2) d
-  | isLambdaDRS d1 = Merge d1 (drsMerge d2 d) -- (ld1 + d2) + d = ld1 + (d2 + d)
-  | isLambdaDRS d2 = Merge d2 (drsMerge d1 d) -- (d1 + ld2) + d = ld2 + (d1 + d)
+  | isLambdaDRS d1 = Merge d1 (drsMerge d2 d)                                 -- (ld1 + d2) + d = ld1 + (d2 + d)
+  | isLambdaDRS d2 = Merge d2 (drsMerge d1 d)                                 -- (d1 + ld2) + d = ld2 + (d1 + d)
   | otherwise      = drsMerge d (drsResolveMerges md)
 drsMerge d@(DRS _ _) d'@(DRS _ _) = DRS (u1 `union` u2) (c1 `union` c2)
   where d1@(DRS u1 c1) = drsPurify $ drsResolveMerges d

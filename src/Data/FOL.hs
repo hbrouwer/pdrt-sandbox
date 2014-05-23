@@ -12,8 +12,7 @@ First Order Logic
 
 module Data.FOL 
 (
-  module Data.FOL
-, module FOL
+  module FOL
 ) where
 
 import Data.FOL.Formula as FOL

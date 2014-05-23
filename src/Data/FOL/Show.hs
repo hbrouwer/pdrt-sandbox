@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {- |
 Module      :  Data.FOL.Show
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
@@ -36,15 +37,15 @@ instance Show FOLForm where
 showFOLForm :: FOLForm -> String
 showFOLForm f = '\n' : showFormula f ++ "\n"
   where showFormula :: FOLForm -> String
-        showFormula (Exists v f) = opExists ++ v ++ showFormula f
-        showFormula (ForAll v f) = opForAll ++ v ++ showFormula f
-        showFormula (And f1 f2)  = "(" ++ showFormula f1 ++ " "  ++ opAnd ++ " "  ++ showFormula f2 ++ ")"
-        showFormula (Or f1 f2)   = "(" ++ showFormula f1 ++ ") " ++ opOr  ++ " (" ++ showFormula f2 ++ ")"
-        showFormula (Imp f1 f2)  = "(" ++ showFormula f1 ++ ") " ++ opImp ++ " (" ++ showFormula f2 ++ ")"
-        showFormula (Neg f)      = opNeg ++ showFormula f
-        showFormula (Rel r d)    = r ++ "(" ++ intercalate "," d ++ ")"
-        showFormula (Top)        = opTop
-        showFormula (Bottom)     = opBottom
+        showFormula (Exists v f1) = opExists ++ v ++ showFormula f1
+        showFormula (ForAll v f1) = opForAll ++ v ++ showFormula f1
+        showFormula (And f1 f2)   = "(" ++ showFormula f1 ++ " "  ++ opAnd ++ " "  ++ showFormula f2 ++ ")"
+        showFormula (Or f1 f2)    = "(" ++ showFormula f1 ++ ") " ++ opOr  ++ " (" ++ showFormula f2 ++ ")"
+        showFormula (Imp f1 f2)   = "(" ++ showFormula f1 ++ ") " ++ opImp ++ " (" ++ showFormula f2 ++ ")"
+        showFormula (Neg f1)      = opNeg ++ showFormula f1
+        showFormula (Rel r d)     = r ++ "(" ++ intercalate "," d ++ ")"
+        showFormula (Top)         = opTop
+        showFormula (Bottom)      = opBottom
 
 ---------------------------------------------------------------------------
 -- | Prints a 'FOLForm'.

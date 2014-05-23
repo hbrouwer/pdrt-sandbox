@@ -12,8 +12,7 @@ Projective Discourse Representation Structure
 
 module Data.PDRS
 (
-  module Data.PDRS
-, module PDRS
+  module PDRS
 ) where
 
 import Data.PDRS.Binding as PDRS

@@ -22,7 +22,7 @@ import qualified Data.DRS.DataType as D
 import Data.DRS.Translate (drsToFOL)
 import qualified Data.FOL.Formula as F
 
-import Data.List (delete, intersect, union)
+import Data.List (union)
 
 import Data.PDRS.Binding
 import Data.PDRS.DataType
@@ -54,13 +54,13 @@ pdrsToDRS p = stripPVars $ movePContent gp (emptyPDRS gp) gp
 
 ---------------------------------------------------------------------------
 -- | Moves projected content in 'PDRS' to its interpretation site in
--- 'PDRS' @p@ based on global 'PDRS' @gp@.
+-- 'PDRS' @lp@ based on global 'PDRS' @gp@.
 ---------------------------------------------------------------------------
 movePContent :: PDRS -> PDRS -> PDRS -> PDRS
-movePContent lp@(LambdaPDRS _) _ _  = lp
-movePContent (AMerge p1 p2)    p gp = movePContent p2 (movePContent p1 p gp) gp
-movePContent (PMerge p1 p2)    p gp = movePContent p2 (movePContent p1 p gp) gp
-movePContent (PDRS _ _ u c)    p gp = move c $ insertPRefs (filter (\r -> not (pdrsPBoundPRef r p gp)) u) p gp
+movePContent lp@(LambdaPDRS _) _  _  = lp
+movePContent (AMerge p1 p2)    lp gp = movePContent p2 (movePContent p1 lp gp) gp
+movePContent (PMerge p1 p2)    lp gp = movePContent p2 (movePContent p1 lp gp) gp
+movePContent (PDRS _ _ u c)    lp gp = move c $ insertPRefs (filter (\r -> not (pdrsPBoundPRef r lp gp)) u) lp gp
   where move :: [PCon] -> PDRS -> PDRS
         move [] p                          = p
         move (pc@(PCon _ (Rel _ _)):pcs) p = move pcs (insertPCon pc p gp)
@@ -106,7 +106,7 @@ insertPCon :: PCon -> PDRS -> PDRS -> PDRS
 insertPCon _ lp@(LambdaPDRS _) _ = lp
 insertPCon pc (AMerge p1 p2) gp = AMerge (insertPCon pc p1 gp) (insertPCon pc p2 gp)
 insertPCon pc (PMerge p1 p2) gp = PMerge (insertPCon pc p1 gp) (insertPCon pc p2 gp)
-insertPCon pc@(PCon pv _) pdrs@(PDRS l m u c) gp
+insertPCon pc@(PCon pv _) (PDRS l m u c) gp
   | pv == l || pdrsIsFreePVar pv gp = PDRS l m u (c ++ [pc])
   | otherwise                       = PDRS l m u (map insert c)
     where insert :: PCon -> PCon

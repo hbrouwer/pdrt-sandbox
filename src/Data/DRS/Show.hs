@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {- |
 Module      :  Data.DRS.Show
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
@@ -181,8 +182,8 @@ printDRSBetaReduct d1 d2 = putStrLn $ '\n' : showDRSBetaReduct d1 d2
 -- @r@.
 ---------------------------------------------------------------------------
 showDRSRefBetaReduct :: (ShowableDRS d) => (DRSRef -> d) -> DRSRef -> String
-showDRSRefBetaReduct d r@(DRSRef v) 
-  = showConcat (showConcat (showModifier "(" 2 bx) (showModifier ")" 2 rv)) (showModifier "=" 2 br)
+showDRSRefBetaReduct _ (LambdaDRSRef _) = error "impossible beta reduction"
+showDRSRefBetaReduct d r@(DRSRef v)     = showConcat (showConcat (showModifier "(" 2 bx) (showModifier ")" 2 rv)) (showModifier "=" 2 br)
   where bx = showDRS (Boxes (resolve d 0 0))
         rv = showPadding (v ++ "\n")
         br = showDRS (Boxes (resolve (d r) 0 0))
@@ -231,21 +232,29 @@ opMerge = "\x002B"
 ---------------------------------------------------------------------------
 
 -- | Top left corner symbol
-boxTopLeft     = '\x250C' 
+boxTopLeft :: Char
+boxTopLeft = '\x250C' 
 -- | Top right corner symbol
-boxTopRight    = '\x2510'
+boxTopRight :: Char
+boxTopRight = '\x2510'
 -- | Bottom left corner symbol
-boxBottomLeft  = '\x2514'
+boxBottomLeft :: Char
+boxBottomLeft = '\x2514'
 -- | Bottom right corner symbol
+boxBottomRight :: Char
 boxBottomRight = '\x2518'
 -- | Middle left corner symbol
-boxMiddleLeft  = '\x251C'
+boxMiddleLeft :: Char
+boxMiddleLeft = '\x251C'
 -- | Middle right corner symbol
+boxMiddleRight :: Char
 boxMiddleRight = '\x2524'
 -- | Horizontal line symbol
-boxHorLine     = '-'
+boxHorLine :: Char
+boxHorLine = '-'
 -- | Vertical line symbol
-boxVerLine     = '|'
+boxVerLine :: Char
+boxVerLine = '|'
 
 ---------------------------------------------------------------------------
 -- | Shows the line by line concatenation of two 'String's.
@@ -264,9 +273,9 @@ showConcat s1 s2 = unlines (conc ls1 ls2)
 -- | Shows the content of a 'DRS' box surrounded by vertical bars.
 ---------------------------------------------------------------------------
 showContent :: Int -> String -> String
-showContent l s = unlines (map show (lines s))
-  where show :: String -> String
-        show s = [boxVerLine] ++ " " ++ s ++ showWhitespace (l - 4 - length s) ++ " " ++ [boxVerLine]
+showContent l s = unlines (map show' (lines s))
+  where show' :: String -> String
+        show' s' = [boxVerLine] ++ " " ++ s' ++ showWhitespace (l - 4 - length s') ++ " " ++ [boxVerLine]
 
 ---------------------------------------------------------------------------
 -- | Shows a horizontal line of length @l@ with left corner symbol @lc@ and
@@ -439,8 +448,7 @@ showConditions c  = foldr ((++) . showCon) "" c
 -- | Shows lambda abstractions over 'DRS' @d@.
 ---------------------------------------------------------------------------
 showDRSLambdas :: DRS -> String
-showDRSLambdas d = show (drsLambdas d)
-  where show :: [(DRSVar,[DRSVar])] -> String
-        show []     = []
-        show ((l,_):ls) = opLambda ++ l ++ "." ++ show ls
-
+showDRSLambdas d = show' (drsLambdas d)
+  where show' :: [(DRSVar,[DRSVar])] -> String
+        show' []     = []
+        show' ((l,_):ls) = opLambda ++ l ++ "." ++ show' ls

@@ -34,8 +34,9 @@ type PrologDRS = String
 -- | Converts Boxer's output into a 'DRS'.
 ---------------------------------------------------------------------------
 boxerToDRS :: String -> DRS
-boxerToDRS s@('s':'e':'m':'(':_) = plDRSToDRS (replaceLambdas (convertPrologVars pldrs []) 0)
-  where pldrs = tail (dropUpToMatchingBracket Square (dropWhile (/= '[') s))
+boxerToDRS s@('s':'e':'m':'(':_) = plDRSToDRS $ replaceLambdas (convertPrologVars pldrs []) 0
+  where pldrs = tail $ dropUpToMatchingBracket Square (dropWhile (/= '[') s)
+boxerToDRS _                     = error "infelicitous input string"
 
 ---------------------------------------------------------------------------
 -- | Replaces all lambda-variables in a 'PrologDRS' by lambda-identifiers.
@@ -103,18 +104,24 @@ plDRSToDRS s
 -- | Converts a 'String' with Prolog referents into a set of 'DRSRef's.
 ---------------------------------------------------------------------------
 parsePlRefs :: String -> [DRSRef]
-parsePlRefs []        = []
-parsePlRefs s@('[':_) = map (toDRSRef . strip) (splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Square s))
+parsePlRefs [] = []
+parsePlRefs s@(b:_)
+  | b == '['  = map (toDRSRef . strip) (splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Square s))
+  | otherwise = error "infelicitous input string"
   where strip :: String -> String
+        strip []        = []
         strip r@('[':_) = strip (dropUpToMatchingBracket Square r)
-        strip r@(':':d) = d
+        strip (':':d)   = d
+        strip (_:_)     = error "infelicitous input string"
 
 ---------------------------------------------------------------------------
 -- | Converts a 'String' with Prolog conditions into a set of 'DRSCon's.
 ---------------------------------------------------------------------------
 parsePlCons :: String -> [DRSCon]
-parsePlCons []        = []
-parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Square s)
+parsePlCons [] = []
+parsePlCons s@(b:_)
+  | b == '['  = parse (dropOuterBrackets $ takeUpToMatchingBracket Square s)
+  | otherwise = error "infelicitous input string"
   where parse :: String -> [DRSCon]
         parse [] = []
         parse (',':cs)   = parse cs
@@ -129,8 +136,8 @@ parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Squar
           | pfx == "prop"  = Prop    (toDRSRef (takeWhile (/= ',') c)) (plDRSToDRS (dropWhile (/= ',') c)) : etc
           | pfx == "pred"  = Rel     (DRSRel (ct !! 1))                [toDRSRef (head ct)]                : etc
           | pfx == "rel"   = Rel     (DRSRel (ct !! 2))                (map toDRSRef (take 2 ct))          : etc
-          | pfx == "role"  = Rel     (DRSRel (capitalize (ct !! 2)))   (map toDRSRef (take 2 ct))          : etc
-          | pfx == "named" = Rel     (DRSRel (capitalize (ct !! 1)))   [toDRSRef (head ct)]                : etc
+          | pfx == "role"  = Rel     (DRSRel (capitalize (ct !! 2)))  (map toDRSRef (take 2 ct))          : etc
+          | pfx == "named" = Rel     (DRSRel (capitalize (ct !! 1)))  [toDRSRef (head ct)]                : etc
           | pfx == "timex" = Rel     (DRSRel (ct !! 1))                [toDRSRef (head ct)]                : etc
           | pfx == "card"  = Rel     (DRSRel ((ct !! 2) ++ (ct !! 1))) [toDRSRef (head ct)]                : etc
           | pfx == "eq"    = Rel     (DRSRel "=")                      (map toDRSRef ct)                   : etc
@@ -141,6 +148,7 @@ parsePlCons s@('[':_) = parse (dropOuterBrackets $ takeUpToMatchingBracket Squar
                 c'  = tail $ dropUpToMatchingBracket Parentheses (dropWhile (/= '(') c)
                 ct  = splitOn ',' c
                 capitalize :: String -> String
+                capitalize []    = []
                 capitalize (h:t) = toUpper h:t
 
 ---------------------------------------------------------------------------

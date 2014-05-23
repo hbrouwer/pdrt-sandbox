@@ -12,8 +12,7 @@ DRS input
 
 module Data.DRS.Input
 (
-  module Data.DRS.Input
-, module Input
+  module Input
 ) where
 
 import Data.DRS.Input.Boxer as Input

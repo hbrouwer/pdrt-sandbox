@@ -25,8 +25,7 @@ module Data.DRS.Variables
 
 import Data.Char (isDigit)
 import Data.DRS.DataType
-import Data.DRS.Structure
-import Data.List (partition, sortBy, union)
+import Data.List (sortBy, union)
 import Data.Ord (comparing)
 
 ---------------------------------------------------------------------------
@@ -147,11 +146,10 @@ lambdas (DRS u c)      = lamRefs u  `union` lamCons c
 increase :: DRSVar -> DRSVar
 increase v = reverse (dropWhile isDigit (reverse v)) ++ i
   where i = case index v of
-          Nothing -> show 1
+          Nothing -> show (1 :: Int)
           Just n  -> show (n + 1)
         index :: DRSVar -> Maybe Int
-        index v 
-          | i == ""   = Nothing
-          | otherwise = Just $ read i
-          where i = reverse (takeWhile isDigit (reverse v))
-
+        index v' 
+          | i' == ""   = Nothing
+          | otherwise = Just $ read i'
+          where i' = reverse (takeWhile isDigit (reverse v'))

@@ -28,7 +28,7 @@ import Data.DRS.DataType
 import Data.DRS.Structure
 import Data.DRS.Variables
 
-import Data.List ((\\), intersect, union)
+import Data.List (intersect, union)
 
 ---------------------------------------------------------------------------
 -- * Exported
@@ -153,6 +153,8 @@ renameRefs u rs = map (`renameVar` rs) u
 -- @rs@.
 ---------------------------------------------------------------------------
 renameCons :: DRS -> DRS -> [(DRSRef,DRSRef)] -> [DRSCon]
+renameCons (LambdaDRS _) _ _  = []
+renameCons (Merge _ _) _ _    = []
 renameCons ld@(DRS _ c) gd rs = map convertCon c
   where convertCon :: DRSCon -> DRSCon
         convertCon (Rel r d)    = Rel r   (map convertRef d)
@@ -211,16 +213,16 @@ purifyRefs (ld@(DRS u _),ers)      gd = (DRS u1 c2,ers1)
           where (cd1,rs1) = purifyRefs (renameSubDRS d1 gd nrs,rs)  gd
                 (cd2,rs2) = purifyRefs (renameSubDRS d2 gd nrs,rs1) gd
                 (ccs,rs3) = purify (cs,rs2)
-                nrs = zip ors (newDRSRefs ors (drsVariables gd `union` rs))
-                ors = drsUniverse d1 `intersect` rs
+                nrs = zip ors' (newDRSRefs ors' (drsVariables gd `union` rs))
+                ors' = drsUniverse d1 `intersect` rs
                 -- In case we do not want to rename ambiguous bindings:
                 -- ors = drsUniverses d2 \\ drsUniverse d1 `intersect` rs
         purify (Or d1 d2:cs,rs)    = (Or cd1 cd2:ccs,rs3)
           where (cd1,rs1) = purifyRefs (renameSubDRS d1 gd nrs,rs)  gd
                 (cd2,rs2) = purifyRefs (renameSubDRS d2 gd nrs,rs1) gd
                 (ccs,rs3) = purify (cs,rs2)
-                nrs = zip ors (newDRSRefs ors (drsVariables gd `union` rs))
-                ors = drsUniverse d1 `intersect` rs
+                nrs = zip ors' (newDRSRefs ors' (drsVariables gd `union` rs))
+                ors' = drsUniverse d1 `intersect` rs
                 -- In case we do not want to rename ambiguous bindings:
                 -- ors = drsUniverses d2 \\ drsUniverse d1 `intersect` rs
         purify (Prop r d1:cs,rs)   = (Prop r cd1:ccs,rs2)

@@ -22,14 +22,13 @@ module Data.PDRS.LambdaCalculus
 ) where
 
 import Data.DRS.LambdaCalculus (renameVar)
-import Data.DRS.Variables (drsRefToDRSVar)
 import Data.PDRS.Binding
 import Data.PDRS.DataType
 import Data.PDRS.ProjectionGraph
 import Data.PDRS.Structure
 import Data.PDRS.Variables
 
-import Data.List (intersect, nub, partition, union)
+import Data.List (intersect, union)
 
 ---------------------------------------------------------------------------
 -- * Exported
@@ -127,7 +126,7 @@ instance (PDRSAtom a, AbstractPDRS b) => AbstractPDRS (a -> b)
 -- @ps@ and 'PDRSRef's @rs@.
 ---------------------------------------------------------------------------
 renameSubPDRS :: PDRS -> PDRS -> [(PVar,PVar)] -> [(PDRSRef,PDRSRef)] -> PDRS
-renameSubPDRS lp@(LambdaPDRS ((v,ds),i)) _ _ rs    = LambdaPDRS ((v,ds'),i)
+renameSubPDRS (LambdaPDRS ((v,ds),i)) _ _ rs    = LambdaPDRS ((v,ds'),i)
   where ds' = map (pdrsRefToDRSVar . flip renameVar rs . PDRSRef) ds
 renameSubPDRS (AMerge p1 p2) gp ps rs    = AMerge p1' p2'
   where p1' = renameSubPDRS p1 gp ps rs
@@ -178,7 +177,7 @@ renamePCons c lp gp ps rs = map rename c
 ---------------------------------------------------------------------------
 renamePDRSRef :: PVar -> PDRSRef -> PDRS -> PDRS -> [(PDRSRef,PDRSRef)] -> PDRSRef
 renamePDRSRef pv r lp gp rs
-  | any (\pr@(PRef pv' r') -> pdrsPRefBoundByPRef (PRef pv r) lp pr gp && pdrsIsFreePVar pv' gp) (pdrsUniverses gp) = r
+  | any (\pr@(PRef pv' _) -> pdrsPRefBoundByPRef (PRef pv r) lp pr gp && pdrsIsFreePVar pv' gp) (pdrsUniverses gp) = r
   | not (pdrsBoundPRef (PRef pv r) lp gp) = r
   | otherwise                             = renameVar r rs
 
@@ -339,35 +338,35 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
         -- 'PRef's @dps'@, based on a list of 'PCon's and a list of existing
         -- 'PRef's @eps@. 
         dups :: [PCon] -> [PRef] -> ([PRef],[PRef])
-        dups [] eps = (eps,[])
-        dups (PCon p (Rel _ d):pcs)    eps = (eps2,dps1 ++ dps2)
-          where (eps2,dps2) = dups pcs (eps ++ upd)
+        dups [] eps' = (eps',[])
+        dups (PCon p (Rel _ d):pcs)    eps' = (eps2,dps1' ++ dps2)
+          where (eps2,dps2) = dups pcs (eps' ++ upd)
                 upd  = filter (\pr -> not (pdrsPBoundPRef pr lp gp)) (map (PRef p) d)
-                dps1 = filter (`dup` eps) upd
-        dups (PCon p (Neg p1):pcs)     eps = (eps2,dps1 ++ dps2)
-          where (eps1,dps1) = unboundDupPRefs p1 gp eps
-                (eps2,dps2) = dups pcs eps1
-        dups (PCon p (Imp p1 p2):pcs)  eps = (eps3,dps1 ++ dps2 ++ dps3)
-          where (eps1,dps1) = unboundDupPRefs p1 gp eps
-                (eps2,dps2) = unboundDupPRefs p2 gp eps1
-                (eps3,dps3) = dups pcs eps2
-        dups (PCon p (Or p1 p2):pcs)   eps = (eps3,dps1 ++ dps2 ++ dps3)
-          where (eps1,dps1) = unboundDupPRefs p1 gp eps
-                (eps2,dps2) = unboundDupPRefs p2 gp eps1
-                (eps3,dps3) = dups pcs eps2
-        dups (PCon p (Prop r p1):pcs)  eps = (eps3,dps1 ++ dps2 ++ dps3)
-          where (eps1,dps1) = unboundDupPRefs p1 gp eps
-                (eps2,dps2) = dups pcs eps1
-                (eps3,dps3) = (eps2 ++ pr,filter (`dup` eps) pr)
+                dps1' = filter (`dup` eps') upd
+        dups (PCon _ (Neg p1):pcs)     eps' = (eps2,dps1' ++ dps2)
+          where (eps1',dps1') = unboundDupPRefs p1 gp eps'
+                (eps2,dps2)   = dups pcs eps1'
+        dups (PCon _ (Imp p1 p2):pcs)  eps' = (eps3,dps1' ++ dps2 ++ dps3)
+          where (eps1',dps1') = unboundDupPRefs p1 gp eps'
+                (eps2,dps2)   = unboundDupPRefs p2 gp eps1'
+                (eps3,dps3)   = dups pcs eps2
+        dups (PCon _ (Or p1 p2):pcs)   eps' = (eps3,dps1' ++ dps2 ++ dps3)
+          where (eps1',dps1') = unboundDupPRefs p1 gp eps'
+                (eps2,dps2)   = unboundDupPRefs p2 gp eps1'
+                (eps3,dps3)   = dups pcs eps2
+        dups (PCon p (Prop r p1):pcs)  eps' = (eps3,dps1' ++ dps2 ++ dps3)
+          where (eps1',dps1') = unboundDupPRefs p1 gp eps'
+                (eps2,dps2)   = dups pcs eps1'
+                (eps3,dps3)   = (eps2 ++ pr,filter (`dup` eps') pr)
                   where pr
                           | pdrsPBoundPRef (PRef p r) lp gp = []
                           | otherwise                       = [PRef p r]
-        dups (PCon p (Diamond p1):pcs) eps = (eps2,dps1 ++ dps2)
-          where (eps1,dps1) = unboundDupPRefs p1 gp eps
-                (eps2,dps2) = dups pcs eps1
-        dups (PCon p (Box p1):pcs)     eps = (eps2,dps1 ++ dps2)
-          where (eps1,dps1) = unboundDupPRefs p1 gp eps
-                (eps2,dps2) = dups pcs eps1
+        dups (PCon _ (Diamond p1):pcs) eps' = (eps2,dps1' ++ dps2)
+          where (eps1',dps1') = unboundDupPRefs p1 gp eps'
+                (eps2,dps2)   = dups pcs eps1'
+        dups (PCon _ (Box p1):pcs)     eps' = (eps2,dps1' ++ dps2)
+          where (eps1',dps1') = unboundDupPRefs p1 gp eps'
+                (eps2,dps2)   = dups pcs eps1'
 
 ---------------------------------------------------------------------------
 -- | Returns whether a 'PRef' @pr@ is /independent/ based on a list of
@@ -389,7 +388,7 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
 ---------------------------------------------------------------------------
 independentPRefs :: PRef -> [PRef] -> PDRS -> PDRS -> Bool
 independentPRefs _ [] _ _                                = True
-independentPRefs pr@(PRef p r) prs lp gp
+independentPRefs pr@(PRef p _) prs lp gp
   | any (flip (pdrsPRefBoundByPRef pr lp) gp) prs        = False
   | not(pdrsBoundPRef pr lp gp) && any (\(PRef p' _) ->
     (pdrsIsAccessibleContext p p' gp)) prs               = False

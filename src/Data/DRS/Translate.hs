@@ -16,11 +16,8 @@ module Data.DRS.Translate
 ) where
 
 import Data.DRS.DataType
-import Data.DRS.LambdaCalculus
 import Data.DRS.Variables
 import qualified Data.FOL as F
-
-import Data.List (intersect, union)
 
 ---------------------------------------------------------------------------
 -- * Exported
@@ -56,7 +53,9 @@ worldRel = "Acc"
 -- | Converts a DRS to a modal FOL formula with world @w@
 ---------------------------------------------------------------------------
 drsToMFOL :: DRS -> F.FOLVar -> F.FOLForm
-drsToMFOL (DRS [] c) w     = drsConsToMFOL c w
+drsToMFOL (LambdaDRS _)  _ = error "infelicitous FOL formula"
+drsToMFOL (Merge _ _)    _ = error "infelicitous FOL formula"
+drsToMFOL (DRS [] c)     w = drsConsToMFOL c w
 drsToMFOL (DRS (r:rs) c) w = F.Exists (drsRefToDRSVar r) (drsToMFOL (DRS rs c) w)
 
 -- | Converts a list of DRS conditions to a modal FOL formula with world @w@
@@ -66,6 +65,8 @@ drsConsToMFOL (Rel r d:[]) w    = F.Rel (drsRelToString r) (w : map drsRefToDRSV
 drsConsToMFOL (Neg d1:[]) w     = F.Neg (drsToMFOL d1 w)
 drsConsToMFOL (Imp d1 d2:[]) w  = quantifyForAll d1
   where quantifyForAll :: DRS -> F.FOLForm
+        quantifyForAll (LambdaDRS _)  = error "infelicitous FOL formula"
+        quantifyForAll (Merge _ _)    = error "infelicitous FOL formula"
         quantifyForAll (DRS [] c)     = F.Imp    (drsConsToMFOL c w) (drsToMFOL d2 w)
         quantifyForAll (DRS (r:rs) c) = F.ForAll (drsRefToDRSVar r)  (quantifyForAll (DRS rs c))
 drsConsToMFOL (Or d1 d2:[]) w   = F.Or (drsToMFOL d1 w) (drsToMFOL d2 w)

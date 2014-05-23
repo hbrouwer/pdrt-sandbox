@@ -41,7 +41,10 @@ stringToPDRS s
 -- | Converts a 'String' into a 'PDRS'.
 ---------------------------------------------------------------------------
 parsePDRS :: String -> PDRS
-parsePDRS s@('<':_) = PDRS l m u c
+parsePDRS [] = PDRS 0 [] [] []
+parsePDRS s@(b:_)
+  | b == '<'  = PDRS l m u c
+  | otherwise = error "infelicitous input string"
   where l  = read $ takeWhile (/= ',') (dropOuterBrackets s)
         m  = parseMAPs $ tail (dropUpToMatchingBracket Curly (tail (dropUpToMatchingBracket Curly s')))
         u  = parseRefs s'
@@ -56,29 +59,31 @@ parseRefs [] = []
 parseRefs s  = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly s
   where parse :: String -> [PRef]
         parse [] = []
-        parse (',':s) = parse s
-        parse s = PRef p (PDRSRef r) : parse (drop (length (show p) + length r + 3) s)
+        parse (',':s') = parse s'
+        parse s' = PRef p (PDRSRef r) : parse (drop (length (show p) + length r + 3) s')
           where p = read $ head t
                 r = head $ tail t
-                t = splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Parentheses s)
+                t = splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Parentheses s')
 
 ---------------------------------------------------------------------------
 -- | Converts a 'String' into a set of 'PCon's.
 ---------------------------------------------------------------------------
 parseCons :: String -> [PCon]
-parseCons []        = []
-parseCons s@('{':_) = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly s
+parseCons [] = []
+parseCons s@(b:_)
+  | b == '{'  = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly s
+  | otherwise = error "infelicitous input string"
   where parse :: String -> [PCon]
-        parse []      = []
-        parse (',':s) = parse s
-        parse s
-          | pfx `elem` opNegString     = PCon p (Neg     (parsePDRS d1))                   : parse (drop (pl + length pfx  + length d1) s)
-          | ifx `elem` opImpString     = PCon p (Imp     (parsePDRS d1) (parsePDRS d2))    : parse (drop (pl + length ifx  + length d1 + length d2) s)
-          | ifx `elem` opOrString      = PCon p (Or      (parsePDRS d1) (parsePDRS d2))    : parse (drop (pl + length ifx  + length d1 + length d2) s)
-          | ':' `elem` pfx             = PCon p (Prop    (PDRSRef prop) (parsePDRS d1))    : parse (drop (pl + length prop + 1 + length d1) s)
-          | pfx `elem` opDiamondString = PCon p (Diamond (parsePDRS d1))                   : parse (drop (pl + length pfx  + length d1) s)
-          | pfx `elem` opBoxString     = PCon p (Box     (parsePDRS d1))                   : parse (drop (pl + length pfx  + length d1) s)
-          | otherwise                  = PCon p (Rel     (PDRSRel rel) (map PDRSRef refs)) : parse (drop (pl + length rel  + 2 + length (intercalate "," refs)) s)
+        parse []       = []
+        parse (',':s') = parse s'
+        parse s'
+          | pfx `elem` opNegString     = PCon p (Neg     (parsePDRS d1))                   : parse (drop (pl + length pfx  + length d1) s')
+          | ifx `elem` opImpString     = PCon p (Imp     (parsePDRS d1) (parsePDRS d2))    : parse (drop (pl + length ifx  + length d1 + length d2) s')
+          | ifx `elem` opOrString      = PCon p (Or      (parsePDRS d1) (parsePDRS d2))    : parse (drop (pl + length ifx  + length d1 + length d2) s')
+          | ':' `elem` pfx             = PCon p (Prop    (PDRSRef prop) (parsePDRS d1))    : parse (drop (pl + length prop + 1 + length d1) s')
+          | pfx `elem` opDiamondString = PCon p (Diamond (parsePDRS d1))                   : parse (drop (pl + length pfx  + length d1) s')
+          | pfx `elem` opBoxString     = PCon p (Box     (parsePDRS d1))                   : parse (drop (pl + length pfx  + length d1) s')
+          | otherwise                  = PCon p (Rel     (PDRSRel rel) (map PDRSRef refs)) : parse (drop (pl + length rel  + 2 + length (intercalate "," refs)) s')
           where pfx  = map toLower (takeWhile (/= '<') c)
                 ifx  = map toLower (takeWhile (/= '<') (dropUpToMatchingBracket Angle c))
                 prop = takeWhile (/= ':') c
@@ -88,7 +93,7 @@ parseCons s@('{':_) = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly 
                 refs = splitOn ',' (dropOuterBrackets (takeUpToMatchingBracket Parentheses (dropWhile (/= '(') c)))
                 c  = tail $ dropWhile (/= ',') t
                 p  = read $ takeWhile (/= ',') t
-                t  = dropOuterBrackets $ takeUpToMatchingBracket Parentheses s
+                t  = dropOuterBrackets $ takeUpToMatchingBracket Parentheses s'
                 pl = length (show p) + 3
 
 ---------------------------------------------------------------------------
@@ -98,9 +103,9 @@ parseMAPs :: String -> [MAP]
 parseMAPs [] = []
 parseMAPs s  = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly s
   where parse :: String -> [MAP]
-        parse [] = []
-        parse (',':s) = parse s
-        parse s = (p1,p2) : parse (drop (length (show p1) + length (show p2) + 3) s)
+        parse []       = []
+        parse (',':s') = parse s'
+        parse s' = (p1,p2) : parse (drop (length (show p1) + length (show p2) + 3) s')
           where p1 = read $ head t
                 p2 = read $ head $ tail t
-                t  = splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Parentheses s)
+                t  = splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Parentheses s')

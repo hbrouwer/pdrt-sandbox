@@ -23,7 +23,7 @@ import Data.DRS.DataType
 import Data.List (union)
 
 ---------------------------------------------------------------------------
--- *Exported
+-- * Exported
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
@@ -74,7 +74,7 @@ isResolvedDRS (DRS u c)     = all isResolvedRef u && all isResolvedCon c
 -- | Returns whether DRS @d1@ is a direct or indirect sub-DRS of DRS @d2@
 ---------------------------------------------------------------------------
 isSubDRS :: DRS -> DRS -> Bool
-isSubDRS d1 (LambdaDRS _) = False
+isSubDRS _  (LambdaDRS _) = False
 isSubDRS d1 (Merge d2 d3) = isSubDRS d1 d2 || isSubDRS d1 d3
 isSubDRS d1 d2@(DRS _ c)  = d1 == d2 || any subDRS c
   where subDRS :: DRSCon -> Bool

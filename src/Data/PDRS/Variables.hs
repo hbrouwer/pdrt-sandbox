@@ -29,10 +29,9 @@ module Data.PDRS.Variables
 , pdrsLambdaVars
 ) where
 
-import Data.DRS.DataType (DRSRef (..), DRSRel (..), DRSVar)
+import Data.DRS.DataType (DRSRef (..), DRSRel (..))
 import Data.DRS.Variables (drsRefToDRSVar,drsRelToString,newDRSRefs)
 import Data.PDRS.DataType
-import Data.PDRS.Structure
 
 import Data.List (sortBy, union)
 import Data.Ord (comparing)
@@ -96,17 +95,18 @@ newPDRSRefs ors ers = map drsRefToPDRSRef (newDRSRefs (map pdrsRefToDRSRef ors) 
 
 ---------------------------------------------------------------------------
 -- | Returns a list of new projected referents for a list of old 'PRef's,
--- based on a list of existing 'PVar's @eps@ and existing 'PDRSRef's @ers@.
+-- based on a list of existing 'PVar's @prs@ and existing 'PDRSRef's @ers@.
 ---------------------------------------------------------------------------
 newPRefs :: [PRef] -> [PDRSRef] -> [PRef]
 newPRefs prs ers = packPRefs ps (newPDRSRefs rs ers)
   where (ps,rs) = unpackPRefs prs ([],[])
         unpackPRefs :: [PRef] -> ([PVar],[PDRSRef]) -> ([PVar],[PDRSRef])
-        unpackPRefs [] uprs                 = uprs
-        unpackPRefs (PRef p r:prs) (pvs,rs) = unpackPRefs prs (pvs ++ [p],rs ++ [r])
+        unpackPRefs [] uprs                   = uprs
+        unpackPRefs (PRef p r:prs') (pvs,rs') = unpackPRefs prs' (pvs ++ [p],rs' ++ [r])
         packPRefs :: [PVar] -> [PDRSRef] -> [PRef]
-        packPRefs [] []           = []
-        packPRefs (pv:pvs) (r:rs) = PRef pv r : packPRefs pvs rs
+        packPRefs _ []             = []
+        packPRefs [] _             = []
+        packPRefs (pv:pvs) (r:rs') = PRef pv r : packPRefs pvs rs'
 
 ---------------------------------------------------------------------------
 -- ** Variable Collections
@@ -166,7 +166,7 @@ pdrsLambdas (PDRS _ _ u c)  = lamRefs (map (\(PRef _ r) -> r) u) `union` lamPCon
         lamPCons (PCon _ (Neg p1):cs)     = pdrsLambdas p1                        `union` lamPCons cs
         lamPCons (PCon _ (Imp p1 p2):cs)  = pdrsLambdas p1 `union` pdrsLambdas p2 `union` lamPCons cs
         lamPCons (PCon _ (Or p1 p2):cs)   = pdrsLambdas p1 `union` pdrsLambdas p2 `union` lamPCons cs
-        lamPCons (PCon p (Prop r p1):cs)  = lamRefs [r]    `union` pdrsLambdas p1 `union` lamPCons cs
+        lamPCons (PCon _ (Prop r p1):cs)  = lamRefs [r]    `union` pdrsLambdas p1 `union` lamPCons cs
         lamPCons (PCon _ (Diamond p1):cs) = pdrsLambdas p1                        `union` lamPCons cs
         lamPCons (PCon _ (Box p1):cs)     = pdrsLambdas p1                        `union` lamPCons cs
         lamRel :: PDRSRel -> [((DRSVar,[DRSVar]),Int)]
@@ -178,4 +178,3 @@ pdrsLambdas (PDRS _ _ u c)  = lamRefs (map (\(PRef _ r) -> r) u) `union` lamPCon
 ---------------------------------------------------------------------------
 pdrsLambdaVars :: PDRS -> [(DRSVar,[DRSVar])]
 pdrsLambdaVars p = map fst (sortBy (comparing snd) (pdrsLambdas p))
-

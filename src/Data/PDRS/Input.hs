@@ -12,8 +12,7 @@ PDRS input
 
 module Data.PDRS.Input
 (
-  module Data.PDRS.Input
-, module Input
+  module Input
 ) where
 
 import Data.PDRS.Input.Boxer as Input

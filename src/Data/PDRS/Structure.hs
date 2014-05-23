@@ -144,7 +144,7 @@ isResolvedPDRS (PDRS _ _ u c)  = all isResolvedRef (map (\(PRef _ r) -> r) u) &&
 -- 'PDRS' @p2@.
 ---------------------------------------------------------------------------
 isSubPDRS :: PDRS -> PDRS -> Bool
-isSubPDRS p1 (LambdaPDRS _)    = False
+isSubPDRS _  (LambdaPDRS _)    = False
 isSubPDRS p1 (AMerge p2 p3)    = isSubPDRS p1 p2 || isSubPDRS p1 p3
 isSubPDRS p1 (PMerge p2 p3)    = isSubPDRS p1 p2 || isSubPDRS p1 p3
 isSubPDRS p1 p2@(PDRS _ _ _ c) = p1 == p2 || any subPDRS c
@@ -156,4 +156,3 @@ isSubPDRS p1 p2@(PDRS _ _ _ c) = p1 == p2 || any subPDRS c
         subPDRS (PCon _ (Prop _ p3))  = isSubPDRS p1 p3
         subPDRS (PCon _ (Diamond p3)) = isSubPDRS p1 p3
         subPDRS (PCon _ (Box p3))     = isSubPDRS p1 p3
-

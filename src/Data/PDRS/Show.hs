@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {- |
 Module      :  Data.PDRS.Show
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
@@ -26,10 +27,7 @@ module Data.PDRS.Show
 , printPDRSRefBetaReduct
 ) where
 
-import Data.DRS.DataType (DRS)
-import Data.DRS.Properties (isFOLDRS)
 import Data.DRS.Show hiding (DRSNotation (..))
-import Data.DRS.Translate (drsToFOL)
 
 import Data.PDRS.DataType
 import Data.PDRS.Merge
@@ -178,7 +176,8 @@ printPDRSBetaReduct p1 p2 = putStrLn $ '\n' : showPDRSBetaReduct p1 p2
 -- referent @r@.
 ---------------------------------------------------------------------------
 showPDRSRefBetaReduct :: (ShowablePDRS p) => (PDRSRef -> p) -> PDRSRef -> String
-showPDRSRefBetaReduct p r@(PDRSRef v) = showConcat (showConcat (showModifier "(" 2 bx) (showModifier ")" 2 rv)) (showModifier "=" 2 br)
+showPDRSRefBetaReduct _ (LambdaPDRSRef _) = error "impossible beta reduction"
+showPDRSRefBetaReduct p r@(PDRSRef v)     = showConcat (showConcat (showModifier "(" 2 bx) (showModifier ")" 2 rv)) (showModifier "=" 2 br)
   where bx = showPDRS (Boxes (resolve p 0 0))
         rv = showPadding (v ++ "\n")
         br = showPDRS (Boxes (resolve (p r) 0 0))
@@ -335,10 +334,10 @@ showPDRSDebug (PDRS l m u c) = "PDRS"       ++ " (" ++ show l ++ ") " ++ show m 
 showHeaderLine :: Int -> PVar -> String
 showHeaderLine l pl = [boxTopLeft] ++ dl ++ "[" ++ sl ++ "]" ++ dr ++ [boxTopRight] ++ "\n"
   where sl = show pl
-        dl = replicate ((floor   (fromIntegral (l - 2) / 2) - lf) - 1) boxHorLine
-        dr = replicate ((ceiling (fromIntegral (l - 2) / 2) - lc) - 1) boxHorLine
-        lf = floor   (fromIntegral (length sl) / 2)
-        lc = ceiling (fromIntegral (length sl) / 2)
+        dl = replicate ((floor   ((fromIntegral (l - 2) / 2) :: Double) - lf) - 1) boxHorLine
+        dr = replicate ((ceiling ((fromIntegral (l - 2) / 2) :: Double) - lc) - 1) boxHorLine
+        lf = floor   ((fromIntegral (length sl) / 2) :: Double)
+        lc = ceiling ((fromIntegral (length sl) / 2) :: Double)
 
 ---------------------------------------------------------------------------
 -- | Shows the universe @u@ of a 'PDRS'.
@@ -404,11 +403,11 @@ showMAPs :: [MAP] -> String
 showMAPs m = showUnique m []
   where showUnique :: [MAP] -> [MAP] -> String
         showUnique [] _ = " "
-        showUnique (m@(pv1,pv2):ms) sms
-          | pv2 < 0                                  = show (abs pv2) ++ " " ++ modStrictSubord ++ " " ++ show pv1 ++ "  " ++ showUnique ms ((abs pv2,abs pv1):sms)
-          | swap m `elem` ms || (pv2,-pv1) `elem` ms = showUnique ms (m:sms)
-          | swap m `elem` sms                        = show pv1       ++ " " ++ modEquals       ++ " " ++ show pv2 ++ "  " ++ showUnique ms (m:sms)
-          | otherwise                                = show pv1       ++ " " ++ modWeakSubord   ++ " " ++ show pv2 ++ "  " ++ showUnique ms (m:sms)
+        showUnique (m'@(pv1,pv2):ms) sms
+          | pv2 < 0                                   = show (abs pv2) ++ " " ++ modStrictSubord ++ " " ++ show pv1 ++ "  " ++ showUnique ms ((abs pv2,abs pv1):sms)
+          | swap m' `elem` ms || (pv2,-pv1) `elem` ms = showUnique ms (m':sms)
+          | swap m' `elem` sms                        = show pv1       ++ " " ++ modEquals       ++ " " ++ show pv2 ++ "  " ++ showUnique ms (m':sms)
+          | otherwise                                 = show pv1       ++ " " ++ modWeakSubord   ++ " " ++ show pv2 ++ "  " ++ showUnique ms (m':sms)
 
 ---------------------------------------------------------------------------
 -- | Shows the 'MAP's @m@ of a 'PDRS' as tuples.
@@ -417,16 +416,16 @@ showMAPsTuples :: [MAP] -> String
 showMAPsTuples m = intercalate "," (map show (unique m []))
   where unique :: [MAP] -> [MAP] -> [MAP]
         unique [] _ = []
-        unique (m@(pv1,pv2):ms) sms
-          | swap m `elem` ms  = unique ms (m:sms)
-          | swap m `elem` sms = m : unique ms (m:sms)
-          | otherwise         = m : unique ms (m:sms)
+        unique (m':ms) sms
+          | swap m' `elem` ms  = unique ms (m':sms)
+          | swap m' `elem` sms = m' : unique ms (m':sms)
+          | otherwise          = m' : unique ms (m':sms)
 
 ---------------------------------------------------------------------------
 -- | Shows lambda abstractions over 'PDRS' @p@.
 ---------------------------------------------------------------------------
 showPDRSLambdas :: PDRS -> String
-showPDRSLambdas p = show (pdrsLambdaVars p)
-  where show :: [(DRSVar,[DRSVar])] -> String
-        show []     = []
-        show ((l,_):ls) = opLambda ++ l ++ "." ++ show ls
+showPDRSLambdas p = show' (pdrsLambdaVars p)
+  where show' :: [(DRSVar,[DRSVar])] -> String
+        show' []     = []
+        show' ((l,_):ls) = opLambda ++ l ++ "." ++ show' ls

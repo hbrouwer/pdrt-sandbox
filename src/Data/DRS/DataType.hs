@@ -34,7 +34,7 @@ data DRS =
   -- ^ A merge between two DRSs
   | DRS [DRSRef] [DRSCon]
   -- ^ A DRS (a set of referents and a set of conditions)
-  deriving (Eq)
+  deriving (Eq,Read)
 
 ---------------------------------------------------------------------------
 -- | DRS variable
@@ -50,7 +50,7 @@ data DRSRef =
   -- to be applied to the referent, and its argument position)
   | DRSRef DRSVar
   -- ^ A DRS referent
-  deriving (Eq,Show)
+  deriving (Eq,Read,Show)
 
 ---------------------------------------------------------------------------
 -- | DRS relation
@@ -58,7 +58,7 @@ data DRSRef =
 data DRSRel =
   LambdaDRSRel ((DRSVar,[DRSVar]),Int)
   | DRSRel String
-  deriving (Eq,Show)
+  deriving (Eq,Read,Show)
 
 ---------------------------------------------------------------------------
 -- | DRS condition
@@ -71,4 +71,4 @@ data DRSCon =
   | Prop DRSRef DRS   -- ^ A proposition DRS
   | Diamond DRS       -- ^ A possible DRS
   | Box DRS           -- ^ A necessary DRS
-  deriving (Eq)
+  deriving (Eq,Read)

@@ -57,18 +57,23 @@ stringToDRS s
 ---------------------------------------------------------------------------
 
 -- | Negation operators (case insensitive): @!, not, neg@.
+opNegString :: [[Char]]
 opNegString     = ["!", "not", "neg"]
 
 -- | Implication operators (case insensitive): @imp, ->, =>, then@.
+opImpString :: [[Char]]
 opImpString     = ["imp", "->", "=>", "then"]
 
 -- | Disjuction operators (case insensitive): @v, or@.
+opOrString :: [[Char]]
 opOrString      = ["v", "or"]
 
 -- | Box operators (case insensitive): @b, box, necessary@.
+opBoxString :: [[Char]]
 opBoxString     = ["b", "box", "necessary"]
 
 -- | Diamond operators (case insensitive): @d, diamond, maybe@.
+opDiamondString :: [[Char]]
 opDiamondString = ["d", "diamond", "maybe"]
 
 ---------------------------------------------------------------------------
@@ -117,16 +122,17 @@ dropOuterBrackets = tail . init
 -- and its matching closing bracket.
 ---------------------------------------------------------------------------
 takeUpToMatchingBracket :: BracketType -> String -> String
-takeUpToMatchingBracket bt (ob:s) = takeUpTo s [ob] 0
+takeUpToMatchingBracket _  []    = []
+takeUpToMatchingBracket bt (_:s) = takeUpTo s [ob] 0
   where ob = fst bs
         bs = brackets bt
         takeUpTo :: String -> String -> Int -> String
-        takeUpTo []     s n = reverse s
-        takeUpTo (c:cs) s n
-          | c == snd bs && n == 0 = reverse (c:s)
-          | c == snd bs && n > 0  = takeUpTo cs (c:s) (n - 1)
-          | c == fst bs           = takeUpTo cs (c:s) (n + 1)
-          | otherwise             = takeUpTo cs (c:s) n
+        takeUpTo []     s' _ = reverse s'
+        takeUpTo (c:cs) s' n
+          | c == snd bs && n == 0 = reverse (c:s')
+          | c == snd bs && n > 0  = takeUpTo cs (c:s') (n - 1)
+          | c == fst bs           = takeUpTo cs (c:s') (n + 1)
+          | otherwise             = takeUpTo cs (c:s') n
 
 ---------------------------------------------------------------------------
 -- | Returns part of 'String' @s@ after opening bracket @ob@ of type @bt@
@@ -134,11 +140,10 @@ takeUpToMatchingBracket bt (ob:s) = takeUpTo s [ob] 0
 ---------------------------------------------------------------------------
 dropUpToMatchingBracket :: BracketType -> String -> String
 dropUpToMatchingBracket _  []     = []
-dropUpToMatchingBracket bt (ob:s) = dropUpTo s 0
-  where ob = fst bs
-        bs = brackets bt
+dropUpToMatchingBracket bt (_:s) = dropUpTo s 0
+  where bs = brackets bt
         dropUpTo :: String -> Int -> String
-        dropUpTo []     n = []
+        dropUpTo []     _ = []
         dropUpTo (c:cs) n
           | c == snd bs && n == 0 = cs
           | c == snd bs && n > 0  = dropUpTo cs (n - 1)
@@ -175,37 +180,44 @@ splitOn c s = case dropWhile (c ==) s of
 -- | Converts a 'String' into a 'DRS'.
 ---------------------------------------------------------------------------
 parseDRS :: String -> DRS
-parseDRS s@('<':_) = DRS (parseRefs s') (parseCons (tail (dropUpToMatchingBracket Curly s')))
+parseDRS [] = DRS [] []
+parseDRS s@(b:_)
+  | b == '<'  = DRS (parseRefs s') (parseCons (tail (dropUpToMatchingBracket Curly s')))
+  | otherwise = error "infelicitous input string"
   where s' = dropOuterBrackets s
 
 ---------------------------------------------------------------------------
 -- | Converts a 'String' into a set of 'DRSRef's.
 ---------------------------------------------------------------------------
 parseRefs :: String -> [DRSRef]
-parseRefs []        = []
-parseRefs s@('{':_) = map DRSRef (splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Curly s))
+parseRefs [] = []
+parseRefs s@(b:_)
+  | b == '{'  = map DRSRef (splitOn ',' (dropOuterBrackets $ takeUpToMatchingBracket Curly s))
+  | otherwise = error "infelicitous input string"
 
 ---------------------------------------------------------------------------
 -- | Converts a 'String' into a set of 'DRSCon's.
 ---------------------------------------------------------------------------
 parseCons :: String -> [DRSCon]
-parseCons []        = []
-parseCons s@('{':_) = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly s
+parseCons [] = []
+parseCons s@(b:_)
+  | b == '{'  = parse $ dropOuterBrackets $ takeUpToMatchingBracket Curly s
+  | otherwise = error "infelicitous input string"
   where parse :: String -> [DRSCon]
         parse []      = []
-        parse (',':s) = parse s
-        parse s
-          | pfx `elem` opNegString     = Neg     (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
-          | ifx `elem` opImpString     = Imp     (parseDRS d1) (parseDRS d2)    : parse (drop (length ifx  + length d1 + length d2) s)
-          | ifx `elem` opOrString      = Or      (parseDRS d1) (parseDRS d2)    : parse (drop (length ifx  + length d1 + length d2) s)
-          | ':' `elem` pfx             = Prop    (DRSRef prop) (parseDRS d1)    : parse (drop (length prop + 1 + length d1) s)
-          | pfx `elem` opDiamondString = Diamond (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
-          | pfx `elem` opBoxString     = Box     (parseDRS d1)                  : parse (drop (length pfx  + length d1) s)
-          | otherwise                  = Rel     (DRSRel rel) (map DRSRef refs) : parse (drop (length rel  + 2 + length (intercalate "," refs)) s)
-          where pfx  = map toLower (takeWhile (/= '<') s)
-                ifx  = map toLower (takeWhile (/= '<') (dropUpToMatchingBracket Angle s))
-                prop = takeWhile (/= ':') s
-                rel  = takeWhile (/= '(') s
-                d1   = takeUpToMatchingBracket Angle (dropWhile (/= '<') s)
-                d2   = takeUpToMatchingBracket Angle (drop (length ifx) (dropUpToMatchingBracket Angle (dropWhile (/= '<') s)))
-                refs = splitOn ',' (dropOuterBrackets (takeUpToMatchingBracket Parentheses (dropWhile (/= '(') s)))
+        parse (',':s') = parse s'
+        parse s'
+          | pfx `elem` opNegString     = Neg     (parseDRS d1)                  : parse (drop (length pfx  + length d1) s')
+          | ifx `elem` opImpString     = Imp     (parseDRS d1) (parseDRS d2)    : parse (drop (length ifx  + length d1 + length d2) s')
+          | ifx `elem` opOrString      = Or      (parseDRS d1) (parseDRS d2)    : parse (drop (length ifx  + length d1 + length d2) s')
+          | ':' `elem` pfx             = Prop    (DRSRef prop) (parseDRS d1)    : parse (drop (length prop + 1 + length d1) s')
+          | pfx `elem` opDiamondString = Diamond (parseDRS d1)                  : parse (drop (length pfx  + length d1) s')
+          | pfx `elem` opBoxString     = Box     (parseDRS d1)                  : parse (drop (length pfx  + length d1) s')
+          | otherwise                  = Rel     (DRSRel rel) (map DRSRef refs) : parse (drop (length rel  + 2 + length (intercalate "," refs)) s')
+          where pfx  = map toLower (takeWhile (/= '<') s')
+                ifx  = map toLower (takeWhile (/= '<') (dropUpToMatchingBracket Angle s'))
+                prop = takeWhile (/= ':') s'
+                rel  = takeWhile (/= '(') s'
+                d1   = takeUpToMatchingBracket Angle (dropWhile (/= '<') s')
+                d2   = takeUpToMatchingBracket Angle (drop (length ifx) (dropUpToMatchingBracket Angle (dropWhile (/= '<') s')))
+                refs = splitOn ',' (dropOuterBrackets (takeUpToMatchingBracket Parentheses (dropWhile (/= '(') s')))
