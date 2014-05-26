@@ -87,10 +87,10 @@ insertPRefs _ lp@(LambdaPDRS _) _ = lp
 insertPRefs prs (AMerge p1 p2) gp = AMerge (insertPRefs prs p1 gp) (insertPRefs prs p2 gp)
 insertPRefs prs (PMerge p1 p2) gp = PMerge (insertPRefs prs p1 gp) (insertPRefs prs p2 gp)
 insertPRefs (pr@(PRef pv ref):prs) lp@(PDRS l m u c) gp
-  | not (null ant)                     = insertPRefs ((PRef (head ant) ref):prs) lp gp
+  | not (null ant)                     = insertPRefs (PRef (head ant) ref:prs) lp gp
   | pv == l || pdrsIsFreePVar pv gp    = insertPRefs prs (PDRS l m (u `union` [pr]) c) gp
   | otherwise                          = insertPRefs prs (PDRS l m u (map insert c))   gp
-  where ant = [ m2 | (m1,m2) <- (pdrsMAPs gp), m1 == pv, m2 `elem` (pdrsLabels gp) ]
+  where ant = [ m2 | (m1,m2) <- pdrsMAPs gp, m1 == pv, m2 `elem` pdrsLabels gp ]
         insert :: PCon -> PCon
         insert pc@(PCon _ (Rel _ _)) = pc
         insert (PCon p (Neg p1))     = PCon p (Neg     (insertPRefs [pr] p1 gp))
@@ -112,7 +112,7 @@ insertPCon pc@(PCon pv con) lp@(PDRS l m u c) gp
   | not (null ant)                  = insertPCon (PCon (head ant) con) lp gp
   | pv == l || pdrsIsFreePVar pv gp = PDRS l m u (c ++ [pc])
   | otherwise                       = PDRS l m u (map insert c)
-  where ant = [ m2 | (m1,m2) <- (pdrsMAPs gp), m1 == pv, m2 `elem` (pdrsLabels gp) ]
+  where ant = [ m2 | (m1,m2) <- pdrsMAPs gp, m1 == pv, m2 `elem` pdrsLabels gp ]
         insert :: PCon -> PCon
         insert pc'@(PCon _ (Rel _ _)) = pc'
         insert (PCon p (Neg p1))      = PCon p (Neg     (insertPCon pc p1 gp))
