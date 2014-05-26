@@ -16,6 +16,7 @@ module Data.PDRS.Structure
 , pdrsLabels
 , pdrsUniverse
 , pdrsUniverses
+, pdrsMAPs
 , emptyPDRS
 , isLambdaPDRS
 , isMergePDRS
@@ -86,6 +87,24 @@ pdrsUniverses (PDRS _ _ u c) = u `union` universes c
         universes (PCon _ (Prop _ p1):cs)  = pdrsUniverses p1 `union` universes cs
         universes (PCon _ (Diamond p1):cs) = pdrsUniverses p1 `union` universes cs
         universes (PCon _ (Box p1):cs)     = pdrsUniverses p1 `union` universes cs
+
+---------------------------------------------------------------------------
+-- | Returns the list of MAPs of a 'PDRS'.
+---------------------------------------------------------------------------
+pdrsMAPs :: PDRS -> [MAP]
+pdrsMAPs (LambdaPDRS _) = []
+pdrsMAPs (AMerge p1 p2) = pdrsMAPs p1 `union` pdrsMAPs p2
+pdrsMAPs (PMerge p1 p2) = pdrsMAPs p1 `union` pdrsMAPs p2
+pdrsMAPs (PDRS _ m _ c) = m `union` maps c
+  where maps :: [PCon] -> [MAP]
+        maps []                       = []
+        maps (PCon _ (Rel _ _):cs)    = maps cs
+        maps (PCon _ (Neg p1):cs)     = pdrsMAPs p1 `union` maps cs
+        maps (PCon _ (Imp p1 p2):cs)  = pdrsMAPs p1 `union` pdrsMAPs p2 `union` maps cs
+        maps (PCon _ (Or p1 p2):cs)   = pdrsMAPs p1 `union` pdrsMAPs p2 `union` maps cs
+        maps (PCon _ (Prop _ p1):cs)  = pdrsMAPs p1 `union` maps cs
+        maps (PCon _ (Diamond p1):cs) = pdrsMAPs p1 `union` maps cs
+        maps (PCon _ (Box p1):cs)     = pdrsMAPs p1 `union` maps cs
 
 ---------------------------------------------------------------------------
 -- | Returns an empty 'PDRS', if possible with the same label as 'PDRS' @p@.

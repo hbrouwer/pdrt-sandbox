@@ -86,10 +86,12 @@ insertPRefs [] pdrs _             = pdrs
 insertPRefs _ lp@(LambdaPDRS _) _ = lp
 insertPRefs prs (AMerge p1 p2) gp = AMerge (insertPRefs prs p1 gp) (insertPRefs prs p2 gp)
 insertPRefs prs (PMerge p1 p2) gp = PMerge (insertPRefs prs p1 gp) (insertPRefs prs p2 gp)
-insertPRefs (pr@(PRef pv _):prs) (PDRS l m u c) gp
+insertPRefs (pr@(PRef pv ref):prs) lp@(PDRS l m u c) gp
+  | not (null ant)                     = insertPRefs ((PRef (head ant) ref):prs) lp gp
   | pv == l || pdrsIsFreePVar pv gp    = insertPRefs prs (PDRS l m (u `union` [pr]) c) gp
   | otherwise                          = insertPRefs prs (PDRS l m u (map insert c))   gp
-  where insert :: PCon -> PCon
+  where ant = [ m2 | (m1,m2) <- (pdrsMAPs gp), m1 == pv, m2 `elem` (pdrsLabels gp) ]
+        insert :: PCon -> PCon
         insert pc@(PCon _ (Rel _ _)) = pc
         insert (PCon p (Neg p1))     = PCon p (Neg     (insertPRefs [pr] p1 gp))
         insert (PCon p (Imp p1 p2))  = PCon p (Imp     (insertPRefs [pr] p1 gp) (insertPRefs [pr] p2 gp))
@@ -106,17 +108,19 @@ insertPCon :: PCon -> PDRS -> PDRS -> PDRS
 insertPCon _ lp@(LambdaPDRS _) _ = lp
 insertPCon pc (AMerge p1 p2) gp = AMerge (insertPCon pc p1 gp) (insertPCon pc p2 gp)
 insertPCon pc (PMerge p1 p2) gp = PMerge (insertPCon pc p1 gp) (insertPCon pc p2 gp)
-insertPCon pc@(PCon pv _) (PDRS l m u c) gp
+insertPCon pc@(PCon pv con) lp@(PDRS l m u c) gp
+  | not (null ant)                  = insertPCon (PCon (head ant) con) lp gp
   | pv == l || pdrsIsFreePVar pv gp = PDRS l m u (c ++ [pc])
   | otherwise                       = PDRS l m u (map insert c)
-    where insert :: PCon -> PCon
-          insert pc'@(PCon _ (Rel _ _)) = pc'
-          insert (PCon p (Neg p1))     = PCon p (Neg     (insertPCon pc p1 gp))
-          insert (PCon p (Imp p1 p2))  = PCon p (Imp     (insertPCon pc p1 gp) (insertPCon pc p2 gp))
-          insert (PCon p (Or p1 p2))   = PCon p (Or      (insertPCon pc p1 gp) (insertPCon pc p2 gp))
-          insert (PCon p (Prop r p1))  = PCon p (Prop r  (insertPCon pc p1 gp))
-          insert (PCon p (Diamond p1)) = PCon p (Diamond (insertPCon pc p1 gp))
-          insert (PCon p (Box p1))     = PCon p (Box     (insertPCon pc p1 gp))
+  where ant = [ m2 | (m1,m2) <- (pdrsMAPs gp), m1 == pv, m2 `elem` (pdrsLabels gp) ]
+        insert :: PCon -> PCon
+        insert pc'@(PCon _ (Rel _ _)) = pc'
+        insert (PCon p (Neg p1))      = PCon p (Neg     (insertPCon pc p1 gp))
+        insert (PCon p (Imp p1 p2))   = PCon p (Imp     (insertPCon pc p1 gp) (insertPCon pc p2 gp))
+        insert (PCon p (Or p1 p2))    = PCon p (Or      (insertPCon pc p1 gp) (insertPCon pc p2 gp))
+        insert (PCon p (Prop r p1))   = PCon p (Prop r  (insertPCon pc p1 gp))
+        insert (PCon p (Diamond p1))  = PCon p (Diamond (insertPCon pc p1 gp))
+        insert (PCon p (Box p1))      = PCon p (Box     (insertPCon pc p1 gp))
 
 ---------------------------------------------------------------------------
 -- | Strips projection variables from a 'PDRS' @p@, resulting in a 'DRS'.
