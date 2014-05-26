@@ -331,7 +331,7 @@ unboundDupPRefs lp@(PDRS _ _ u c) gp eps = (eps1,filter (`dup` eps) uu ++ dps1)
         dup :: PRef -> [PRef] -> Bool
         dup _ []                                       = False
         dup pr@(PRef p r) (pr'@(PRef _ r'):prs)
-          | not(pdrsBoundPVar p lp gp)                 = False -- ^ free pointers may be bound later on.
+          | not(pdrsBoundPVar p lp gp)                 = False -- free pointers may be bound later on.
           | r == r' && independentPRefs pr [pr'] lp gp = True
           | otherwise                                  = dup pr prs
         -- | Returns a tuple of existing 'PRef's @eps'@ and duplicate
