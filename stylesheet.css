@@ -4,17 +4,17 @@ body {
 
 a {
   text-decoration: none;
-  color: #CE991C;
+  color: #ce991c;
 }
 
 a:visited {
   text-decoration: none;
-  color: #CE991C;
+  color: #ce991c;
 }
 
 a:hover {
   text-decoration: none;
-  color: #99157E;
+  color: #99157e;
   background: #eeeeee;
 }
 
@@ -29,7 +29,7 @@ div.content {
 }
 
 span.projective {
-  color: #CE991C;
+  color: #ce991c;
 }
 
 p {
@@ -52,7 +52,7 @@ h1 {
   margin-bottom: 20px;
   font-family: sans-serif;
   font-size: 12pt;
-  color: #157E99;
+  color: #157e99;
 }
 
 strong {
@@ -72,7 +72,6 @@ div.west {
 }
 
 div.east {
-  font-weight: 550;
   font-size: 20pt;
   float: right;
   margin-top: 30px;
