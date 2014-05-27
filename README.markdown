@@ -20,14 +20,14 @@ based on Montague Semantics, defined as Haskell functions.
 References
 ----------
 
-* H. Kamp. *A theory of truth and semantic representation*, 1981;
+* H. Kamp. *A theory of truth and semantic representation*, 1981.
 
 * H. Kamp and U. Reyle. *From discourse to logic: Introduction to
   model-theoretic semantics of natural language, formal logic and Discourse
-  Representation Theory*, 1993;
+  Representation Theory*, 1993.
 
 * N. J. Venhuizen, J. Bos and H. Brouwer. *Parsimonious semantic
-  representations with projection pointers*, 2013;
+  representations with projection pointers*, 2013.
                      
 * N. J. Venhuizen, J. Bos, P. Hendriks and H. Brouwer. *How and why
   conventional implicatures project*, 2014.
