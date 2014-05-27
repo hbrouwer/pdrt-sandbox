@@ -3,7 +3,8 @@ pdrt-sandbox
 
 Synopsis
 --------
-(Projective) Discourse Representation Theory
+[(Projective) Discourse Representation
+Theory](http://hbrouwer.github.io/pdrt-sandbox/)
 
 Description
 -----------
