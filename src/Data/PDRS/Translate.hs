@@ -91,6 +91,8 @@ insertPRefs (pr@(PRef pv ref):prs) lp@(PDRS l m u c) gp
   | pv == l || pdrsIsFreePVar pv gp    = insertPRefs prs (PDRS l m (u `union` [pr]) c) gp
   | otherwise                          = insertPRefs prs (PDRS l m u (map insert c))   gp
   where ant = [ m2 | (m1,m2) <- pdrsMAPs gp, m1 == pv, m2 `elem` pdrsLabels gp ]
+        -- Note: this only eliminates direct cycles @[(1,2),(2,1)]@, where
+        -- @1@ (or @2@) is a 'PDRS' label in @gp@.
         insert :: PCon -> PCon
         insert pc@(PCon _ (Rel _ _)) = pc
         insert (PCon p (Neg p1))     = PCon p (Neg     (insertPRefs [pr] p1 gp))
@@ -113,6 +115,8 @@ insertPCon pc@(PCon pv con) lp@(PDRS l m u c) gp
   | pv == l || pdrsIsFreePVar pv gp = PDRS l m u (c ++ [pc])
   | otherwise                       = PDRS l m u (map insert c)
   where ant = [ m2 | (m1,m2) <- pdrsMAPs gp, m1 == pv, m2 `elem` pdrsLabels gp ]
+        -- Note: this only eliminates direct cycles @[(1,2),(2,1)]@, where
+        -- @1@ (or @2@) is a 'PDRS' label in @gp@.
         insert :: PCon -> PCon
         insert pc'@(PCon _ (Rel _ _)) = pc'
         insert (PCon p (Neg p1))      = PCon p (Neg     (insertPCon pc p1 gp))
