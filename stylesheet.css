@@ -12,6 +12,10 @@ a:visited {
   color: #ce991c;
 }
 
+a.img:hover {
+  background: #ffffff;
+}
+
 a:hover {
   text-decoration: none;
   color: #99157e;
