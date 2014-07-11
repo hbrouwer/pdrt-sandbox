@@ -32,3 +32,9 @@ References
                      
 * N. J. Venhuizen, J. Bos, P. Hendriks and H. Brouwer. *How and why
   conventional implicatures project*, 2014.
+
+License
+-------
+
+The library is available under the [Apache License, Version
+2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
