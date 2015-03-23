@@ -18,7 +18,7 @@ module Data.DRS.Input.Boxer
 , convertPrologVars
 ) where
 
-import Data.Char (isNumber, isPunctuation, toUpper)
+import Data.Char (isAlpha, isNumber, isPunctuation, toUpper)
 import Data.List (partition, isPrefixOf)
 import Data.DRS.DataType
 import Data.DRS.Input.String
@@ -34,8 +34,9 @@ type PrologDRS = String
 -- | Converts Boxer's output into a 'DRS'.
 ---------------------------------------------------------------------------
 boxerToDRS :: String -> DRS
-boxerToDRS s@('s':'e':'m':'(':_) = plDRSToDRS $ replaceLambdas (convertPrologVars pldrs []) 0
+boxerToDRS s@('s':'e':'m':'(':_) = plDRSToDRS $ replaceLambdas pldrs 0
   where pldrs = tail $ dropUpToMatchingBracket Square (dropWhile (/= '[') s)
+        -- pldrs' = convertPrologVars pldrs []
 boxerToDRS _                     = error "infelicitous input string"
 
 ---------------------------------------------------------------------------
@@ -92,13 +93,44 @@ plDRSToDRS s
   | drsType == "alfa"   = Merge (plDRSToDRS (tail (dropWhile (/= ',') drs))) (plDRSToDRS drs')
   | drsType == "lambda" = LambdaDRS ((takeWhile (/= ':') drs,[]), read (dropWhile (/= ':') drs) :: Int)
   | drsType == "app"    = LambdaDRS ((takeWhile (/= ':') l,[last sd]), read (tail (dropWhile (/= ':') (init l))) :: Int)
-  | otherwise           = error "not a valid DRS"
-  where drsType = takeWhile (/= '(') s
-        drs     = dropOuterBrackets $ takeUpToMatchingBracket Parentheses (drop (length drsType) s)
+  | drsType == "sdrs"   = plSDRSToDRS (tail drs)
+  | otherwise           = error ("not a valid DRS: " ++ drsType)
+  where drsType = (reverse . takeWhile isAlpha . reverse . takeWhile (/= '(')) s
+        drs     = dropOuterBrackets $ takeUpToMatchingBracket Parentheses (dropWhile (/= '(') s)
         drs'    = tail (dropUpToMatchingBracket Parentheses (dropWhile (/= '(') drs))
         -- | For app:
         l  = tail (dropWhile (/= '(') (head sd))
         sd = splitOn ',' drs
+
+---------------------------------------------------------------------------
+-- | Converts a 'PrologDRS' of type sdrs into a 'DRS'.
+-- XXX SDRSs are currently translated to DRSs with same accessibility
+-- and spacial properties as SDRSs:
+-- * coordinated relation -> Merge
+-- * subordinated relation -> Embedded propositional condition
+---------------------------------------------------------------------------
+plSDRSToDRS :: String -> DRS
+plSDRSToDRS k
+    | (sdrsType == "lab") && head (postBrackets k) == ',' = segToDRS k         -- last coordinated SDRS
+    |  sdrsType == "lab" = Merge (segToDRS k) (plSDRSToDRS (postBrackets k))   -- coordinated SDRS relation
+    |  sdrsType == "sub" = Merge k1 (DRS subUniverse (subCons ++ subRelation)) -- subordinated SDRS relation
+    | otherwise          = error "not a valid SDRS"
+    where sdrsType      = takeWhile (/= '(') k
+          inBrackets    = dropOuterBrackets . takeUpToMatchingBracket Parentheses . dropWhile (/= '(')
+          postBrackets  = tail . dropUpToMatchingBracket Parentheses . dropWhile (/= '(')
+          k1@(DRS u1 _) = segToDRS k
+          segToDRS      = plDRSToDRS . tail . dropWhile (/= ',') . inBrackets
+          subUniverse   = map (\(Prop pr _) -> pr) subCons 
+          subCons       = [Prop ((toDRSRef . takeWhile (/= ',') . inBrackets) s) (segToDRS s)]
+              where s = postBrackets (inBrackets k)
+          subRelation  = [Rel (findRel (dropWhile (/= ':') (postBrackets k))) relRefs]
+              where findRel :: String -> DRSRel
+                    findRel (':':'r':'e':'l':rel)
+                        | toDRSRef (r !! 1) == head subUniverse = DRSRel (last r)
+                        | otherwise                             = findRel (dropWhile (/= ':') rel)
+                        where r = splitOn ',' (inBrackets rel)
+                    findRel _ = DRSRel "subordinated"
+                    relRefs = [DRSRef e | DRSRef e <- u1, head e == 'e'] ++ subUniverse
 
 ---------------------------------------------------------------------------
 -- | Converts a 'String' with Prolog referents into a set of 'DRSRef's.
@@ -125,8 +157,6 @@ parsePlCons s@(b:_)
   where parse :: String -> [DRSCon]
         parse [] = []
         parse (',':cs)   = parse cs
-        parse (':':cs)   = parse cs
-        parse cs@('[':_) = parse (dropUpToMatchingBracket Square cs)
         parse cs
           | pfx == "not"   = Neg     (plDRSToDRS c)                                                        : etc
           | pfx == "imp"   = Imp     (plDRSToDRS c) (plDRSToDRS c')                                        : etc
@@ -141,15 +171,25 @@ parsePlCons s@(b:_)
           | pfx == "timex" = Rel     (DRSRel (ct !! 1))                [toDRSRef (head ct)]                : etc
           | pfx == "card"  = Rel     (DRSRel ((ct !! 2) ++ (ct !! 1))) [toDRSRef (head ct)]                : etc
           | pfx == "eq"    = Rel     (DRSRel "=")                      (map toDRSRef ct)                   : etc
-          | otherwise      = error "not a valid condition"
-          where pfx = takeWhile (/= '(') cs
-                c   = dropOuterBrackets $ takeUpToMatchingBracket Parentheses (drop (length pfx) cs) 
-                etc = parse (drop (length pfx + length c + 2) cs)
+          | pfx == "duplex" = Rel    (DRSRel (head ct))                [toDRSRef (takeWhile (/= ',') c'),dref] 
+                            : Prop   dref (DRS [] [Imp (plDRSToDRS d1) (plDRSToDRS d2)])                   : etc
+          | otherwise      = error ("not a valid condition: " ++ pfx)
+          where pfx = (reverse . takeWhile (/= ':'). reverse . takeWhile (/= '(')) cs
+                c   = dropOuterBrackets $ takeUpToMatchingBracket Parentheses (dropWhile (/= '(') cs) 
+                etc = parse ((drop (length c + 2) . dropWhile (/= '(')) cs)
                 c'  = tail $ dropUpToMatchingBracket Parentheses (dropWhile (/= '(') c)
                 ct  = splitOn ',' c
                 capitalize :: String -> String
                 capitalize []    = []
                 capitalize (h:t) = toUpper h:t
+                --tokid
+                --  | tokid' == "" = []
+                --  | otherwise    = [DRSRef tokid']
+                --  where tokid' = (dropOuterBrackets . takeUpToMatchingBracket Square . dropWhile (/= '[')) cs
+                -- ^ For duplex conditions
+                dref = toDRSRef (takeWhile (/= ':') d1)
+                d1  = tail $ dropWhile (/= ',') c
+                d2  = tail $ dropWhile (/= ',') c'
 
 ---------------------------------------------------------------------------
 -- | Converts a 'String' to a 'DRSRef', which may be a 'LambdaDRSRef'.
