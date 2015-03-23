@@ -110,7 +110,6 @@ showItem (c,is,ps) =
     (Box pv)      -> "Con" ++ "\t" ++ opBox             ++ " " ++ show pv ++ tail'
   where tail' = "\t\t" ++ show is ++ "\t\t" ++ show ps ++ "\n"
 
-
 ---------------------------------------------------------------------------
 -- | Converts a 'PDRS' into a list of 'Item's
 ---------------------------------------------------------------------------
@@ -132,7 +131,7 @@ universeToItems (PRef p r:prs) l = (Ref r,l,p) : universeToItems prs l
 ---------------------------------------------------------------------------
 pconsToItems :: [PCon] -> PVar -> [Item]
 pconsToItems [] _     = []
-pconsToItems (c:[]) l = case c of
+pconsToItems [c] l = case c of
   (PCon p (PDRS.Rel r d))    -> [(Rel r d,l,p)]
   (PCon p (PDRS.Neg p1))     -> (Neg     (pdrsLabel p1),l,p)                : pdrsToItems p1 
   (PCon p (PDRS.Imp p1 p2))  -> (Imp     (pdrsLabel p1) (pdrsLabel p2),l,p) : pdrsToItems p1 ++ pdrsToItems p2

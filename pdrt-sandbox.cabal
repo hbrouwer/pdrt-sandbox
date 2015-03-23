@@ -57,5 +57,5 @@ library
                        Data.PDRS.Structure, Data.PDRS.Translate,
                        Data.PDRS.Variables
   ghc-options:         -Wall -Werror
-  build-depends:       base ==4.6.*, containers ==0.5.*
+  build-depends:       base >=4, containers >=0.3
   hs-source-dirs:      src

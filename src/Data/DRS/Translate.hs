@@ -60,19 +60,19 @@ drsToMFOL (DRS (r:rs) c) w = F.Exists (drsRefToDRSVar r) (drsToMFOL (DRS rs c) w
 
 -- | Converts a list of DRS conditions to a modal FOL formula with world @w@
 drsConsToMFOL :: [DRSCon] -> F.FOLVar -> F.FOLForm
-drsConsToMFOL [] _              = F.Top
-drsConsToMFOL (Rel r d:[]) w    = F.Rel (drsRelToString r) (w : map drsRefToDRSVar d)
-drsConsToMFOL (Neg d1:[]) w     = F.Neg (drsToMFOL d1 w)
-drsConsToMFOL (Imp d1 d2:[]) w  = quantifyForAll d1
+drsConsToMFOL [] _           = F.Top
+drsConsToMFOL [Rel r d] w    = F.Rel (drsRelToString r) (w : map drsRefToDRSVar d)
+drsConsToMFOL [Neg d1] w     = F.Neg (drsToMFOL d1 w)
+drsConsToMFOL [Imp d1 d2] w  = quantifyForAll d1
   where quantifyForAll :: DRS -> F.FOLForm
         quantifyForAll (LambdaDRS _)  = error "infelicitous FOL formula"
         quantifyForAll (Merge _ _)    = error "infelicitous FOL formula"
         quantifyForAll (DRS [] c)     = F.Imp    (drsConsToMFOL c w) (drsToMFOL d2 w)
         quantifyForAll (DRS (r:rs) c) = F.ForAll (drsRefToDRSVar r)  (quantifyForAll (DRS rs c))
-drsConsToMFOL (Or d1 d2:[]) w   = F.Or (drsToMFOL d1 w) (drsToMFOL d2 w)
-drsConsToMFOL (Prop r d1:[]) w  = F.And (F.Rel worldRel [w,drsRefToDRSVar r]) (drsToMFOL d1 (drsRefToDRSVar r))
-drsConsToMFOL (Diamond d1:[]) w = F.Exists v (F.And (F.Rel worldRel [w,v]) (drsToMFOL d1 v))
+drsConsToMFOL [Or d1 d2] w   = F.Or (drsToMFOL d1 w) (drsToMFOL d2 w)
+drsConsToMFOL [Prop r d1] w  = F.And (F.Rel worldRel [w,drsRefToDRSVar r]) (drsToMFOL d1 (drsRefToDRSVar r))
+drsConsToMFOL [Diamond d1] w = F.Exists v (F.And (F.Rel worldRel [w,v]) (drsToMFOL d1 v))
   where v = w ++ "'"
-drsConsToMFOL (Box d1:[]) w     = F.ForAll v (F.Imp (F.Rel worldRel [w,v]) (drsToMFOL d1 v))
+drsConsToMFOL [Box d1] w     = F.ForAll v (F.Imp (F.Rel worldRel [w,v]) (drsToMFOL d1 v))
   where v = w ++ "'"
-drsConsToMFOL (c:cs) w          = F.And (drsConsToMFOL [c] w) (drsConsToMFOL cs w)
+drsConsToMFOL (c:cs) w       = F.And (drsConsToMFOL [c] w) (drsConsToMFOL cs w)

@@ -30,8 +30,8 @@ import Data.PDRS.DataType
 ---------------------------------------------------------------------------
 boxerToPDRS :: String -> PDRS
 boxerToPDRS s@('s':'e':'m':'(':_) = bindPRefs (plPDRSToPDRS (replaceLambdas plpdrs 0)) []
-  where plpdrs = tail $ dropUpToMatchingBracket Square (dropWhile (/= '[') s)
-        --plpdrs' = convertPrologVars plpdrs []
+    where plpdrs = tail $ dropUpToMatchingBracket Square (dropWhile (/= '[') s)
+          --plpdrs' = convertPrologVars plpdrs []
 boxerToPDRS _                     = error "infelicitous input string"
 
 ---------------------------------------------------------------------------
@@ -47,26 +47,27 @@ plPDRSToPDRS s
   | pdrsType == "merge"  = AMerge (plPDRSToPDRS pdrs) (plPDRSToPDRS pdrs')
   | pdrsType == "smerge" = AMerge (plPDRSToPDRS pdrs) (plPDRSToPDRS pdrs')
   | pdrsType == "alfa"   = PMerge (plPDRSToPDRS (tail (dropWhile (/= ',') pdrs))) (plPDRSToPDRS pdrs')
-  | pdrsType == "lambda" = LambdaPDRS ((takeWhile (/= ':') pdrs,[]), read (dropWhile (/= ':') pdrs) :: Int)
-  | pdrsType == "app"    = LambdaPDRS ((takeWhile (/= ':') l,[last sd]), read (tail (dropWhile (/= ':') (init l))) :: Int)
+  | pdrsType == "lambda" = LambdaPDRS ((takeWhile (/= ':') pdrs,[]),        read (dropWhile (/= ':') pdrs) :: Int)
+  | pdrsType == "app"    = LambdaPDRS ((takeWhile (/= ':') appl,[last sd]), read (tail (dropWhile (/= ':') (init appl))) :: Int)
   | pdrsType == "sdrs"   = plSDRSToPDRS (tail pdrs)
   | otherwise            = error ("not a valid PDRS" ++ pdrsType)
   where pdrsType = (reverse . takeWhile isAlpha . reverse . takeWhile (/= '(')) s
         pdrs     = dropOuterBrackets $ takeUpToMatchingBracket Parentheses (dropWhile (/= '(') s)
         pdrs'    = tail (dropUpToMatchingBracket Parentheses (dropWhile (/= '(') pdrs))
-        plLabel = read ((filter isNumber . takeWhile (/= ':')) s) :: Int
-        plPRefs = parsePlRefs pdrs
-        plPCons = parsePlCons (tail (dropUpToMatchingBracket Square pdrs))
-        -- | For app:
-        l  = tail (dropWhile (/= '(') (head sd))
-        sd = splitOn ',' pdrs
-
+        plLabel  = read ((filter isNumber . takeWhile (/= ':')) s) :: Int
+        plPRefs  = parsePlRefs pdrs
+        plPCons  = parsePlCons (tail (dropUpToMatchingBracket Square pdrs))
+        appl     = tail (dropWhile (/= '(') (head sd))
+        sd       = splitOn ',' pdrs
 
 ---------------------------------------------------------------------------
 -- | Converts a 'PrologDRS' of type sdrs into a 'PDRS'.
+-- 
 -- XXX SDRSs are currently translated to PDRSs with same accessibility
 -- and spacial properties as SDRSs:
--- * coordinated relation -> AMerge
+-- 
+-- * coordinated relation  -> AMerge
+--
 -- * subordinated relation -> Propositional conditions + MAP-constraint
 ---------------------------------------------------------------------------
 plSDRSToPDRS :: String -> PDRS
@@ -80,26 +81,26 @@ plSDRSToPDRS k
           postBrackets = tail . dropUpToMatchingBracket Parentheses . dropWhile (/= '(')
           segToPDRS    = plPDRSToPDRS . tail . dropWhile (/= ',') . inBrackets
           subLab       = read (show m1 ++ show m0) :: PVar
-            where (m0,m1) = head subMAPs
+              where (m0,m1) = head subMAPs
           subMAPs      = [(snd (subPCTuples !! 1), snd (head subPCTuples))]
           subPRefs     = map (PRef subLab . fst) subPCTuples
           subPCTuples  = map propToTuples subPCons
-            where propToTuples :: PCon -> (PDRSRef,PVar)
-                  propToTuples (PCon _ (Prop r (PDRS l _ _ _)))            = (r,l)
-                  propToTuples (PCon _ (Prop r (AMerge (PDRS l _ _ _) _))) = (r,l)
-                  propToTuples (PCon _ (Prop r (PMerge (PDRS l _ _ _) _))) = (r,l)
-                  propToTuples _                                           = error "not a valid SDRS segment"
+              where propToTuples :: PCon -> (PDRSRef,PVar)
+                    propToTuples (PCon _ (Prop r (PDRS l _ _ _)))            = (r,l)
+                    propToTuples (PCon _ (Prop r (AMerge (PDRS l _ _ _) _))) = (r,l)
+                    propToTuples (PCon _ (Prop r (PMerge (PDRS l _ _ _) _))) = (r,l)
+                    propToTuples _                                           = error "not a valid SDRS segment"
           subPCons     = [toProp (inBrackets k), toProp (postBrackets (inBrackets k))]
-            where toProp :: String -> PCon
-                  toProp s = PCon subLab (Prop ((toPDRSRef . takeWhile (/= ',') . inBrackets) s) (segToPDRS s))
-          subRelation  = [PCon subLab (Rel (findRel (dropWhile (/= ':') (postBrackets k)) rs) rs)]
-            where rs = map fst subPCTuples
-                  findRel :: String -> [PDRSRef] -> PDRSRel
-                  findRel (':':'r':'e':'l':rel) prs
-                    | map toPDRSRef (init r) == prs = PDRSRel (last r)
-                    | otherwise                     = findRel (dropWhile (/= ':') rel) prs
-                    where r = splitOn ',' (inBrackets rel)
-                  findRel _ _ = PDRSRel "subordinated"
+              where toProp :: String -> PCon
+                    toProp s = PCon subLab (Prop ((toPDRSRef . takeWhile (/= ',') . inBrackets) s) (segToPDRS s))
+          subRelation  = [PCon subLab (Rel (findRel (dropWhile (/= ':') (postBrackets k))) rs)]
+              where rs = map fst subPCTuples
+                    findRel :: String -> PDRSRel
+                    findRel (':':'r':'e':'l':rel)
+                        | map toPDRSRef (init r) == rs = PDRSRel (last r)
+                        | otherwise                    = findRel (dropWhile (/= ':') rel)
+                        where r = splitOn ',' (inBrackets rel)
+                    findRel _                          = PDRSRel "subordinated"
 
 ---------------------------------------------------------------------------
 -- | Converts a 'String' with Prolog referents into a set of 'PRef's.
@@ -126,21 +127,21 @@ parsePlCons s@(b:_)
         parse [] = []
         parse (',':cs) = parse cs
         parse cs
-          | pfx == "not"   = PCon lab (Neg     (plPDRSToPDRS c))                                                         : etc
-          | pfx == "imp"   = PCon lab (Imp     (plPDRSToPDRS c) (plPDRSToPDRS c'))                                       : etc
-          | pfx == "or"    = PCon lab (Or      (plPDRSToPDRS c) (plPDRSToPDRS c'))                                       : etc
-          | pfx == "pos"   = PCon lab (Diamond (plPDRSToPDRS c))                                                         : etc
-          | pfx == "nec"   = PCon lab (Box     (plPDRSToPDRS c))                                                         : etc
-          | pfx == "prop"  = PCon lab (Prop    (toPDRSRef (takeWhile (/= ',') c)) (plPDRSToPDRS (dropWhile (/= ',') c))) : etc
-          | pfx == "pred"  = PCon lab (Rel     (PDRSRel (ct !! 1))                [toPDRSRef (head ct)])                 : etc
-          | pfx == "rel"   = PCon lab (Rel     (PDRSRel (ct !! 2))                (map toPDRSRef (take 2 ct)))           : etc
-          | pfx == "role"  = PCon lab (Rel     (PDRSRel (capitalize (ct !! 2)))   (map toPDRSRef (take 2 ct)))           : etc
-          | pfx == "named" = PCon lab (Rel     (PDRSRel (capitalize (ct !! 1)))   [toPDRSRef (head ct)])                 : etc
-          | pfx == "timex" = PCon lab (Rel     (PDRSRel (ct !! 1))                [toPDRSRef (head ct)])                 : etc
-          | pfx == "card"  = PCon lab (Rel     (PDRSRel ((ct !! 2) ++ (ct !! 1))) [toPDRSRef (head ct)])                 : etc
-          | pfx == "eq"    = PCon lab (Rel     (PDRSRel "=")                      (map toPDRSRef ct))                    : etc
-          | pfx == "duplex" = PCon lab (Rel    (PDRSRel (head ct))                [toPDRSRef (takeWhile (/= ',') c'),dref])
-                            : PCon lab (Prop dref (PDRS nl [] [] [PCon nl (Imp (plPDRSToPDRS dp1) (plPDRSToPDRS dp2))])) : etc
+          | pfx == "not"    = PCon lab (Neg     (plPDRSToPDRS c))                                                         : etc
+          | pfx == "imp"    = PCon lab (Imp     (plPDRSToPDRS c) (plPDRSToPDRS c'))                                       : etc
+          | pfx == "or"     = PCon lab (Or      (plPDRSToPDRS c) (plPDRSToPDRS c'))                                       : etc
+          | pfx == "pos"    = PCon lab (Diamond (plPDRSToPDRS c))                                                         : etc
+          | pfx == "nec"    = PCon lab (Box     (plPDRSToPDRS c))                                                         : etc
+          | pfx == "prop"   = PCon lab (Prop    (toPDRSRef (takeWhile (/= ',') c)) (plPDRSToPDRS (dropWhile (/= ',') c))) : etc
+          | pfx == "pred"   = PCon lab (Rel     (PDRSRel (ct !! 1))                [toPDRSRef (head ct)])                 : etc
+          | pfx == "rel"    = PCon lab (Rel     (PDRSRel (ct !! 2))                (map toPDRSRef (take 2 ct)))           : etc
+          | pfx == "role"   = PCon lab (Rel     (PDRSRel (capitalize (ct !! 2)))   (map toPDRSRef (take 2 ct)))           : etc
+          | pfx == "named"  = PCon lab (Rel     (PDRSRel (capitalize (ct !! 1)))   [toPDRSRef (head ct)])                 : etc
+          | pfx == "timex"  = PCon lab (Rel     (PDRSRel (ct !! 1))                [toPDRSRef (head ct)])                 : etc
+          | pfx == "card"   = PCon lab (Rel     (PDRSRel ((ct !! 2) ++ (ct !! 1))) [toPDRSRef (head ct)])                 : etc
+          | pfx == "eq"     = PCon lab (Rel     (PDRSRel "=")                      (map toPDRSRef ct))                    : etc
+          | pfx == "duplex" = PCon lab (Rel     (PDRSRel (head ct))                [toPDRSRef (takeWhile (/= ',') c'),dr])
+                            : PCon lab (Prop    dr (PDRS nl [] [] [PCon nl (Imp (plPDRSToPDRS dp1) (plPDRSToPDRS dp2))])) : etc
           | otherwise       = error ("not a valid condition " ++ pfx)
           where pfx = (reverse . takeWhile (/= ':'). reverse . takeWhile (/= '(')) cs
                 lab = read ((filter isNumber . takeWhile (/= ':')) cs) :: Int
@@ -156,10 +157,10 @@ parsePlCons s@(b:_)
                 --  | otherwise    = [toPDRSRef tokid']
                 --  where tokid' = (dropOuterBrackets . takeUpToMatchingBracket Square . dropWhile (/= '[')) cs
                 -- ^ For duplex conditions
-                dref = toPDRSRef (takeWhile (/= ':') dp1)
-                dp1  = tail $ dropWhile (/= ',') c
-                dp2  = tail $ dropWhile (/= ',') c'
-                nl   = read (filter isNumber (takeWhile (/= ':') dp1 ++ takeWhile (/= ':') dp2)) :: Int
+                dr  = toPDRSRef (takeWhile (/= ':') dp1)
+                dp1 = tail $ dropWhile (/= ',') c
+                dp2 = tail $ dropWhile (/= ',') c'
+                nl  = read (filter isNumber (takeWhile (/= ':') dp1 ++ takeWhile (/= ':') dp2)) :: Int
 
 ---------------------------------------------------------------------------
 -- | Converts a 'String' to a 'PDRSRef', which may be a 'LambdaPDRSRef'.
