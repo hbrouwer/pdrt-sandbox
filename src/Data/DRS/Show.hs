@@ -122,13 +122,10 @@ instance (ShowableDRS d) => Show (DRSNotation d) where
 showDRS :: DRSNotation DRS -> String
 showDRS n = 
   case n of
-    (Boxes d)  -> showModifier (showDRSLambdas rd) 2 (showDRSBox rd)
-      where rd = drsResolveMerges d
-    (Linear d) -> showDRSLambdas rd ++ showDRSLinear rd ++ "\n"
-      where rd = drsResolveMerges d
-    (Set d)    -> showDRSLambdas rd ++ showDRSSet rd ++ "\n"
-      where rd = drsResolveMerges d
-    (Debug d)  -> showDRSDebug d ++ "\n"
+    (Boxes d)  -> showModifier (showDRSLambdas d) 2 (showDRSBox d)
+    (Linear d) -> showDRSLambdas d ++ showDRSLinear d ++ "\n"
+    (Set d)    -> showDRSLambdas d ++ showDRSSet d    ++ "\n"
+    (Debug d)  -> showDRSDebug d   ++ "\n"
 
 ---------------------------------------------------------------------------
 -- | Prints a 'DRS'.
@@ -319,11 +316,13 @@ showDRSBox (LambdaDRS ((v,d),_))
   | not (null d) = v ++ "(" ++ intercalate "," d ++ ")" ++ "\n"
   | otherwise    = v ++ "\n"
 showDRSBox (Merge d1 d2)
-  | isLambdaDRS d1 && isLambdaDRS d2      = showConcat (showDRSBox d1) (showModifier opMerge 0 (showDRSBox d2))
-  | not(isLambdaDRS d1) && isLambdaDRS d2 = showConcat (showDRSBox d1) (showModifier opMerge 2 (showPadding (showDRSBox d2)))
-  | isLambdaDRS d1 && not(isLambdaDRS d2) = showConcat (showPadding (showDRSBox d1)) (showModifier opMerge 2 (showDRSBox d2))
-  | otherwise                             = showDRSBox (d1 <<+>> d2)
-showDRSBox (DRS u c)         = showHorizontalLine l boxTopLeft boxTopRight
+  | isLambdaDRS d1 && isLambdaDRS d2      = showModifier "(" 0 (showConcat (showConcat (showDRSBox d1) (showModifier opMerge 0 (showDRSBox d2))) ")")
+  | not(isLambdaDRS d1) && isLambdaDRS d2 = showBrackets (showConcat (showDRSBox d1) (showModifier opMerge 2 (showPadding (showDRSBox d2))))
+  | isLambdaDRS d1 && not(isLambdaDRS d2) = showBrackets (showConcat (showPadding (showDRSBox d1)) (showModifier opMerge 2 (showDRSBox d2)))
+  | otherwise                             = showBrackets (showConcat (showDRSBox d1) (showModifier opMerge 2 (showDRSBox d2)))
+  where showBrackets :: String -> String
+        showBrackets s = showModifier "(" 2 (showConcat s (showPadding ")\n"))
+showDRSBox (DRS u c)   = showHorizontalLine l boxTopLeft boxTopRight
   ++ showContent l ul ++ showHorizontalLine l boxMiddleLeft boxMiddleRight
   ++ showContent l cl ++ showHorizontalLine l boxBottomLeft boxBottomRight
   where ul
