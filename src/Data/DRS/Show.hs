@@ -375,9 +375,9 @@ showDRSSet (DRS u c)         = "<{" ++ showUniverse u "," ++ "},{" ++ intercalat
 -- | Show a 'DRS' in 'Debug' notation.
 ---------------------------------------------------------------------------
 showDRSDebug :: DRS -> String
-showDRSDebug (LambdaDRS l) = "LambdaPDRS" ++ " "  ++ show l
-showDRSDebug (Merge d1 d2) = "Merge"      ++ " (" ++ showDRSDebug d1 ++ ") (" ++ showDRSDebug d2 ++ ")"
-showDRSDebug (DRS u c)     = "DRS"        ++ " "  ++ show u ++ " [" ++ intercalate "," (map showCon c) ++ "]"
+showDRSDebug (LambdaDRS l) = "LambdaDRS" ++ " "  ++ show l
+showDRSDebug (Merge d1 d2) = "Merge"     ++ " (" ++ showDRSDebug d1 ++ ") (" ++ showDRSDebug d2 ++ ")"
+showDRSDebug (DRS u c)     = "DRS"       ++ " "  ++ show u ++ " [" ++ intercalate "," (map showCon c) ++ "]"
   where showCon :: DRSCon -> String
         showCon (Rel r d)    = "Rel ("     ++ show r          ++ ")" ++ " " ++ show d
         showCon (Neg d1)     = "Neg ("     ++ showDRSDebug d1 ++ ")"
