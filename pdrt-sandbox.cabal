@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                pdrt-sandbox
-version:             0.1.0.0
+version:             0.1.0
 synopsis:            (Projective) Discourse Representation Theory
 description:         This is an implementation of the formal framework of 
                      Projective Discourse Representation Theory (Venhuizen et
