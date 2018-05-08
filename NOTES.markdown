@@ -5,7 +5,7 @@ git checkout master
 make clean
 
 git checkout gh-pages
-git rm -r dist/docs
+git rm -r dist/doc
 git commit -m 'removed docs'
 git push
 
@@ -14,6 +14,6 @@ make
 make haddock
 
 git checkout gh-pages
-git add dist/docs
+git add dist/doc
 git commit -m 'updated docs'
 git push
