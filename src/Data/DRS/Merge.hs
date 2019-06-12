@@ -43,7 +43,7 @@ drsMerge d md@(Merge d1 d2)
 drsMerge md@(Merge d1 d2) d
   | isLambdaDRS d1 = Merge d1 (drsMerge d2 d)                                 -- (ld1 + d2) + d = ld1 + (d2 + d)
   | isLambdaDRS d2 = Merge d2 (drsMerge d1 d)                                 -- (d1 + ld2) + d = ld2 + (d1 + d)
-  | otherwise      = drsMerge d (drsResolveMerges md)
+  | otherwise      = drsMerge (drsResolveMerges md) d
 drsMerge d@(DRS _ _) d'@(DRS _ _) = DRS (u1 `union` u2) (c1 `union` c2)
   where d1@(DRS u1 c1) = drsPurify $ drsResolveMerges d
         (DRS u2 c2)    = drsAlphaConvert d'' (zip ors nrs)
