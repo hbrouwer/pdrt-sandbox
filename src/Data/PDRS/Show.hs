@@ -49,7 +49,11 @@ import Data.Tuple (swap)
 -- | Derive and instance of the Show typeclass for 'PDRS'.
 ---------------------------------------------------------------------------
 instance Show PDRS where
-  show p = '\n' : showPDRS (Boxes p)
+  show p = '\n' : ps
+    where s = lines $ showPDRS (Boxes p)
+          ps
+            | length s == 3 = unlines $ drop 2 s
+            | otherwise     = unlines s
 
 ---------------------------------------------------------------------------
 -- | Typeclass for 'showablePDRS's, that are unresolved.
@@ -103,12 +107,14 @@ instance (ShowablePDRS p) => Show (PDRSNotation p) where
 -- | Shows a 'PDRS'.
 ---------------------------------------------------------------------------
 showPDRS :: PDRSNotation PDRS -> String
-showPDRS n =
-  case n of
-    (Boxes p)  -> showModifier (showPDRSLambdas p) 2 (showPDRSBox p)
-    (Linear p) -> showPDRSLambdas p ++ showPDRSLinear p ++ "\n" 
-    (Set p)    -> showPDRSLambdas p ++ showPDRSSet p  ++ "\n" 
-    (Debug p)  -> showPDRSDebug p ++ "\n"
+showPDRS (Boxes p)  = showModifier (showPDRSLambdas p) 2 bxp
+  where bx = showPDRSBox p
+        bxp
+          | length (lines bx) == 1 = showPadding bx
+          | otherwise              = bx
+showPDRS (Linear p) = showPDRSLambdas p ++ showPDRSLinear p ++ "\n"
+showPDRS (Set p)    = showPDRSLambdas p ++ showPDRSSet p    ++ "\n"
+showPDRS (Debug p)  = showPDRSDebug p   ++ "\n"
 
 ---------------------------------------------------------------------------
 -- | Prints a 'PDRS'.
@@ -169,7 +175,11 @@ showPDRSBetaReduct p1 p2 = showConcat (showConcat (showModifier "(" 2 b1) (showM
 -- 'PDRS' @p2@.
 ---------------------------------------------------------------------------
 printPDRSBetaReduct :: (ShowablePDRS p) => (PDRS -> p) -> PDRS -> IO ()
-printPDRSBetaReduct p1 p2 = putStrLn $ '\n' : showPDRSBetaReduct p1 p2
+printPDRSBetaReduct p1 p2 = putStrLn $ '\n' : brs
+  where s = lines $ showPDRSBetaReduct p1 p2
+        brs
+          | length s == 3 = unlines $ drop 2 s
+          | otherwise     = unlines s
 
 ---------------------------------------------------------------------------
 -- | Shows the beta reduction of an @'unresolved PDRS'@ @p@ with a PDRS
@@ -187,7 +197,11 @@ showPDRSRefBetaReduct p r@(PDRSRef v)     = showConcat (showConcat (showModifier
 -- 'PDRSRef' @r@.
 ---------------------------------------------------------------------------
 printPDRSRefBetaReduct :: (ShowablePDRS p) => (PDRSRef -> p) -> PDRSRef -> IO ()
-printPDRSRefBetaReduct p r = putStrLn $ '\n' : showPDRSRefBetaReduct p r
+printPDRSRefBetaReduct p r = putStrLn $ '\n' : brs
+  where s = lines $ showPDRSRefBetaReduct p r
+        brs
+          | length s == 3 = unlines $ drop 2 s
+          | otherwise     = unlines s
 
 ---------------------------------------------------------------------------
 -- * Private

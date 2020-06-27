@@ -66,7 +66,11 @@ import Data.List (intercalate, union)
 -- | Derive an instance of the 'Show' typeclass for 'DRS'.
 ---------------------------------------------------------------------------
 instance Show DRS where
-  show d = '\n' : showDRS (Boxes d)
+  show d = '\n' : ds
+    where s = lines $ showDRS (Boxes d)
+          ds
+            | length s == 3 = unlines $ drop 2 s
+            | otherwise     = unlines s
 
 ---------------------------------------------------------------------------
 -- | Typeclass for 'showableDRS's, that are unresolved.
@@ -120,12 +124,14 @@ instance (ShowableDRS d) => Show (DRSNotation d) where
 -- | Shows a 'DRS'.
 ---------------------------------------------------------------------------
 showDRS :: DRSNotation DRS -> String
-showDRS n = 
-  case n of
-    (Boxes d)  -> showModifier (showDRSLambdas d) 2 (showDRSBox d)
-    (Linear d) -> showDRSLambdas d ++ showDRSLinear d ++ "\n"
-    (Set d)    -> showDRSLambdas d ++ showDRSSet d    ++ "\n"
-    (Debug d)  -> showDRSDebug d   ++ "\n"
+showDRS (Boxes d)  = showModifier (showDRSLambdas d) 2 bxp
+  where bx = showDRSBox d
+        bxp
+          | length (lines bx) == 1 = showPadding bx
+          | otherwise              = bx
+showDRS (Linear d) = showDRSLambdas d ++ showDRSLinear d ++ "\n"
+showDRS (Set d)    = showDRSLambdas d ++ showDRSSet d    ++ "\n"
+showDRS (Debug d)  = showDRSDebug d   ++ "\n"
 
 ---------------------------------------------------------------------------
 -- | Prints a 'DRS'.
@@ -161,8 +167,7 @@ printMerge d1 d2 = putStrLn $ '\n' : showMerge d1 d2
 -- @d2@.
 ---------------------------------------------------------------------------
 showDRSBetaReduct :: (ShowableDRS d) => (DRS -> d) -> DRS -> String
-showDRSBetaReduct d1 d2 
-  = showConcat (showConcat (showModifier "(" 2 b1) (showModifier ")" 2 b2)) (showModifier "=" 2 br)
+showDRSBetaReduct d1 d2 = showConcat (showConcat (showModifier "(" 2 b1) (showModifier ")" 2 b2)) (showModifier "=" 2 br)
   where b1 = showDRS (Boxes (resolve d1 0 0))
         b2 = showDRS (Boxes d2)
         br = showDRS (Boxes (resolve (d1 d2) 0 0))
@@ -172,7 +177,11 @@ showDRSBetaReduct d1 d2
 -- @d2@.
 ---------------------------------------------------------------------------
 printDRSBetaReduct :: (ShowableDRS d) => (DRS -> d) -> DRS -> IO ()
-printDRSBetaReduct d1 d2 = putStrLn $ '\n' : showDRSBetaReduct d1 d2
+printDRSBetaReduct d1 d2 = putStrLn $ '\n' : brs
+  where s = lines $ showDRSBetaReduct d1 d2
+        brs
+          | length s == 3 = unlines $ drop 2 s
+          | otherwise     = unlines s
 
 ---------------------------------------------------------------------------
 -- | Shows the beta reduction of an 'unresolved DRS' @d@ with a 'DRSRef'
@@ -190,7 +199,11 @@ showDRSRefBetaReduct d r@(DRSRef v)     = showConcat (showConcat (showModifier "
 -- @r@.
 ---------------------------------------------------------------------------
 printDRSRefBetaReduct :: (ShowableDRS d) => (DRSRef -> d) -> DRSRef -> IO ()
-printDRSRefBetaReduct d r = putStrLn $ '\n' : showDRSRefBetaReduct d r
+printDRSRefBetaReduct d r = putStrLn $ '\n' : brs 
+  where s = lines $ showDRSRefBetaReduct d r
+        brs
+          | length s == 3 = unlines $ drop 2 s
+          | otherwise     = unlines s
 
 ---------------------------------------------------------------------------
 -- ** Operators
