@@ -16,8 +16,11 @@ module Data.DRS.Translate
 ) where
 
 import Data.DRS.DataType
+import Data.DRS.LambdaCalculus
 import Data.DRS.Variables
 import qualified Data.FOL as F
+
+import Data.List (intersect, union)
 
 ---------------------------------------------------------------------------
 -- * Exported
@@ -27,7 +30,11 @@ import qualified Data.FOL as F
 -- | Converts a 'DRS' @d@ to a 'F.FOLForm'
 ---------------------------------------------------------------------------
 drsToFOL :: DRS -> F.FOLForm
-drsToFOL d = drsToMFOL d worldVar
+--drsToFOL d = drsToMFOL d worldVar
+drsToFOL d = drsToMFOL d' worldVar
+  where d'  = drsAlphaConvert d (zip ors nrs)
+        ors = drsVariables d `intersect` [DRSRef worldVar]
+        nrs = newDRSRefs ors (drsVariables d `union` [DRSRef worldVar]) 
 
 ---------------------------------------------------------------------------
 -- * Private
