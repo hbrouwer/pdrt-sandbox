@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {- |
 Module      :  Data.PDRS.Merge
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen

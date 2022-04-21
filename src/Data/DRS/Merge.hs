@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {- |
 Module      :  Data.DRS.Merge
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen

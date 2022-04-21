@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {- |
 Module      :  Data.DRS.LambdaCalculus
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
