@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {- |
 Module      :  Data.PDRS.Merge
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
@@ -62,10 +61,14 @@ pdrsAMerge p1@(PDRS{}) p2@(PDRS{}) = pdrsPurify $ amerge p1 (pdrsDisjoin p2' p1'
         -- | Make sure all asserted content in 'PDRS' @p@ remains
         -- asserted by renaming global label to @l@ before merging.
         amerge p@(PDRS l1 _ _ _) (PDRS l2 m2 u2 c2) = PDRS l2 (m1 `union` m2') (u1 `union` u2') (c1 `union` c2')
-          where (PDRS _ m1 u1 c1)    = pdrsAlphaConvert p [(l1,l2)] []
-                (PDRS _ m2' u2' c2') = pdrsAlphaConvert (PDRS l1 m2 u2 c2) [(l1,l2)] [] 
-                -- ^ in order to make sure that projected variables can
-                -- become bound by means of assertive merge
+          where p'   = pdrsAlphaConvert p [(l1,l2)] []
+                m1   = pdrsMAP p'
+                u1   = pdrsUniverse p'
+                c1   = pdrsConditions p'
+                p''  = pdrsAlphaConvert (PDRS l1 m2 u2 c2) [(l1,l2)] []
+                m2'  = pdrsMAP p''
+                u2'  = pdrsUniverse p''
+                c2'  = pdrsConditions p''
         amerge pdrs1 pdrs2                          = AMerge pdrs1 pdrs2
 
 -- | Infix notation for 'pdrsAMerge'

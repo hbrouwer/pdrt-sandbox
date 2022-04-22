@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {- |
 Module      :  Data.DRS.Merge
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
@@ -46,11 +45,15 @@ drsMerge md@(Merge d1 d2) d
   | isLambdaDRS d2 = Merge d2 (drsMerge d1 d)                                 -- (d1 + ld2) + d = ld2 + (d1 + d)
   | otherwise      = drsMerge (drsResolveMerges md) d
 drsMerge d@(DRS _ _) d'@(DRS _ _) = DRS (u1 `union` u2) (c1 `union` c2)
-  where d1@(DRS u1 c1) = drsPurify $ drsResolveMerges d
-        (DRS u2 c2)    = drsAlphaConvert d'' (zip ors nrs)
+  where d1  = drsPurify $ drsResolveMerges d
+        u1  = drsUniverse d1
+        c1  = drsConditions d1
         d'' = drsPurify $ drsResolveMerges d'
         ors = drsVariables d'' `intersect` drsVariables d1
         nrs = newDRSRefs ors (drsVariables d'' `union` drsVariables d1)
+        d2  = drsAlphaConvert d'' (zip ors nrs)
+        u2  = drsUniverse d2
+        c2  = drsConditions d2
 
 -- | Infix notation for 'drsMerge'.
 (<<+>>) :: DRS -> DRS ->DRS

@@ -12,99 +12,18 @@ Structural operations on PDRSs
 
 module Data.PDRS.Structure
 (
-  pdrsLabel
-, pdrsLabels
-, pdrsUniverse
-, pdrsUniverses
-, pdrsMAPs
-, emptyPDRS
+  emptyPDRS
 , isLambdaPDRS
 , isMergePDRS
 , isResolvedPDRS
 , isSubPDRS
 ) where
 
-import Data.List (union)
 import Data.PDRS.DataType
 
 ---------------------------------------------------------------------------
 -- * Exported
 ---------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- | Returns the label of a 'PDRS'.
----------------------------------------------------------------------------
-pdrsLabel :: PDRS -> PVar
-pdrsLabel (LambdaPDRS _) = 0
-pdrsLabel (AMerge p1 p2)
-  | isLambdaPDRS p2 = pdrsLabel p1
-  | otherwise       = pdrsLabel p2
-pdrsLabel (PMerge p1 p2)
-  | isLambdaPDRS p2 = pdrsLabel p1
-  | otherwise       = pdrsLabel p2
-pdrsLabel (PDRS l _ _ _) = l
-
----------------------------------------------------------------------------
--- | Returns all the labels in a 'PDRS'.
----------------------------------------------------------------------------
-pdrsLabels :: PDRS -> [PVar]
-pdrsLabels (LambdaPDRS _) = []
-pdrsLabels (AMerge p1 p2) = pdrsLabels p1 ++ pdrsLabels p2
-pdrsLabels (PMerge p1 p2) = pdrsLabels p1 ++ pdrsLabels p2 
-pdrsLabels (PDRS l _ _ c) = l:concatMap labels c
-  where labels :: PCon -> [PVar]
-        labels (PCon _ (Rel _ _ ))   = []
-        labels (PCon _ (Neg p1))     = pdrsLabels p1
-        labels (PCon _ (Imp p1 p2))  = pdrsLabels p1 ++ pdrsLabels p2
-        labels (PCon _ (Or p1 p2))   = pdrsLabels p1 ++ pdrsLabels p2
-        labels (PCon _ (Prop _ p1))  = pdrsLabels p1
-        labels (PCon _ (Diamond p1)) = pdrsLabels p1
-        labels (PCon _ (Box p1))     = pdrsLabels p1
-
----------------------------------------------------------------------------
--- | Returns the universe of a PDRS
----------------------------------------------------------------------------
-pdrsUniverse :: PDRS -> [PRef]
-pdrsUniverse (LambdaPDRS _)  = []
-pdrsUniverse (AMerge p1 p2) = pdrsUniverse p1 ++ pdrsUniverse p2
-pdrsUniverse (PMerge p1 p2) = pdrsUniverse p1 ++ pdrsUniverse p2
-pdrsUniverse (PDRS _ _ u _) = u
-
----------------------------------------------------------------------------
--- | Returns the list of projected referents in all universes of a 'PDRS'.
----------------------------------------------------------------------------
-pdrsUniverses :: PDRS -> [PRef]
-pdrsUniverses (LambdaPDRS _) = []
-pdrsUniverses (AMerge p1 p2) = pdrsUniverses p1 `union` pdrsUniverses p2
-pdrsUniverses (PMerge p1 p2) = pdrsUniverses p1 `union` pdrsUniverses p2
-pdrsUniverses (PDRS _ _ u c) = u `union` universes c
-  where universes :: [PCon] -> [PRef]
-        universes []                       = []
-        universes (PCon _ (Rel _ _):cs)    = universes cs
-        universes (PCon _ (Neg p1):cs)     = pdrsUniverses p1 `union` universes cs
-        universes (PCon _ (Imp p1 p2):cs)  = pdrsUniverses p1 `union` pdrsUniverses p2 `union` universes cs
-        universes (PCon _ (Or p1 p2):cs)   = pdrsUniverses p1 `union` pdrsUniverses p2 `union` universes cs
-        universes (PCon _ (Prop _ p1):cs)  = pdrsUniverses p1 `union` universes cs
-        universes (PCon _ (Diamond p1):cs) = pdrsUniverses p1 `union` universes cs
-        universes (PCon _ (Box p1):cs)     = pdrsUniverses p1 `union` universes cs
-
----------------------------------------------------------------------------
--- | Returns the list of MAPs of a 'PDRS'.
----------------------------------------------------------------------------
-pdrsMAPs :: PDRS -> [MAP]
-pdrsMAPs (LambdaPDRS _) = []
-pdrsMAPs (AMerge p1 p2) = pdrsMAPs p1 `union` pdrsMAPs p2
-pdrsMAPs (PMerge p1 p2) = pdrsMAPs p1 `union` pdrsMAPs p2
-pdrsMAPs (PDRS _ m _ c) = m `union` maps c
-  where maps :: [PCon] -> [MAP]
-        maps []                       = []
-        maps (PCon _ (Rel _ _):cs)    = maps cs
-        maps (PCon _ (Neg p1):cs)     = pdrsMAPs p1 `union` maps cs
-        maps (PCon _ (Imp p1 p2):cs)  = pdrsMAPs p1 `union` pdrsMAPs p2 `union` maps cs
-        maps (PCon _ (Or p1 p2):cs)   = pdrsMAPs p1 `union` pdrsMAPs p2 `union` maps cs
-        maps (PCon _ (Prop _ p1):cs)  = pdrsMAPs p1 `union` maps cs
-        maps (PCon _ (Diamond p1):cs) = pdrsMAPs p1 `union` maps cs
-        maps (PCon _ (Box p1):cs)     = pdrsMAPs p1 `union` maps cs
 
 ---------------------------------------------------------------------------
 -- | Returns an empty 'PDRS', if possible with the same label as 'PDRS' @p@.

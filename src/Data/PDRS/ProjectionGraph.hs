@@ -22,7 +22,7 @@ module Data.PDRS.ProjectionGraph
 import Data.Graph (buildG, Edge, Graph, path, vertices)
 import Data.List (union)
 import Data.PDRS.DataType
-import Data.PDRS.Structure
+import Data.PDRS.Variables
 
 ---------------------------------------------------------------------------
 -- * Exported

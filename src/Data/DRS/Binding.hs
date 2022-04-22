@@ -18,6 +18,7 @@ module Data.DRS.Binding
 
 import Data.DRS.DataType
 import Data.DRS.Structure
+import Data.DRS.Variables
 import Data.List (partition, union)
 
 ---------------------------------------------------------------------------

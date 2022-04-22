@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {- |
 Module      :  Data.DRS.LambdaCalculus
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
@@ -26,7 +25,6 @@ module Data.DRS.LambdaCalculus
 
 import Data.DRS.Binding
 import Data.DRS.DataType
-import Data.DRS.Structure
 import Data.DRS.Variables
 
 import Data.List (intersect, union)
@@ -198,9 +196,11 @@ purifyRefs (Merge d1 d2,ers)      gd = (Merge cd1 cd2,ers2)
 purifyRefs (ld@(DRS u _),ers)      gd = (DRS u1 c2,ers1)
 -- In case we do not want to rename ambiguous bindings:
 -- purifyRefs (ld@(DRS u _),ers)      gd = (DRS u1 c2,u1 ++ ers1)
-  where (DRS u1 c1) = drsAlphaConvert ld (zip ors (newDRSRefs ors (drsVariables gd `union` ers)))
-        ors         = u `intersect` ers
-        (c2,ers1)    = purify (c1,u1 ++ ers)
+  where ld'       = drsAlphaConvert ld (zip ors (newDRSRefs ors (drsVariables gd `union` ers)))
+        u1        = drsUniverse ld'
+        c1        = drsConditions ld'
+        ors       = u `intersect` ers
+        (c2,ers1) = purify (c1,u1 ++ ers)
         -- In case we do not want to rename ambiguous bindings:
         --(c2,ers1)    = purify (c1,ers)
         purify :: ([DRSCon],[DRSRef]) -> ([DRSCon],[DRSRef])

@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {- |
 Module      :  Data.PDRS.LambdaCalculus
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
@@ -26,7 +25,6 @@ import Data.DRS.LambdaCalculus (renameVar)
 import Data.PDRS.Binding
 import Data.PDRS.DataType
 import Data.PDRS.ProjectionGraph
-import Data.PDRS.Structure
 import Data.PDRS.Variables
 
 import Data.List (intersect, union)
@@ -224,7 +222,11 @@ purifyPVars (PMerge p1 p2,pvs)      gp = (PMerge cp1 cp2,pvs2)
 -- In case we do not want to rename ambiguous bindings:
 -- purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs1 `union` pvs2)
 purifyPVars (lp@(PDRS l _ _ _),pvs) gp = (PDRS l1 m1 u1 c2,pvs2)
-  where (PDRS l1 m1 u1 c1) = pdrsAlphaConvert lp (zip ol (newPVars ol (pdrsPVars gp `union` pvs))) []
+  where lp'       = pdrsAlphaConvert lp (zip ol (newPVars ol (pdrsPVars gp `union` pvs))) []
+        l1        = pdrsLabel lp'
+        m1        = pdrsMAP lp'
+        u1        = pdrsUniverse lp'
+        c1        = pdrsConditions lp'
         ol        = [l] `intersect` pvs
         (c2,pvs2) = purify (c1,pvs `union` pvs1)
         -- ^ In case we do not want to rename ambiguous bindings:

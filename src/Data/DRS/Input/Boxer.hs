@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {- |
 Module      :  Data.DRS.Input.Boxer
 Copyright   :  (c) Harm Brouwer and Noortje Venhuizen
@@ -23,6 +22,7 @@ import Data.Char (isAlpha, isNumber, isPunctuation, toUpper)
 import Data.List (partition, isPrefixOf)
 import Data.DRS.DataType
 import Data.DRS.Input.String
+import Data.DRS.Variables
 
 ---------------------------------------------------------------------------
 -- * Exported
@@ -121,9 +121,14 @@ plSDRSToDRS k
     where sdrsType      = takeWhile (/= '(') k
           inBrackets    = dropOuterBrackets . takeUpToMatchingBracket Parentheses . dropWhile (/= '(')
           postBrackets  = tail . dropUpToMatchingBracket Parentheses . dropWhile (/= '(')
-          k1@(DRS u1 _) = segToDRS k
+          k1            = segToDRS k
+          u1            = drsUniverse k1
           segToDRS      = plDRSToDRS . tail . dropWhile (/= ',') . inBrackets
-          subUniverse   = map (\(Prop pr _) -> pr) subCons 
+          subUniverse = propDRSRefs subCons
+              where propDRSRefs :: [DRSCon] -> [DRSRef]
+                    propDRSRefs []               = []
+                    propDRSRefs ((Prop pr _):cs) = pr : propDRSRefs cs
+                    propDRSRefs (_:cs)           = propDRSRefs cs
           subCons       = [Prop ((toDRSRef . takeWhile (/= ',') . inBrackets) s) (segToDRS s)]
               where s = postBrackets (inBrackets k)
           subRelation   = [Rel (findRel (dropWhile (/= ':') (postBrackets k))) relRefs]

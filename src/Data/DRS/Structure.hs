@@ -12,27 +12,17 @@ Structural operations on DRSs
 
 module Data.DRS.Structure
 (
-  drsUniverse
-, isLambdaDRS
+  isLambdaDRS
 , isMergeDRS
 , isResolvedDRS
 , isSubDRS
 ) where
 
 import Data.DRS.DataType
-import Data.List (union)
 
 ---------------------------------------------------------------------------
 -- * Exported
 ---------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- | Returns the universe of a DRS
----------------------------------------------------------------------------
-drsUniverse :: DRS -> [DRSRef]
-drsUniverse (LambdaDRS _) = []
-drsUniverse (Merge d1 d2) = drsUniverse d1 `union` drsUniverse d2
-drsUniverse (DRS u _)     = u
 
 ---------------------------------------------------------------------------
 -- | Returns whether a 'DRS' is entirely a 'LambdaDRS' (at its top-level).

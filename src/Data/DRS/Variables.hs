@@ -18,6 +18,8 @@ module Data.DRS.Variables
 -- * New Variables
 , newDRSRefs
 -- * Variable Collections
+, drsUniverse
+, drsConditions
 , drsUniverses
 , drsVariables
 , drsLambdas
@@ -70,6 +72,22 @@ newDRSRefs (r:ors) ers
 ---------------------------------------------------------------------------
 -- ** Variable Collections
 ---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Returns the list of 'DRSRef's from the top-level universe in a 'DRS'.
+---------------------------------------------------------------------------
+drsUniverse :: DRS -> [DRSRef]
+drsUniverse (LambdaDRS _) = []
+drsUniverse (Merge d1 d2) = drsUniverse d1 ++ drsUniverse d2
+drsUniverse (DRS u _)     = u
+
+---------------------------------------------------------------------------
+-- | Returns the list of 'DRSCon's in a 'DRS'.
+---------------------------------------------------------------------------
+drsConditions :: DRS -> [DRSCon]
+drsConditions (LambdaDRS _) = []
+drsConditions (Merge d1 d2) = drsConditions d1 ++ drsConditions d2
+drsConditions (DRS _ c)     = c
 
 ---------------------------------------------------------------------------
 -- | Returns the list of 'DRSRef's from all universes in a 'DRS'.

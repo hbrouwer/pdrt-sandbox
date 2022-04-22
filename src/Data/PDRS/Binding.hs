@@ -24,6 +24,7 @@ module Data.PDRS.Binding
 import Data.PDRS.DataType
 import Data.PDRS.ProjectionGraph
 import Data.PDRS.Structure
+import Data.PDRS.Variables
 import Data.List (delete, partition, union)
 
 ---------------------------------------------------------------------------

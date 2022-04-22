@@ -22,7 +22,6 @@ import Data.DRS.Show
 
 import Data.PDRS.DataType (PDRS(..), PVar, PRef(..), PDRSRef(..), PCon(..), PDRSRel(..))
 import qualified Data.PDRS.DataType as PDRS
-import Data.PDRS.Structure
 import Data.PDRS.Variables
 
 import Data.List (intercalate)
