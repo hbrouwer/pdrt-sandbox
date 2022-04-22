@@ -14,7 +14,9 @@ and function composition
 
 module Data.DRS.LambdaCalculus
 (
-  drsAlphaConvert
+  DRSAtom
+, AbstractDRS
+, drsAlphaConvert
 , renameVar
 , drsBetaReduce
 , (<<@>>)
@@ -32,6 +34,26 @@ import Data.List (intersect, union)
 ---------------------------------------------------------------------------
 -- * Exported
 ---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- ** Type classes
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Type class for a 'DRSAtom', which is either a 'DRS' or a 'DRSRef'.
+---------------------------------------------------------------------------
+class DRSAtom a
+instance DRSAtom DRS
+instance DRSAtom DRSRef
+
+---------------------------------------------------------------------------
+-- | Type class for an 'AbstractDRS', which is either a resolved 'DRS', or 
+-- an 'unresolved DRS' that takes a 'DRSAtom' and yields an 'AbstractDRS'.
+---------------------------------------------------------------------------
+class AbstractDRS a
+instance AbstractDRS DRS
+instance (DRSAtom a, AbstractDRS b) => AbstractDRS (a -> b)
+
 
 ---------------------------------------------------------------------------
 -- ** Alpha Conversion
@@ -104,25 +126,6 @@ drsPurify gdrs = fst $ purifyRefs (gdrs,drsFreeRefs gdrs gdrs) gdrs
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
--- ** Type classes
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- | Type class for a 'DRSAtom', which is either a 'DRS' or a 'DRSRef'.
----------------------------------------------------------------------------
-class DRSAtom a
-instance DRSAtom DRS
-instance DRSAtom DRSRef
-
----------------------------------------------------------------------------
--- | Type class for an 'AbstractDRS', which is either a resolved 'DRS', or 
--- an 'unresolved DRS' that takes a 'DRSAtom' and yields an 'AbstractDRS'.
----------------------------------------------------------------------------
-class AbstractDRS a
-instance AbstractDRS DRS
-instance (DRSAtom a, AbstractDRS b) => AbstractDRS (a -> b)
-
----------------------------------------------------------------------------
 -- ** DRS renaming
 ---------------------------------------------------------------------------
 
@@ -177,7 +180,7 @@ renameCons ld@(DRS _ c) gd rs = map convertCon c
 --
 -- [This function implements the following algorithm:]
 --
--- (1) start with the global 'DRS' @gd@ and add all free 'PVar's in @gd@ to
+-- (1) start with the global 'DRS' @gd@ and add all free PVars in @gd@ to
 -- the list of seen referents @rs@ (see 'drsPurify');
 -- 
 -- 2. check the universe @u@ of the first atomic 'DRS' @ld@ against @rs@

@@ -42,7 +42,7 @@ pdrsToFOL :: PDRS -> F.FOLForm
 pdrsToFOL p = drsToFOL (pdrsToDRS p)
 
 ---------------------------------------------------------------------------
--- | Translates a PDRS into a DRS.
+-- | Translates a 'PDRS' into a 'D.DRS'.
 ---------------------------------------------------------------------------
 pdrsToDRS :: PDRS -> D.DRS
 pdrsToDRS p = stripPVars $ movePContent gp (emptyPDRS gp) gp
@@ -127,7 +127,7 @@ insertPCon pc@(PCon pv con) lp@(PDRS l m u c) gp
         insert (PCon p (Box p1))      = PCon p (Box     (insertPCon pc p1 gp))
 
 ---------------------------------------------------------------------------
--- | Strips projection variables from a 'PDRS' @p@, resulting in a 'DRS'.
+-- | Strips projection variables from a 'PDRS' @p@, resulting in a 'D.DRS'.
 ---------------------------------------------------------------------------
 stripPVars :: PDRS -> D.DRS
 stripPVars (LambdaPDRS lt) = D.LambdaDRS lt

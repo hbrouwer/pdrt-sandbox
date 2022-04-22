@@ -17,6 +17,8 @@ module Data.DRS.Show
 -- * Show DRS (pretty printing)
   DRSNotation (..)
 , showDRS
+, ShowableDRS
+, drsResolve
 , printDRS
 , showMerge
 , printMerge
@@ -73,36 +75,36 @@ instance Show DRS where
             | otherwise     = unlines s
 
 ---------------------------------------------------------------------------
--- | Typeclass for 'showableDRS's, that are unresolved.
+-- | Typeclass for showableDRSs, that are unresolved.
 ---------------------------------------------------------------------------
 class ShowableDRS d where 
-  resolve :: d -> Int -> Int -> DRS
+  drsResolve :: d -> Int -> Int -> DRS
 
 -- | Derive appropriate instances of 'ShowableDRS'.
 instance ShowableDRS DRS where
-  resolve d _ _ = d
+  drsResolve d _ _ = d
 instance (ShowableDRS d) => ShowableDRS (DRSRef -> d) where
-  resolve ud nr nd = resolve (ud rv) (nr + 1) nd
+  drsResolve ud nr nd = drsResolve (ud rv) (nr + 1) nd
     where rv = LambdaDRSRef (('r' : show nr,[]), nr + nd)
 instance (ShowableDRS d) => ShowableDRS (DRS -> d) where
-  resolve ud nr nd = resolve (ud lv) nr (nd + 1)
+  drsResolve ud nr nd = drsResolve (ud lv) nr (nd + 1)
     where lv = LambdaDRS (('k' : show nd,[]), nr + nd)
 instance (ShowableDRS d) => ShowableDRS ((DRSRef -> DRS) -> d) where
-  resolve ud nr nd = resolve (ud lv) nr (nd + 1)
+  drsResolve ud nr nd = drsResolve (ud lv) nr (nd + 1)
     where lv x = LambdaDRS (('k' : show nd,[drsRefToDRSVar x]), nr + nd)
 instance (ShowableDRS d) => ShowableDRS (DRSRel -> d) where
-  resolve ud nr nd = resolve (ud lv) nr (nd + 1)
+  drsResolve ud nr nd = drsResolve (ud lv) nr (nd + 1)
     where lv = LambdaDRSRel (('P' : show nd,[]), nr + nd)
 
 -- | Derive appropriate instances of 'Show' for 'ShowableDRS's.
 instance (ShowableDRS d) => Show (DRSRef -> d) where
-  show d = show (resolve d 0 0)
+  show d = show (drsResolve d 0 0)
 instance (ShowableDRS d) => Show (DRS -> d) where
-  show d = show (resolve d 0 0)
+  show d = show (drsResolve d 0 0)
 instance (ShowableDRS d) => Show ((DRSRef -> DRS) -> d) where
-  show d = show (resolve d 0 0)
+  show d = show (drsResolve d 0 0)
 instance (ShowableDRS d) => Show (DRSRel -> d) where
-  show d = show (resolve d 0 0)
+  show d = show (drsResolve d 0 0)
 
 ---------------------------------------------------------------------------
 -- | 'DRS' notations.
@@ -115,10 +117,10 @@ data DRSNotation d =
 
 -- | Derive an instance of Show for 'DRSNotation'.
 instance (ShowableDRS d) => Show (DRSNotation d) where
-  show (Boxes d)  = '\n' : showDRS (Boxes  (resolve d 0 0))
-  show (Linear d) = '\n' : showDRS (Linear (resolve d 0 0))
-  show (Set d)    = '\n' : showDRS (Set    (resolve d 0 0))
-  show (Debug d)  = '\n' : showDRS (Debug  (resolve d 0 0))
+  show (Boxes d)  = '\n' : showDRS (Boxes  (drsResolve d 0 0))
+  show (Linear d) = '\n' : showDRS (Linear (drsResolve d 0 0))
+  show (Set d)    = '\n' : showDRS (Set    (drsResolve d 0 0))
+  show (Debug d)  = '\n' : showDRS (Debug  (drsResolve d 0 0))
 
 ---------------------------------------------------------------------------
 -- | Shows a 'DRS'.
@@ -168,9 +170,9 @@ printMerge d1 d2 = putStrLn $ '\n' : showMerge d1 d2
 ---------------------------------------------------------------------------
 showDRSBetaReduct :: (ShowableDRS d) => (DRS -> d) -> DRS -> String
 showDRSBetaReduct d1 d2 = showConcat (showConcat (showModifier "(" 2 b1) (showModifier ")" 2 b2)) (showModifier "=" 2 br)
-  where b1 = showDRS (Boxes (resolve d1 0 0))
+  where b1 = showDRS (Boxes (drsResolve d1 0 0))
         b2 = showDRS (Boxes d2)
-        br = showDRS (Boxes (resolve (d1 d2) 0 0))
+        br = showDRS (Boxes (drsResolve (d1 d2) 0 0))
 
 ---------------------------------------------------------------------------
 -- | Prints the beta reduction of an 'unresolved DRS' @d1@ with a 'DRS'
@@ -190,9 +192,9 @@ printDRSBetaReduct d1 d2 = putStrLn $ '\n' : brs
 showDRSRefBetaReduct :: (ShowableDRS d) => (DRSRef -> d) -> DRSRef -> String
 showDRSRefBetaReduct _ (LambdaDRSRef _) = error "impossible beta reduction"
 showDRSRefBetaReduct d r@(DRSRef v)     = showConcat (showConcat (showModifier "(" 2 bx) (showModifier ")" 2 rv)) (showModifier "=" 2 br)
-  where bx = showDRS (Boxes (resolve d 0 0))
+  where bx = showDRS (Boxes (drsResolve d 0 0))
         rv = showPadding (v ++ "\n")
-        br = showDRS (Boxes (resolve (d r) 0 0))
+        br = showDRS (Boxes (drsResolve (d r) 0 0))
 
 ---------------------------------------------------------------------------
 -- | Prints the beta reduction of an 'unresolved DRS' @d@ with a 'DRSRef'

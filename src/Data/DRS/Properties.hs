@@ -27,7 +27,7 @@ import Data.DRS.Variables
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
--- | Returns whether 'DRS' @d@ can be translated into a 'FOLForm'.
+-- | Returns whether 'DRS' @d@ can be translated into a FOLForm.
 ---------------------------------------------------------------------------
 isFOLDRS :: DRS -> Bool
 isFOLDRS d = isResolvedDRS d && isPureDRS d && isProperDRS d

@@ -16,6 +16,8 @@ module Data.PDRS.Show
 (
   PDRSNotation (..)
 , showPDRS
+, ShowablePDRS
+, pdrsResolve
 , printPDRS
 , showAMerge
 , printAMerge
@@ -56,36 +58,36 @@ instance Show PDRS where
             | otherwise     = unlines s
 
 ---------------------------------------------------------------------------
--- | Typeclass for 'showablePDRS's, that are unresolved.
+-- | Typeclass for showablePDRSs, that are unresolved.
 ---------------------------------------------------------------------------
 class ShowablePDRS p where 
-  resolve :: p -> Int -> Int -> PDRS
+  pdrsResolve :: p -> Int -> Int -> PDRS
 
 -- | Derive appropriate instances of 'ShowablePDRS'.
 instance ShowablePDRS PDRS where
-  resolve p _ _ = p
+  pdrsResolve p _ _ = p
 instance (ShowablePDRS p) => ShowablePDRS (PDRSRef -> p) where
-  resolve up nr np = resolve (up rv) (nr + 1) np
+  pdrsResolve up nr np = pdrsResolve (up rv) (nr + 1) np
     where rv = LambdaPDRSRef (('r' : show nr,[]), nr + np)
 instance (ShowablePDRS p) => ShowablePDRS (PDRS -> p) where
-  resolve up nr np = resolve (up lv) nr (np + 1)
+  pdrsResolve up nr np = pdrsResolve (up lv) nr (np + 1)
     where lv = LambdaPDRS (('k' : show np,[]), nr + np)
 instance (ShowablePDRS p) => ShowablePDRS ((PDRSRef -> PDRS) -> p) where
-  resolve up nr np = resolve (up lv) nr (np + 1)
+  pdrsResolve up nr np = pdrsResolve (up lv) nr (np + 1)
     where lv x = LambdaPDRS (('k' : show np,[pdrsRefToDRSVar x]), nr + np)
 instance (ShowablePDRS p) => ShowablePDRS (PDRSRel -> p) where
-  resolve up nr np = resolve (up lv) nr (np + 1)
+  pdrsResolve up nr np = pdrsResolve (up lv) nr (np + 1)
     where lv = LambdaPDRSRel (('P' : show np,[]), nr + np)
 
 -- | Derive appropriate instances of 'Show' for 'ShowablePDRS's.
 instance (ShowablePDRS p) => Show (PDRSRef -> p) where
-  show p = show (resolve p 0 0)
+  show p = show (pdrsResolve p 0 0)
 instance (ShowablePDRS p) => Show (PDRS -> p) where
-  show p = show (resolve p 0 0)
+  show p = show (pdrsResolve p 0 0)
 instance (ShowablePDRS p) => Show ((PDRSRef -> PDRS) -> p) where
-  show p = show (resolve p 0 0)
+  show p = show (pdrsResolve p 0 0)
 instance (ShowablePDRS p) => Show (PDRSRel -> p) where
-  show p = show (resolve p 0 0)
+  show p = show (pdrsResolve p 0 0)
 
 ---------------------------------------------------------------------------
 -- | 'PDRS' notations.
@@ -98,10 +100,10 @@ data PDRSNotation p =
 
 -- | Derive an instance of 'Show' for 'PDRSNotation'.
 instance (ShowablePDRS p) => Show (PDRSNotation p) where
-  show (Boxes p)  = '\n' : showPDRS (Boxes  (resolve p 0 0))
-  show (Linear p) = '\n' : showPDRS (Linear (resolve p 0 0))
-  show (Set p)    = '\n' : showPDRS (Set    (resolve p 0 0))
-  show (Debug p)  = '\n' : showPDRS (Debug  (resolve p 0 0))
+  show (Boxes p)  = '\n' : showPDRS (Boxes  (pdrsResolve p 0 0))
+  show (Linear p) = '\n' : showPDRS (Linear (pdrsResolve p 0 0))
+  show (Set p)    = '\n' : showPDRS (Set    (pdrsResolve p 0 0))
+  show (Debug p)  = '\n' : showPDRS (Debug  (pdrsResolve p 0 0))
 
 ---------------------------------------------------------------------------
 -- | Shows a 'PDRS'.
@@ -166,9 +168,9 @@ printPMerge p1 p2 = putStrLn $ '\n' : showPMerge p1 p2
 ---------------------------------------------------------------------------
 showPDRSBetaReduct :: (ShowablePDRS p) => (PDRS -> p) -> PDRS -> String
 showPDRSBetaReduct p1 p2 = showConcat (showConcat (showModifier "(" 2 b1) (showModifier ")" 2 b2)) (showModifier "=" 2 br)
-  where b1 = showPDRS (Boxes (resolve p1 0 0))
+  where b1 = showPDRS (Boxes (pdrsResolve p1 0 0))
         b2 = showPDRS (Boxes p2)
-        br = showPDRS (Boxes (resolve (p1 p2) 0 0))
+        br = showPDRS (Boxes (pdrsResolve (p1 p2) 0 0))
 
 ---------------------------------------------------------------------------
 -- | Prints the beta reduction of an @'unresolved PDRS'@ @p1@ with a
@@ -188,9 +190,9 @@ printPDRSBetaReduct p1 p2 = putStrLn $ '\n' : brs
 showPDRSRefBetaReduct :: (ShowablePDRS p) => (PDRSRef -> p) -> PDRSRef -> String
 showPDRSRefBetaReduct _ (LambdaPDRSRef _) = error "impossible beta reduction"
 showPDRSRefBetaReduct p r@(PDRSRef v)     = showConcat (showConcat (showModifier "(" 2 bx) (showModifier ")" 2 rv)) (showModifier "=" 2 br)
-  where bx = showPDRS (Boxes (resolve p 0 0))
+  where bx = showPDRS (Boxes (pdrsResolve p 0 0))
         rv = showPadding (v ++ "\n")
-        br = showPDRS (Boxes (resolve (p r) 0 0))
+        br = showPDRS (Boxes (pdrsResolve (p r) 0 0))
 
 ---------------------------------------------------------------------------
 -- | Prints the beta reduction of an @'unresolved PDRS'@ @p@ with a

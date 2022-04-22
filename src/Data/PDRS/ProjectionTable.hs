@@ -12,7 +12,9 @@ PDRS projection table
 
 module Data.PDRS.ProjectionTable
 (
-  PTable
+  PTableItem
+, PTableContent
+, PTable
 , showPTable
 , printPTable
 , pdrsToPTable
@@ -31,9 +33,33 @@ import Data.List (intercalate)
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
+-- ** Defining a PTable
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Rows of a 'PTable'
+---------------------------------------------------------------------------
+type PTableItem = (PTableContent,PVar,PVar)
+
+---------------------------------------------------------------------------
+-- | First column of a 'PTable'
+---------------------------------------------------------------------------
+data PTableContent =
+  MAP (PVar,PVar)
+  | Ref PDRSRef
+  | Rel PDRSRel [PDRSRef]
+  | Neg PVar
+  | Imp PVar PVar
+  | Or PVar PVar
+  | Prop PDRSRef PVar
+  | Diamond PVar
+  | Box PVar
+  deriving (Eq)
+
+---------------------------------------------------------------------------
 -- | Projection table
 ---------------------------------------------------------------------------
-data PTable = PTable [Item]
+data PTable = PTable [PTableItem]
   deriving (Eq)
 
 -- | Derive and instance of the Show typeclass for 'PTable'.
@@ -44,7 +70,7 @@ instance Show PTable where
 -- | Shows a projection table
 ---------------------------------------------------------------------------
 showPTable :: PTable -> String
-showPTable (PTable is) = "[Type]\t[Content]\t[Intro st]\t[Proj. st]\n" ++ concatMap showItem is
+showPTable (PTable is) = "[Type]\t[Content]\t[Intro st]\t[Proj. st]\n" ++ concatMap showPTableItem is
 
 ---------------------------------------------------------------------------
 -- | Prints a projection table
@@ -63,34 +89,10 @@ pdrsToPTable = PTable . pdrsToItems
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
--- ** Defining a PTable
+-- | Shows an 'PTableItem'
 ---------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- | Rows of a 'PTable'
----------------------------------------------------------------------------
-type Item = (Content,PVar,PVar)
-
----------------------------------------------------------------------------
--- | First column of a 'PTable'
----------------------------------------------------------------------------
-data Content =
-  MAP (PVar,PVar)
-  | Ref PDRSRef
-  | Rel PDRSRel [PDRSRef]
-  | Neg PVar
-  | Imp PVar PVar
-  | Or PVar PVar
-  | Prop PDRSRef PVar
-  | Diamond PVar
-  | Box PVar
-  deriving (Eq)
-
----------------------------------------------------------------------------
--- | Shows an 'Item'
----------------------------------------------------------------------------
-showItem :: Item -> String
-showItem (c,is,ps) =
+showPTableItem :: PTableItem -> String
+showPTableItem (c,is,ps) =
   case c of
     (MAP m)       -> "MAP" ++ "\t" ++ show m            ++ tail'
     (Ref r)       -> "Ref" ++ "\t" ++ pdrsRefToDRSVar r ++ tail'
@@ -104,25 +106,25 @@ showItem (c,is,ps) =
   where tail' = "\t\t" ++ show is ++ "\t\t" ++ show ps ++ "\n"
 
 ---------------------------------------------------------------------------
--- | Converts a 'PDRS' into a list of 'Item's
+-- | Converts a 'PDRS' into a list of 'PTableItem's
 ---------------------------------------------------------------------------
-pdrsToItems :: PDRS -> [Item]
+pdrsToItems :: PDRS -> [PTableItem]
 pdrsToItems (LambdaPDRS _) = []
 pdrsToItems (AMerge p1 p2) = pdrsToItems p1 ++ pdrsToItems p2
 pdrsToItems (PMerge p1 p2) = pdrsToItems p1 ++ pdrsToItems p2
 pdrsToItems (PDRS l m u c) = (MAP (l,l),l,l) : map (\x -> (MAP x,l,l)) m ++ universeToItems u l ++ pconsToItems c l
 
 ---------------------------------------------------------------------------
--- | Converts the universe of a 'PDRS' into a list of 'Item's
+-- | Converts the universe of a 'PDRS' into a list of 'PTableItem's
 ---------------------------------------------------------------------------
-universeToItems :: [PRef] -> PVar -> [Item]
+universeToItems :: [PRef] -> PVar -> [PTableItem]
 universeToItems [] _                         = []
 universeToItems (PRef p r:prs) l = (Ref r,l,p) : universeToItems prs l
 
 ---------------------------------------------------------------------------
--- | Converts a list of 'PCon's into a list of 'Item's
+-- | Converts a list of 'PCon's into a list of 'PTableItem's
 ---------------------------------------------------------------------------
-pconsToItems :: [PCon] -> PVar -> [Item]
+pconsToItems :: [PCon] -> PVar -> [PTableItem]
 pconsToItems [] _     = []
 pconsToItems [c] l = case c of
   (PCon p (PDRS.Rel r d))    -> [(Rel r d,l,p)]

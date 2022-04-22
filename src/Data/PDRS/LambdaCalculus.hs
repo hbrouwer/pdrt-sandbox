@@ -13,7 +13,9 @@ function composition, and `PDRS purification'
 
 module Data.PDRS.LambdaCalculus
 (
-  pdrsAlphaConvert
+  PDRSAtom
+, AbstractPDRS
+, pdrsAlphaConvert
 , pdrsBetaReduce
 , (<<@>>)
 , pdrsFunctionCompose
@@ -32,6 +34,26 @@ import Data.List (intersect, union)
 ---------------------------------------------------------------------------
 -- * Exported
 ---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- ** Type classes
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- | Type class for a 'PDRSAtom', which is either a 'PDRS' or a 'PDRSRef'.
+---------------------------------------------------------------------------
+class PDRSAtom a
+instance PDRSAtom PDRS
+instance PDRSAtom PDRSRef
+
+---------------------------------------------------------------------------
+-- | Type class for an 'AbstractPDRS', which is either a resolved 'PDRS',
+-- or an unresolved 'PDRS' that takes a 'PDRSAtom' and yields an 
+-- 'AbstractPDRS'.
+---------------------------------------------------------------------------
+class AbstractPDRS a
+instance AbstractPDRS PDRS
+instance (PDRSAtom a, AbstractPDRS b) => AbstractPDRS (a -> b)
 
 ---------------------------------------------------------------------------
 -- ** Alpha Conversion
@@ -94,26 +116,6 @@ pdrsPurify gp = purifyPRefs cgp cgp (zip prs (newPRefs prs (pdrsVariables cgp)))
 ---------------------------------------------------------------------------
 -- * Private
 ---------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- ** Type classes
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- | Type class for a 'PDRSAtom', which is either a 'PDRS' or a 'PDRSRef'.
----------------------------------------------------------------------------
-class PDRSAtom a
-instance PDRSAtom PDRS
-instance PDRSAtom PDRSRef
-
----------------------------------------------------------------------------
--- | Type class for an 'AbstractPDRS', which is either a resolved 'PDRS',
--- or an unresolved 'PDRS' that takes a 'PDRSAtom' and yields an 
--- 'AbstractPDRS'.
----------------------------------------------------------------------------
-class AbstractPDRS a
-instance AbstractPDRS PDRS
-instance (PDRSAtom a, AbstractPDRS b) => AbstractPDRS (a -> b)
 
 ---------------------------------------------------------------------------
 -- ** PDRS renaming

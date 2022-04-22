@@ -108,7 +108,7 @@ drsUniverses (DRS u c)     = u ++ universes c
 
 ---------------------------------------------------------------------------
 -- | Returns the list of all 'DRSRef's in a 'DRS' (equals 'drsUniverses'
--- ++ 'drsFreeRefs').
+-- ++ drsFreeRefs).
 ---------------------------------------------------------------------------
 drsVariables :: DRS -> [DRSRef]
 drsVariables (LambdaDRS _) = []
